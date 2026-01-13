@@ -12,7 +12,7 @@ services:
       # LƯU Ý: host là tên service 'postgres', không phải localhost
       DATABASE_URL: ${DATABASE_URL}
       DIRECT_URL: ${DIRECT_URL}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
       REDIS_PORT: ${REDIS_PORT}
     depends_on:
       - redis
