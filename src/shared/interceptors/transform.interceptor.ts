@@ -14,6 +14,12 @@ export interface Response<T> {
   statusCode: number;
   message: string;
   data: T;
+  meta?: Record<string, any>;
+}
+
+export interface ResponseWithMeta<T> {
+  data: T;
+  meta: Record<string, any>;
 }
 
 @Injectable()
@@ -31,11 +37,35 @@ export class TransformInterceptor<T> implements NestInterceptor<
       context.getHandler(),
     );
     return next.handle().pipe(
-      map((data: T) => {
+      map((data: T | ResponseWithMeta<T>) => {
         const res = context.switchToHttp().getResponse<Res>();
         const statusCode = res.statusCode;
-        return { statusCode, data, message: responseMessage, errors: null };
+
+        // Handle case when response has meta
+        if (this.isResponseWithMeta(data)) {
+          return {
+            statusCode,
+            data: data.data,
+            meta: data.meta,
+            message: responseMessage,
+            success: true,
+          };
+        }
+
+        // Default case without meta
+        return { statusCode, data, message: responseMessage, success: true };
       }),
+    );
+  }
+
+  private isResponseWithMeta<T>(
+    data: T | ResponseWithMeta<T>,
+  ): data is ResponseWithMeta<T> {
+    return (
+      data !== null &&
+      typeof data === 'object' &&
+      'meta' in data &&
+      'data' in data
     );
   }
 }
