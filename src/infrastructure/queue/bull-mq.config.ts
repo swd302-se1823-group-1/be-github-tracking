@@ -3,26 +3,32 @@ import { BullModule } from '@nestjs/bullmq';
 
 export const BullMQConfig = BullModule.forRootAsync({
   imports: [ConfigModule],
-  useFactory: (configService: ConfigService) => ({
-    connection: {
-      host: configService.get<string>('REDIS_HOST'),
-      port: configService.get<number>('REDIS_PORT'),
-      password: configService.get<string>('REDIS_PASSWORD') || undefined,
-    },
-    defaultJobOptions: {
-      attempts: 3, // Retry 3 lần
-      backoff: {
-        type: 'exponential', // 1s, 2s, 4s, 8s...
-        delay: 2000, // Initial delay 2s
+  useFactory: (configService: ConfigService) => {
+    const host = configService.get<string>('REDIS_HOST') ?? 'localhost';
+    const port = configService.get<number>('REDIS_PORT') ?? 6379;
+    const password = configService.get<string>('REDIS_PASSWORD');
+
+    return {
+      connection: {
+        host,
+        port,
+        password,
       },
-      removeOnComplete: {
-        age: 24 * 3600, // Keep successful jobs for 24h
-        count: 1000, // Keep max 1000 jobs
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 2000,
+        },
+        removeOnComplete: {
+          age: 24 * 3600,
+          count: 1000,
+        },
+        removeOnFail: {
+          age: 7 * 24 * 3600,
+        },
       },
-      removeOnFail: {
-        age: 7 * 24 * 3600, // Keep failed jobs for 7 days
-      },
-    },
-  }),
+    };
+  },
   inject: [ConfigService],
 });
