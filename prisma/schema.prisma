@@ -267,7 +267,7 @@ model ProjectMember {
   id            BigInt    @id @default(autoincrement())
   project_id    BigInt
   student_id    String    @db.Uuid
-  role          String?   @db.VarChar(50)
+  role          ProjectMemberRole
   joined_at     DateTime  @default(now())
   is_active     Boolean   @default(true)
   deleted_at    DateTime?
@@ -363,4 +363,9 @@ enum UserRole {
   ADMIN
   STUDENT
   LECTURER
+}
+
+enum ProjectMemberRole {
+  LEADER
+  MEMBER
 }
