@@ -104,7 +104,7 @@ model Student {
   updated_by       User?     @relation("StudentUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
-  user            User            @relation(fields: [id], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [id], references: [id], onDelete: NoAction)
   github_mappings GithubMapping[]
   enrollments     Enrollment[]
   project_members ProjectMember[]
@@ -230,6 +230,7 @@ model Enrollment {
   class   Class   @relation(fields: [class_id], references: [id], onDelete: Cascade)
   student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
+  @@unique([class_id, student_id])
   @@map("enrollments")
 }
 
@@ -284,6 +285,7 @@ model ProjectMember {
   student Student  @relation(fields: [student_id], references: [id], onDelete: Cascade)
   commits Commit[]
 
+  @@unique([project_id, student_id])
   @@map("project_members")
 }
 
