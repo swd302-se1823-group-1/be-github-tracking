@@ -15,10 +15,10 @@ datasource db {
 }
 
 generator dbml {
-  provider = "prisma-dbml-generator"
-  output   = "../dbml"
+  provider    = "prisma-dbml-generator"
+  output      = "../dbml"
   projectName = "My Project Name"
-  manyToMany          = false
+  manyToMany  = false
 }
 
 // ============================================================================
@@ -32,6 +32,8 @@ model User {
   full_name     String?   @db.VarChar(255)
   role          UserRole  @default(STUDENT)
   avatar_url    String?   @db.VarChar(500)
+  provider      String? // 'google', 'facebook', 'local'
+  providerId    String?
   is_active     Boolean   @default(true)
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
@@ -333,24 +335,24 @@ model Project {
 }
 
 model ProjectMember {
-  id            BigInt    @id @default(autoincrement())
+  id            BigInt            @id @default(autoincrement())
   project_id    BigInt
-  student_id    String    @db.Uuid
+  student_id    String            @db.Uuid
   role          ProjectMemberRole
-  joined_at     DateTime  @default(now())
-  is_active     Boolean   @default(true)
+  joined_at     DateTime          @default(now())
+  is_active     Boolean           @default(true)
   deleted_at    DateTime?
-  deleted_by_id String?   @db.Uuid
+  deleted_by_id String?           @db.Uuid
   /// @hide
-  deleted_by    User?     @relation("ProjectMemberDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
-  created_at    DateTime  @default(now())
-  created_by_id String?   @db.Uuid
+  deleted_by    User?             @relation("ProjectMemberDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
+  created_at    DateTime          @default(now())
+  created_by_id String?           @db.Uuid
   /// @hide
-  created_by    User?     @relation("ProjectMemberCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
-  updated_at    DateTime  @default(now()) @updatedAt
-  updated_by_id String?   @db.Uuid
+  created_by    User?             @relation("ProjectMemberCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
+  updated_at    DateTime          @default(now()) @updatedAt
+  updated_by_id String?           @db.Uuid
   /// @hide
-  updated_by    User?     @relation("ProjectMemberUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
+  updated_by    User?             @relation("ProjectMemberUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
   /// @hide
@@ -367,15 +369,15 @@ model ProjectMember {
 model Repository {
   id                     BigInt    @id @default(autoincrement())
   project_id             BigInt
-  url                    String   @db.VarChar(500)
-  name                   String   @db.VarChar(255)
-  organization           String   @db.VarChar(255)
-  owner                  String   @db.VarChar(255)
-  encrypted_access_token String   @db.Text
-  token_iv               String   @db.VarChar(255)
+  url                    String    @db.VarChar(500)
+  name                   String    @db.VarChar(255)
+  organization           String    @db.VarChar(255)
+  owner                  String    @db.VarChar(255)
+  encrypted_access_token String    @db.Text
+  token_iv               String    @db.VarChar(255)
   last_scanned_at        DateTime?
-  scan_status            String   @db.VarChar(50)
-  error_message          String   @db.Text
+  scan_status            String    @db.VarChar(50)
+  error_message          String    @db.Text
   deleted_at             DateTime?
   deleted_by_id          String?   @db.Uuid
   /// @hide
