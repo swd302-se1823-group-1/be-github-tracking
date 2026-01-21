@@ -14,6 +14,13 @@ datasource db {
   provider = "postgresql"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+  output   = "../dbml"
+  projectName = "My Project Name"
+  manyToMany          = false
+}
+
 // ============================================================================
 // Core User Models
 // ============================================================================
@@ -44,46 +51,72 @@ model User {
   lecturer Lecturer?
 
   // Opposite relations for student audit fields
+  /// @hide
   deleted_students        Student[]       @relation("StudentDeletedBy")
+  /// @hide
   created_students        Student[]       @relation("StudentCreatedBy")
+  /// @hide
   updated_students        Student[]       @relation("StudentUpdatedBy")
   // Opposite relations for lecturer audit fields
+  /// @hide
   deleted_lecturers       Lecturer[]      @relation("LecturerDeletedBy")
+  /// @hide
   created_lecturers       Lecturer[]      @relation("LecturerCreatedBy")
+  /// @hide
   updated_lecturers       Lecturer[]      @relation("LecturerUpdatedBy")
   // Opposite relations for github mapping audit fields
+  /// @hide
   deleted_github_mappings GithubMapping[] @relation("GithubMappingDeletedBy")
+  /// @hide
   created_github_mappings GithubMapping[] @relation("GithubMappingCreatedBy")
+  /// @hide
   updated_github_mappings GithubMapping[] @relation("GithubMappingUpdatedBy")
 
   // Opposite relations for semester audit fields
+  /// @hide
   deleted_semesters Semester[] @relation("SemesterDeletedBy")
+  /// @hide
   created_semesters Semester[] @relation("SemesterCreatedBy")
+  /// @hide
   updated_semesters Semester[] @relation("SemesterUpdatedBy")
 
   // Opposite relations for class audit fields
+  /// @hide
   deleted_classes Class[] @relation("ClassDeletedBy")
+  /// @hide
   created_classes Class[] @relation("ClassCreatedBy")
+  /// @hide
   updated_classes Class[] @relation("ClassUpdatedBy")
 
   // Opposite relations for enrollment audit fields
+  /// @hide
   deleted_enrollments Enrollment[] @relation("EnrollmentDeletedBy")
+  /// @hide
   created_enrollments Enrollment[] @relation("EnrollmentCreatedBy")
   updated_enrollments Enrollment[] @relation("EnrollmentUpdatedBy")
 
   // Opposite relations for project audit fields
+  /// @hide
   deleted_projects Project[] @relation("ProjectDeletedBy")
+  /// @hide
   created_projects Project[] @relation("ProjectCreatedBy")
+  /// @hide
   updated_projects Project[] @relation("ProjectUpdatedBy")
 
   // Opposite relations for project member audit fields
+  /// @hide
   deleted_project_members ProjectMember[] @relation("ProjectMemberDeletedBy")
+  /// @hide
   created_project_members ProjectMember[] @relation("ProjectMemberCreatedBy")
+  /// @hide
   updated_project_members ProjectMember[] @relation("ProjectMemberUpdatedBy")
 
   // Opposite relations for repository audit fields
+  /// @hide
   deleted_repositories Repository[] @relation("RepositoryDeletedBy")
+  /// @hide
   created_repositories Repository[] @relation("RepositoryCreatedBy")
+  /// @hide
   updated_repositories Repository[] @relation("RepositoryUpdatedBy")
 
   @@map("users")
@@ -95,18 +128,25 @@ model Student {
   university_email String?   @db.VarChar(255)
   deleted_at       DateTime?
   deleted_by_id    String?   @db.Uuid
+  /// @hide
   deleted_by       User?     @relation("StudentDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at       DateTime  @default(now())
   created_by_id    String?   @db.Uuid
+  /// @hide
   created_by       User?     @relation("StudentCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at       DateTime  @default(now()) @updatedAt
   updated_by_id    String?   @db.Uuid
+  /// @hide
   updated_by       User?     @relation("StudentUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
+  /// @hide
   user            User            @relation(fields: [id], references: [id], onDelete: NoAction)
+  /// @hide
   github_mappings GithubMapping[]
+  /// @hide
   enrollments     Enrollment[]
+  /// @hide
   project_members ProjectMember[]
 
   @@map("students")
@@ -120,16 +160,21 @@ model Lecturer {
   phone_number  String?   @db.VarChar(20)
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
+  /// @hide
   deleted_by    User?     @relation("LecturerDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at    DateTime  @default(now())
   created_by_id String?   @db.Uuid
+  /// @hide
   created_by    User?     @relation("LecturerCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at    DateTime  @default(now()) @updatedAt
   updated_by_id String?   @db.Uuid
+  /// @hide
   updated_by    User?     @relation("LecturerUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
+  /// @hide
   user    User    @relation(fields: [id], references: [id], onDelete: NoAction)
+  /// @hide
   classes Class[]
 
   @@map("lecturers")
@@ -143,12 +188,15 @@ model GithubMapping {
   is_verified     Boolean   @default(false)
   deleted_at      DateTime?
   deleted_by_id   String?   @db.Uuid
+  /// @hide
   deleted_by      User?     @relation("GithubMappingDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at      DateTime  @default(now())
   created_by_id   String?   @db.Uuid
+  /// @hide
   created_by      User?     @relation("GithubMappingCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at      DateTime  @default(now()) @updatedAt
   updated_by_id   String?   @db.Uuid
+  /// @hide
   updated_by      User?     @relation("GithubMappingUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
@@ -170,12 +218,15 @@ model Semester {
   is_active     Boolean   @default(true)
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
+  /// @hide
   deleted_by    User?     @relation("SemesterDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at    DateTime  @default(now())
   created_by_id String?   @db.Uuid
+  /// @hide
   created_by    User?     @relation("SemesterCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at    DateTime  @default(now()) @updatedAt
   updated_by_id String?   @db.Uuid
+  /// @hide
   updated_by    User?     @relation("SemesterUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
@@ -193,18 +244,25 @@ model Class {
   description   String?   @db.Text
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
+  /// @hide
   deleted_by    User?     @relation("ClassDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at    DateTime  @default(now())
   created_by_id String?   @db.Uuid
+  /// @hide
   created_by    User?     @relation("ClassCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at    DateTime  @default(now()) @updatedAt
   updated_by_id String?   @db.Uuid
+  /// @hide
   updated_by    User?     @relation("ClassUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
+  /// @hide
   semester    Semester     @relation(fields: [semester_id], references: [id], onDelete: Cascade)
+  /// @hide
   lecturer    Lecturer     @relation(fields: [lecturer_id], references: [id], onDelete: Restrict)
+  /// @hide
   enrollments Enrollment[]
+  /// @hide
   projects    Project[]
 
   @@map("classes")
@@ -218,16 +276,21 @@ model Enrollment {
   enrolled_at   DateTime  @default(now())
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
+  /// @hide
   deleted_by    User?     @relation("EnrollmentDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at    DateTime  @default(now())
   created_by_id String?   @db.Uuid
+  /// @hide
   created_by    User?     @relation("EnrollmentCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at    DateTime  @default(now()) @updatedAt
   updated_by_id String?   @db.Uuid
+  /// @hide
   updated_by    User?     @relation("EnrollmentUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
+  /// @hide
   class   Class   @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  /// @hide
   student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   @@unique([class_id, student_id])
@@ -247,17 +310,23 @@ model Project {
   avatar_url    String?   @db.VarChar(500)
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
+  /// @hide
   deleted_by    User?     @relation("ProjectDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at    DateTime  @default(now())
   created_by_id String?   @db.Uuid
+  /// @hide
   created_by    User?     @relation("ProjectCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at    DateTime  @default(now()) @updatedAt
   updated_by_id String?   @db.Uuid
+  /// @hide
   updated_by    User?     @relation("ProjectUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
+  /// @hide
   class           Class           @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  /// @hide
   project_members ProjectMember[]
+  /// @hide
   repositories    Repository[]
 
   @@map("projects")
@@ -272,17 +341,23 @@ model ProjectMember {
   is_active     Boolean   @default(true)
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
+  /// @hide
   deleted_by    User?     @relation("ProjectMemberDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at    DateTime  @default(now())
   created_by_id String?   @db.Uuid
+  /// @hide
   created_by    User?     @relation("ProjectMemberCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at    DateTime  @default(now()) @updatedAt
   updated_by_id String?   @db.Uuid
+  /// @hide
   updated_by    User?     @relation("ProjectMemberUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
+  /// @hide
   project Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// @hide
   student Student  @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  /// @hide
   commits Commit[]
 
   @@unique([project_id, student_id])
@@ -303,17 +378,23 @@ model Repository {
   error_message          String?   @db.Text
   deleted_at             DateTime?
   deleted_by_id          String?   @db.Uuid
+  /// @hide
   deleted_by             User?     @relation("RepositoryDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
   created_at             DateTime  @default(now())
   created_by_id          String?   @db.Uuid
+  /// @hide
   created_by             User?     @relation("RepositoryCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
   updated_at             DateTime  @default(now()) @updatedAt
   updated_by_id          String?   @db.Uuid
+  /// @hide
   updated_by             User?     @relation("RepositoryUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
+  /// @hide
   project   Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  /// @hide
   commits   Commit[]
+  /// @hide
   sync_logs SyncLog[]
 
   @@map("repositories")
@@ -335,7 +416,9 @@ model Commit {
   created_at        DateTime  @default(now())
 
   // Relations
+  /// @hide
   repository     Repository     @relation(fields: [repository_id], references: [id], onDelete: Cascade)
+  /// @hide
   project_member ProjectMember? @relation(fields: [project_member_id], references: [id], onDelete: SetNull)
 
   @@map("commits")
@@ -354,6 +437,7 @@ model SyncLog {
   log_message       String?   @db.Text
 
   // Relations
+  /// @hide
   repository Repository @relation(fields: [repository_id], references: [id], onDelete: Cascade)
 
   @@map("sync_logs")
