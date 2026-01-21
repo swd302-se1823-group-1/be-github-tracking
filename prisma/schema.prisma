@@ -90,6 +90,14 @@ model User {
   /// @hide
   updated_classes Class[] @relation("ClassUpdatedBy")
 
+  // Opposite relations for course audit fields
+  /// @hide
+  deleted_courses Course[] @relation("CourseDeletedBy")
+  /// @hide
+  created_courses Course[] @relation("CourseCreatedBy")
+  /// @hide
+  updated_courses Course[] @relation("CourseUpdatedBy")
+
   // Opposite relations for enrollment audit fields
   /// @hide
   deleted_enrollments Enrollment[] @relation("EnrollmentDeletedBy")
@@ -221,9 +229,9 @@ model GithubMapping {
 // ============================================================================
 
 model Semester {
-  id            String    @id @db.VarChar(20)
-  code          String?   @db.VarChar(50)
-  name          String?   @db.VarChar(100)
+  id            BigInt    @id @default(autoincrement())
+  code          String    @unique @db.VarChar(50)
+  name          String   @db.VarChar(100)
   start_date    DateTime? @db.Date
   end_date      DateTime? @db.Date
   is_active     Boolean   @default(true)
@@ -242,18 +250,18 @@ model Semester {
 
   // Relations
   classes Class[]
-
   @@index([is_active])
   @@index([start_date, end_date])
   @@map("semesters")
 }
 
 model Class {
-  id            BigInt    @id @default(autoincrement())
-  semester_id   String    @db.VarChar(20)
+  id            String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  semester_id   BigInt
   lecturer_id   String    @db.Uuid
-  code          String?   @db.VarChar(50)
-  name          String?   @db.VarChar(255)
+  course_id     String    @db.Uuid
+  class_code    String   @db.VarChar(50)
+  class_name    String   @db.VarChar(255)
   description   String?   @db.Text
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
@@ -277,16 +285,42 @@ model Class {
   enrollments Enrollment[]
   /// @hide
   projects    Project[]
-
+  // Relations
+  /// @hide
+  course      Course    @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  @@unique([course_id, semester_id, class_code])
   @@index([semester_id])
   @@index([lecturer_id])
-  @@index([code])
+  @@index([class_code])
+  @@index([course_id])
   @@map("classes")
 }
+model Course {
+  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  code        String   @unique @db.VarChar(20) // Ví dụ: SWD392
+  name        String   @db.VarChar(255)        // Software Architecture and Design
+  deleted_at  DateTime?
+  deleted_by_id String?   @db.Uuid
+  /// @hide
+  deleted_by    User?     @relation("CourseDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
+  created_at    DateTime  @default(now())
+  created_by_id String?   @db.Uuid
+  /// @hide
+  created_by    User?     @relation("CourseCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
+  updated_at    DateTime  @default(now()) @updatedAt
+  updated_by_id String?   @db.Uuid
+  /// @hide
+  updated_by    User?     @relation("CourseUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
+  // Relations
+  classes     Class[]  // Một môn học có thể mở nhiều lớp (SE1823, SE1824...)
+  @@index([code])
+  @@map("courses")
+}
+
 
 model Enrollment {
   id            BigInt    @id @default(autoincrement())
-  class_id      BigInt
+  class_id      String    @db.Uuid
   student_id    String    @db.Uuid
   total_score   Decimal?  @db.Decimal(5, 2)
   enrolled_at   DateTime  @default(now())
@@ -318,8 +352,8 @@ model Enrollment {
 // ============================================================================
 
 model Project {
-  id            BigInt    @id @default(autoincrement())
-  class_id      BigInt
+  id            String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  class_id      String    @db.Uuid
   name          String?   @db.VarChar(255)
   topic         String?   @db.VarChar(255)
   description   String?   @db.Text
@@ -349,8 +383,8 @@ model Project {
 }
 
 model ProjectMember {
-  id            BigInt            @id @default(autoincrement())
-  project_id    BigInt
+  id            String            @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  project_id    String            @db.Uuid
   student_id    String            @db.Uuid
   role          ProjectMemberRole
   joined_at     DateTime          @default(now())
@@ -381,8 +415,8 @@ model ProjectMember {
 }
 
 model Repository {
-  id                     BigInt    @id @default(autoincrement())
-  project_id             BigInt
+  id                     String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  project_id             String    @db.Uuid
   url                    String    @db.VarChar(500)
   name                   String    @db.VarChar(255)
   organization           String    @db.VarChar(255)
@@ -421,9 +455,9 @@ model Repository {
 }
 
 model Commit {
-  id                BigInt    @id @default(autoincrement())
-  repository_id     BigInt
-  project_member_id BigInt?
+  id                String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  repository_id     String    @db.Uuid
+  project_member_id String    @db.Uuid
   message           String?   @db.Text
   author_name_raw   String?   @db.VarChar(255)
   author_email_raw  String?   @db.VarChar(255)
@@ -439,7 +473,7 @@ model Commit {
   /// @hide
   repository     Repository     @relation(fields: [repository_id], references: [id], onDelete: Cascade)
   /// @hide
-  project_member ProjectMember? @relation(fields: [project_member_id], references: [id], onDelete: SetNull)
+  project_member ProjectMember? @relation(fields: [project_member_id], references: [id], onDelete: Cascade)
 
   @@unique([repository_id, hash])
   @@index([repository_id, committed_date])
@@ -450,8 +484,8 @@ model Commit {
 }
 
 model SyncLog {
-  id                BigInt    @id @default(autoincrement())
-  repository_id     BigInt
+  id                String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  repository_id     String    @db.Uuid
   trigger_type      String?   @db.VarChar(50)
   started_at        DateTime?
   completed_at      DateTime?
