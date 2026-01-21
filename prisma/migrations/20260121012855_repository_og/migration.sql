@@ -1,21 +1,8 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'STUDENT', 'LECTURER');
 
--- DropForeignKey
-ALTER TABLE "Post" DROP CONSTRAINT "Post_authorId_fkey";
-
--- DropTable
-DROP TABLE "Post";
-
--- DropTable
-DROP TABLE "User";
+-- CreateEnum
+CREATE TYPE "ProjectMemberRole" AS ENUM ('LEADER', 'MEMBER');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -161,7 +148,7 @@ CREATE TABLE "project_members" (
     "id" BIGSERIAL NOT NULL,
     "project_id" BIGINT NOT NULL,
     "student_id" UUID NOT NULL,
-    "role" VARCHAR(50),
+    "role" "ProjectMemberRole" NOT NULL,
     "joined_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "deleted_at" TIMESTAMP(3),
@@ -178,15 +165,15 @@ CREATE TABLE "project_members" (
 CREATE TABLE "repositories" (
     "id" BIGSERIAL NOT NULL,
     "project_id" BIGINT NOT NULL,
-    "url" VARCHAR(500),
-    "name" VARCHAR(255),
-    "owner" VARCHAR(255),
-    "type" VARCHAR(50),
-    "encrypted_access_token" TEXT,
-    "token_iv" VARCHAR(255),
+    "url" VARCHAR(500) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "organization" VARCHAR(255) NOT NULL,
+    "owner" VARCHAR(255) NOT NULL,
+    "encrypted_access_token" TEXT NOT NULL,
+    "token_iv" VARCHAR(255) NOT NULL,
     "last_scanned_at" TIMESTAMP(3),
-    "scan_status" VARCHAR(50),
-    "error_message" TEXT,
+    "scan_status" VARCHAR(50) NOT NULL,
+    "error_message" TEXT NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "deleted_by_id" UUID,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -241,6 +228,12 @@ CREATE UNIQUE INDEX "students_student_code_key" ON "students"("student_code");
 -- CreateIndex
 CREATE UNIQUE INDEX "lecturers_employee_code_key" ON "lecturers"("employee_code");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "enrollments_class_id_student_id_key" ON "enrollments"("class_id", "student_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "project_members_project_id_student_id_key" ON "project_members"("project_id", "student_id");
+
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_deleted_by_id_fkey" FOREIGN KEY ("deleted_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
 
@@ -260,7 +253,7 @@ ALTER TABLE "students" ADD CONSTRAINT "students_created_by_id_fkey" FOREIGN KEY 
 ALTER TABLE "students" ADD CONSTRAINT "students_updated_by_id_fkey" FOREIGN KEY ("updated_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "students" ADD CONSTRAINT "students_id_fkey" FOREIGN KEY ("id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "students" ADD CONSTRAINT "students_id_fkey" FOREIGN KEY ("id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "lecturers" ADD CONSTRAINT "lecturers_deleted_by_id_fkey" FOREIGN KEY ("deleted_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
