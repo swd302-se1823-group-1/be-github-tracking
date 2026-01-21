@@ -227,15 +227,15 @@ Table project_members {
 Table repositories {
   id BigInt [pk, increment]
   project_id BigInt [not null]
-  url String
-  name String
-  owner String
-  type String
-  encrypted_access_token String
-  token_iv String
+  url String [not null]
+  name String [not null]
+  organization String [not null]
+  owner String [not null]
+  encrypted_access_token String [not null]
+  token_iv String [not null]
   last_scanned_at DateTime
-  scan_status String
-  error_message String
+  scan_status String [not null]
+  error_message String [not null]
   deleted_at DateTime
   deleted_by_id String
   deleted_by users [note: '@hide']
