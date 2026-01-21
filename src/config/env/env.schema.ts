@@ -3,6 +3,12 @@ import { z } from 'zod';
 export const envSchema = z.object({
   DATABASE_URL: z.url(),
   DIRECT_URL: z.url(),
+
+  // JWT Configuration
+  JWT_ACCESS_SECRET: z.string(),
+  JWT_ACCESS_EXPIRES: z.string().default('15m'),
+  JWT_REFRESH_SECRET: z.string(),
+  JWT_REFRESH_EXPIRES: z.string().default('7d'),
 });
 
 export type Env = z.infer<typeof envSchema>;

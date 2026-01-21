@@ -6,8 +6,9 @@
 
 generator client {
   provider      = "prisma-client"
-  output        = "../generated/prisma"
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  moduleFormat    = "cjs"
 }
 
 datasource db {
@@ -51,6 +52,7 @@ model User {
   // Relations
   student  Student?
   lecturer Lecturer?
+  refresh_tokens RefreshToken[]
 
   // Opposite relations for student audit fields
   /// @hide
@@ -133,6 +135,31 @@ model User {
   @@index([email])
   @@index([role, is_active])
   @@map("users")
+}
+
+model RefreshToken {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jti         String   @unique @db.VarChar(36) // JWT ID - UUID embedded in token
+  
+  // Device identification
+  device_id   String   @db.VarChar(255)
+  device_name String?  @db.VarChar(255) // e.g., "iPhone 13", "My Gaming PC"
+  
+  user_id     String   @db.Uuid
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // Security metadata
+  ip_address  String?  @db.VarChar(45) // IPv6 max length
+  user_agent  String?  @db.Text
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  expires_at  DateTime
+  revoked_at  DateTime? // Null = active, has value = revoked
+
+  @@index([user_id, device_id])
+  @@index([expires_at])
+  @@map("refresh_tokens")
 }
 
 model Student {

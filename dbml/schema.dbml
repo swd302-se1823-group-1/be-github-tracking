@@ -31,6 +31,7 @@ Table users {
   updated_user users [not null]
   student students
   lecturer lecturers
+  refresh_tokens refresh_tokens [not null]
   deleted_students students [not null, note: '@hide']
   created_students students [not null, note: '@hide']
   updated_students students [not null, note: '@hide']
@@ -46,6 +47,9 @@ Table users {
   deleted_classes classes [not null, note: '@hide']
   created_classes classes [not null, note: '@hide']
   updated_classes classes [not null, note: '@hide']
+  deleted_courses courses [not null, note: '@hide']
+  created_courses courses [not null, note: '@hide']
+  updated_courses courses [not null, note: '@hide']
   deleted_enrollments enrollments [not null, note: '@hide']
   created_enrollments enrollments [not null, note: '@hide']
   updated_enrollments enrollments [not null]
@@ -62,6 +66,21 @@ Table users {
   indexes {
     (provider, provider_id) [unique]
   }
+}
+
+Table refresh_tokens {
+  id String [pk]
+  jti String [unique, not null]
+  device_id String [not null]
+  device_name String
+  user_id String [not null]
+  user users [not null]
+  ip_address String
+  user_agent String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  expires_at DateTime [not null]
+  revoked_at DateTime
 }
 
 Table students {
@@ -122,8 +141,8 @@ Table github_mappings {
 
 Table semesters {
   id BigInt [pk, increment]
-  code String
-  name String
+  code String [unique, not null]
+  name String [not null]
   start_date DateTime
   end_date DateTime
   is_active Boolean [not null, default: true]
@@ -144,8 +163,8 @@ Table classes {
   semester_id BigInt [not null]
   lecturer_id String [not null]
   course_id String [not null]
-  code String
-  name String
+  class_code String [not null]
+  class_name String [not null]
   description String
   deleted_at DateTime
   deleted_by_id String
@@ -161,12 +180,25 @@ Table classes {
   enrollments enrollments [not null, note: '@hide']
   projects projects [not null, note: '@hide']
   course courses [not null, note: '@hide']
+
+  indexes {
+    (course_id, semester_id, class_code) [unique]
+  }
 }
 
 Table courses {
   id String [pk]
   code String [unique, not null]
   name String [not null]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
   classes classes [not null]
 }
 
@@ -318,6 +350,8 @@ Ref: users.created_by_id - users.id [delete: No Action]
 
 Ref: users.updated_by_id - users.id [delete: No Action]
 
+Ref: refresh_tokens.user_id > users.id [delete: Cascade]
+
 Ref: students.deleted_by_id - users.id [delete: No Action]
 
 Ref: students.created_by_id - users.id [delete: No Action]
@@ -359,6 +393,12 @@ Ref: classes.semester_id > semesters.id [delete: Cascade]
 Ref: classes.lecturer_id > lecturers.id [delete: Restrict]
 
 Ref: classes.course_id > courses.id [delete: Cascade]
+
+Ref: courses.deleted_by_id > users.id [delete: No Action]
+
+Ref: courses.created_by_id > users.id [delete: No Action]
+
+Ref: courses.updated_by_id > users.id [delete: No Action]
 
 Ref: enrollments.deleted_by_id > users.id [delete: No Action]
 
