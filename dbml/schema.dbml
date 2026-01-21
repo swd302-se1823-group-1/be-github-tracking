@@ -2,7 +2,7 @@
 //// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 //// ------------------------------------------------------
 
-Project "My Project Name" {
+Project "GitHub Tracking System" {
   database_type: ''
   Note: ''
 }
@@ -14,6 +14,8 @@ Table users {
   full_name String
   role UserRole [not null, default: 'STUDENT']
   avatar_url String
+  provider String
+  provider_id String
   is_active Boolean [not null, default: true]
   deleted_at DateTime
   deleted_by_id String
@@ -56,6 +58,10 @@ Table users {
   deleted_repositories repositories [not null, note: '@hide']
   created_repositories repositories [not null, note: '@hide']
   updated_repositories repositories [not null, note: '@hide']
+
+  indexes {
+    (provider, provider_id) [unique]
+  }
 }
 
 Table students {
@@ -99,8 +105,8 @@ Table lecturers {
 Table github_mappings {
   id BigInt [pk, increment]
   student_id String [not null]
-  github_email String
-  github_username String
+  github_email String [unique]
+  github_username String [unique]
   is_verified Boolean [not null, default: false]
   deleted_at DateTime
   deleted_by_id String
@@ -115,7 +121,7 @@ Table github_mappings {
 }
 
 Table semesters {
-  id String [pk]
+  id BigInt [pk, increment]
   code String
   name String
   start_date DateTime
@@ -134,9 +140,10 @@ Table semesters {
 }
 
 Table classes {
-  id BigInt [pk, increment]
-  semester_id String [not null]
+  id String [pk]
+  semester_id BigInt [not null]
   lecturer_id String [not null]
+  course_id String [not null]
   code String
   name String
   description String
@@ -153,11 +160,19 @@ Table classes {
   lecturer lecturers [not null, note: '@hide']
   enrollments enrollments [not null, note: '@hide']
   projects projects [not null, note: '@hide']
+  course courses [not null, note: '@hide']
+}
+
+Table courses {
+  id String [pk]
+  code String [unique, not null]
+  name String [not null]
+  classes classes [not null]
 }
 
 Table enrollments {
   id BigInt [pk, increment]
-  class_id BigInt [not null]
+  class_id String [not null]
   student_id String [not null]
   total_score Decimal
   enrolled_at DateTime [default: `now()`, not null]
@@ -179,8 +194,8 @@ Table enrollments {
 }
 
 Table projects {
-  id BigInt [pk, increment]
-  class_id BigInt [not null]
+  id String [pk]
+  class_id String [not null]
   name String
   topic String
   description String
@@ -200,8 +215,8 @@ Table projects {
 }
 
 Table project_members {
-  id BigInt [pk, increment]
-  project_id BigInt [not null]
+  id String [pk]
+  project_id String [not null]
   student_id String [not null]
   role ProjectMemberRole [not null]
   joined_at DateTime [default: `now()`, not null]
@@ -225,8 +240,8 @@ Table project_members {
 }
 
 Table repositories {
-  id BigInt [pk, increment]
-  project_id BigInt [not null]
+  id String [pk]
+  project_id String [not null]
   url String [not null]
   name String [not null]
   organization String [not null]
@@ -251,9 +266,9 @@ Table repositories {
 }
 
 Table commits {
-  id BigInt [pk, increment]
-  repository_id BigInt [not null]
-  project_member_id BigInt
+  id String [pk]
+  repository_id String [not null]
+  project_member_id String [not null]
   message String
   author_name_raw String
   author_email_raw String
@@ -266,11 +281,15 @@ Table commits {
   created_at DateTime [default: `now()`, not null]
   repository repositories [not null, note: '@hide']
   project_member project_members [note: '@hide']
+
+  indexes {
+    (repository_id, hash) [unique]
+  }
 }
 
 Table sync_logs {
-  id BigInt [pk, increment]
-  repository_id BigInt [not null]
+  id String [pk]
+  repository_id String [not null]
   trigger_type String
   started_at DateTime
   completed_at DateTime
@@ -339,6 +358,8 @@ Ref: classes.semester_id > semesters.id [delete: Cascade]
 
 Ref: classes.lecturer_id > lecturers.id [delete: Restrict]
 
+Ref: classes.course_id > courses.id [delete: Cascade]
+
 Ref: enrollments.deleted_by_id > users.id [delete: No Action]
 
 Ref: enrollments.created_by_id > users.id [delete: No Action]
@@ -377,6 +398,6 @@ Ref: repositories.project_id > projects.id [delete: Cascade]
 
 Ref: commits.repository_id > repositories.id [delete: Cascade]
 
-Ref: commits.project_member_id > project_members.id [delete: Set Null]
+Ref: commits.project_member_id > project_members.id [delete: Cascade]
 
 Ref: sync_logs.repository_id > repositories.id [delete: Cascade]
