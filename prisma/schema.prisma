@@ -17,7 +17,7 @@ datasource db {
 generator dbml {
   provider    = "prisma-dbml-generator"
   output      = "../dbml"
-  projectName = "My Project Name"
+  projectName = "GitHub Tracking System"
   manyToMany  = false
 }
 
@@ -32,8 +32,8 @@ model User {
   full_name     String?   @db.VarChar(255)
   role          UserRole  @default(STUDENT)
   avatar_url    String?   @db.VarChar(500)
-  provider      String? // 'google', 'facebook', 'local'
-  providerId    String?
+  provider      String?   @db.VarChar(50) // 'google', 'facebook', 'local'
+  provider_id   String?   @db.VarChar(255)
   is_active     Boolean   @default(true)
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
@@ -121,6 +121,9 @@ model User {
   /// @hide
   updated_repositories Repository[] @relation("RepositoryUpdatedBy")
 
+  @@unique([provider, provider_id])
+  @@index([email])
+  @@index([role, is_active])
   @@map("users")
 }
 
@@ -151,6 +154,8 @@ model Student {
   /// @hide
   project_members ProjectMember[]
 
+  @@index([student_code])
+  @@index([university_email])
   @@map("students")
 }
 
@@ -204,6 +209,10 @@ model GithubMapping {
   // Relations
   student Student @relation(fields: [student_id], references: [id], onDelete: NoAction)
 
+  @@unique([github_email])
+  @@unique([github_username])
+  @@index([student_id, is_verified])
+  @@index([is_verified])
   @@map("github_mappings")
 }
 
@@ -234,6 +243,8 @@ model Semester {
   // Relations
   classes Class[]
 
+  @@index([is_active])
+  @@index([start_date, end_date])
   @@map("semesters")
 }
 
@@ -267,6 +278,9 @@ model Class {
   /// @hide
   projects    Project[]
 
+  @@index([semester_id])
+  @@index([lecturer_id])
+  @@index([code])
   @@map("classes")
 }
 
@@ -399,6 +413,10 @@ model Repository {
   /// @hide
   sync_logs SyncLog[]
 
+  @@index([project_id])
+  @@index([scan_status])
+  @@index([last_scanned_at])
+  @@index([project_id, scan_status])
   @@map("repositories")
 }
 
@@ -423,6 +441,11 @@ model Commit {
   /// @hide
   project_member ProjectMember? @relation(fields: [project_member_id], references: [id], onDelete: SetNull)
 
+  @@unique([repository_id, hash])
+  @@index([repository_id, committed_date])
+  @@index([author_email_raw])
+  @@index([committed_date])
+  @@index([hash])
   @@map("commits")
 }
 
@@ -442,6 +465,9 @@ model SyncLog {
   /// @hide
   repository Repository @relation(fields: [repository_id], references: [id], onDelete: Cascade)
 
+  @@index([repository_id])
+  @@index([status])
+  @@index([started_at])
   @@map("sync_logs")
 }
 
