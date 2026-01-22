@@ -1,5 +1,7 @@
-import { User as PrismaUser } from '@/generated/prisma/client';
-import { UserRole as PrismaUserRole } from '@/generated/prisma/enums';
+import {
+  User as PrismaUser,
+  UserRole as PrismaUserRole,
+} from '@generated/prisma/client';
 import { User } from '../../domain/aggregates/user.aggregate';
 import { UserRole } from '../../domain/enums/user-role.enum';
 

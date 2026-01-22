@@ -3,7 +3,7 @@ import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtConfig, JWT_CONFIG_KEY } from '@/config/jwt';
 import { generateId } from '@/shared/utils/uuid';
-import { UserRole } from '@/generated/prisma/enums';
+import { UserRole } from '@generated/prisma/enums';
 
 export interface TokenPayload {
   sub: string;

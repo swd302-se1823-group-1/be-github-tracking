@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DomainException } from '../exceptions/domain.exception';
-import { Prisma } from '@/generated/prisma/client';
+import { Prisma } from '@generated/prisma/client';
+
 /**
  * Standardized error response format
  */
