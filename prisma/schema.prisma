@@ -8,7 +8,7 @@ generator client {
   provider      = "prisma-client"
   output        = "../generated/prisma"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
-  moduleFormat    = "cjs"
+  moduleFormat  = "cjs"
 }
 
 datasource db {
@@ -50,8 +50,8 @@ model User {
   updated_user  User[]    @relation("UpdatedBy")
 
   // Relations
-  student  Student?
-  lecturer Lecturer?
+  student        Student?
+  lecturer       Lecturer?
   refresh_tokens RefreshToken[]
 
   // Opposite relations for student audit fields
@@ -138,24 +138,24 @@ model User {
 }
 
 model RefreshToken {
-  id          String   @id @default(uuid()) @db.Uuid
-  jti         String   @unique @db.VarChar(36) // JWT ID - UUID embedded in token
-  
+  id  String @id @default(uuid()) @db.Uuid
+  jti String @unique @db.VarChar(36) // JWT ID - UUID embedded in token
+
   // Device identification
-  device_id   String   @db.VarChar(255)
-  device_name String?  @db.VarChar(255) // e.g., "iPhone 13", "My Gaming PC"
-  
-  user_id     String   @db.Uuid
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device_id   String  @db.VarChar(255)
+  device_name String? @db.VarChar(255) // e.g., "iPhone 13", "My Gaming PC"
+
+  user_id String @db.Uuid
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   // Security metadata
-  ip_address  String?  @db.VarChar(45) // IPv6 max length
-  user_agent  String?  @db.Text
-  
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now()) @updatedAt
-  expires_at  DateTime
-  revoked_at  DateTime? // Null = active, has value = revoked
+  ip_address String? @db.VarChar(45) // IPv6 max length
+  user_agent String? @db.Text
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  expires_at DateTime
+  revoked_at DateTime? // Null = active, has value = revoked
 
   @@index([user_id, device_id])
   @@index([expires_at])
@@ -258,7 +258,7 @@ model GithubMapping {
 model Semester {
   id            BigInt    @id @default(autoincrement())
   code          String    @unique @db.VarChar(50)
-  name          String   @db.VarChar(100)
+  name          String    @db.VarChar(100)
   start_date    DateTime? @db.Date
   end_date      DateTime? @db.Date
   is_active     Boolean   @default(true)
@@ -277,31 +277,33 @@ model Semester {
 
   // Relations
   classes Class[]
+
   @@index([is_active])
   @@index([start_date, end_date])
   @@map("semesters")
 }
 
 model Class {
-  id            String    @id @db.Uuid @default(uuid())
-  semester_id   BigInt
-  lecturer_id   String    @db.Uuid
-  course_id     String    @db.Uuid
-  class_code    String   @db.VarChar(50)
-  class_name    String   @db.VarChar(255)
-  description   String?   @db.Text
-  deleted_at    DateTime?
-  deleted_by_id String?   @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
+  semester_id     BigInt
+  enroll_password String    @db.VarChar(255)
+  lecturer_id     String    @db.Uuid
+  course_id       String    @db.Uuid
+  class_code      String    @db.VarChar(50)
+  class_name      String    @db.VarChar(255)
+  description     String?   @db.Text
+  deleted_at      DateTime?
+  deleted_by_id   String?   @db.Uuid
   /// @hide
-  deleted_by    User?     @relation("ClassDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
-  created_at    DateTime  @default(now())
-  created_by_id String?   @db.Uuid
+  deleted_by      User?     @relation("ClassDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
+  created_at      DateTime  @default(now())
+  created_by_id   String?   @db.Uuid
   /// @hide
-  created_by    User?     @relation("ClassCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
-  updated_at    DateTime  @default(now()) @updatedAt
-  updated_by_id String?   @db.Uuid
+  created_by      User?     @relation("ClassCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
+  updated_at      DateTime  @default(now()) @updatedAt
+  updated_by_id   String?   @db.Uuid
   /// @hide
-  updated_by    User?     @relation("ClassUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
+  updated_by      User?     @relation("ClassUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
   /// @hide
@@ -314,7 +316,8 @@ model Class {
   projects    Project[]
   // Relations
   /// @hide
-  course      Course    @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  course      Course       @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
   @@unique([course_id, semester_id, class_code])
   @@index([semester_id])
   @@index([lecturer_id])
@@ -322,11 +325,12 @@ model Class {
   @@index([course_id])
   @@map("classes")
 }
+
 model Course {
-  id          String   @id @default(uuid()) @db.Uuid
-  code        String   @unique @db.VarChar(20) // Ví dụ: SWD392
-  name        String   @db.VarChar(255)        // Software Architecture and Design
-  deleted_at  DateTime?
+  id            String    @id @default(uuid()) @db.Uuid
+  code          String    @unique @db.VarChar(20) // Ví dụ: SWD392
+  name          String    @db.VarChar(255) // Software Architecture and Design
+  deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid
   /// @hide
   deleted_by    User?     @relation("CourseDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
@@ -339,11 +343,11 @@ model Course {
   /// @hide
   updated_by    User?     @relation("CourseUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
   // Relations
-  classes     Class[]  // Một môn học có thể mở nhiều lớp (SE1823, SE1824...)
+  classes       Class[] // Một môn học có thể mở nhiều lớp (SE1823, SE1824...)
+
   @@index([code])
   @@map("courses")
 }
-
 
 model Enrollment {
   id            BigInt    @id @default(autoincrement())
@@ -379,7 +383,7 @@ model Enrollment {
 // ============================================================================
 
 model Project {
-  id            String    @id @db.Uuid @default(uuid())
+  id            String    @id @default(uuid()) @db.Uuid
   class_id      String    @db.Uuid
   name          String?   @db.VarChar(255)
   topic         String?   @db.VarChar(255)
@@ -410,7 +414,7 @@ model Project {
 }
 
 model ProjectMember {
-  id            String            @id @db.Uuid @default(uuid())
+  id            String            @id @default(uuid()) @db.Uuid
   project_id    String            @db.Uuid
   student_id    String            @db.Uuid
   role          ProjectMemberRole
@@ -442,7 +446,7 @@ model ProjectMember {
 }
 
 model Repository {
-  id                     String    @id @db.Uuid @default(uuid())
+  id                     String    @id @default(uuid()) @db.Uuid
   project_id             String    @db.Uuid
   url                    String    @db.VarChar(500)
   name                   String    @db.VarChar(255)
@@ -482,7 +486,7 @@ model Repository {
 }
 
 model Commit {
-  id                String    @id @db.Uuid @default(uuid())
+  id                String    @id @default(uuid()) @db.Uuid
   repository_id     String    @db.Uuid
   project_member_id String    @db.Uuid
   message           String?   @db.Text
@@ -511,7 +515,7 @@ model Commit {
 }
 
 model SyncLog {
-  id                String    @id @db.Uuid @default(uuid())
+  id                String    @id @default(uuid()) @db.Uuid
   repository_id     String    @db.Uuid
   trigger_type      String?   @db.VarChar(50)
   started_at        DateTime?
