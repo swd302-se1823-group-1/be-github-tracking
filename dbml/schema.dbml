@@ -161,6 +161,7 @@ Table semesters {
 Table classes {
   id String [pk]
   semester_id BigInt [not null]
+  enroll_password String [not null]
   lecturer_id String [not null]
   course_id String [not null]
   class_code String [not null]
