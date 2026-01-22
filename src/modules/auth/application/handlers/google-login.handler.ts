@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { IUserRepository } from '@/modules/auth/domain/repositories/user.repository';
-import { IRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
 import { generateId } from '@/shared/utils/uuid';
 import { GoogleLoginCommand } from '@/modules/auth/application/commands/google-login.command';
 import { TokenService } from '@/modules/auth/application/services/token.service';
 import { User } from '@/modules/auth/domain/aggregates/user.aggregate';
 import { UserRole } from '@/modules/auth/domain/enums/user-role.enum';
+import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 
 @CommandHandler(GoogleLoginCommand)
 export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {

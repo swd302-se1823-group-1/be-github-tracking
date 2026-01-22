@@ -5,6 +5,8 @@ import { AppConfigModule, ThrottlerConfig } from '@/config';
 import { InfrastructureModule } from '@/infrastructure';
 import { SharedModule } from '@/shared';
 import { AuthModule } from '@/modules/auth/auth.module';
+import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
+import { JwtAccessGuard } from '@/modules/auth/infrastructure';
 
 @Module({
   imports: [
@@ -15,6 +17,16 @@ import { AuthModule } from '@/modules/auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: 'APP_GUARD',
+      useClass: RolesGuard,
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: JwtAccessGuard,
+    },
+  ],
 })
 export class AppModule {}

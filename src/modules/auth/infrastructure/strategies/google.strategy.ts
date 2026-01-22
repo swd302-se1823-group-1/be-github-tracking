@@ -6,7 +6,7 @@ import { GOOGLE_CONFIG_KEY, GoogleConfig } from '@/config/google';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     const googleConfig = configService.get<GoogleConfig>(GOOGLE_CONFIG_KEY)!;
 
     super({

@@ -1,10 +1,11 @@
+import { UserRole } from '@/modules/auth/domain/enums/user-role.enum';
 import 'express';
 
 interface UserPayload {
   userId: string;
   deviceId: string;
   jti: string;
-  role: string;
+  role: UserRole;
 }
 
 interface GoogleUser {
