@@ -12,6 +12,8 @@ CREATE TABLE "users" (
     "full_name" VARCHAR(255),
     "role" "UserRole" NOT NULL DEFAULT 'STUDENT',
     "avatar_url" VARCHAR(500),
+    "provider" VARCHAR(50),
+    "provider_id" VARCHAR(255),
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "deleted_at" TIMESTAMP(3),
     "deleted_by_id" UUID,
@@ -21,6 +23,23 @@ CREATE TABLE "users" (
     "updated_by_id" UUID,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "refresh_tokens" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "jti" VARCHAR(36) NOT NULL,
+    "device_id" VARCHAR(255) NOT NULL,
+    "device_name" VARCHAR(255),
+    "user_id" UUID NOT NULL,
+    "ip_address" VARCHAR(45),
+    "user_agent" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "revoked_at" TIMESTAMP(3),
+
+    CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -74,9 +93,9 @@ CREATE TABLE "github_mappings" (
 
 -- CreateTable
 CREATE TABLE "semesters" (
-    "id" VARCHAR(20) NOT NULL,
-    "code" VARCHAR(50),
-    "name" VARCHAR(100),
+    "id" BIGSERIAL NOT NULL,
+    "code" VARCHAR(50) NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
     "start_date" DATE,
     "end_date" DATE,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
@@ -92,11 +111,12 @@ CREATE TABLE "semesters" (
 
 -- CreateTable
 CREATE TABLE "classes" (
-    "id" BIGSERIAL NOT NULL,
-    "semester_id" VARCHAR(20) NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "semester_id" BIGINT NOT NULL,
     "lecturer_id" UUID NOT NULL,
-    "code" VARCHAR(50),
-    "name" VARCHAR(255),
+    "course_id" UUID NOT NULL,
+    "class_code" VARCHAR(50) NOT NULL,
+    "class_name" VARCHAR(255) NOT NULL,
     "description" TEXT,
     "deleted_at" TIMESTAMP(3),
     "deleted_by_id" UUID,
@@ -109,9 +129,24 @@ CREATE TABLE "classes" (
 );
 
 -- CreateTable
+CREATE TABLE "courses" (
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "code" VARCHAR(20) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
+    "deleted_by_id" UUID,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_by_id" UUID,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_by_id" UUID,
+
+    CONSTRAINT "courses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "enrollments" (
     "id" BIGSERIAL NOT NULL,
-    "class_id" BIGINT NOT NULL,
+    "class_id" UUID NOT NULL,
     "student_id" UUID NOT NULL,
     "total_score" DECIMAL(5,2),
     "enrolled_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -127,8 +162,8 @@ CREATE TABLE "enrollments" (
 
 -- CreateTable
 CREATE TABLE "projects" (
-    "id" BIGSERIAL NOT NULL,
-    "class_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "class_id" UUID NOT NULL,
     "name" VARCHAR(255),
     "topic" VARCHAR(255),
     "description" TEXT,
@@ -145,8 +180,8 @@ CREATE TABLE "projects" (
 
 -- CreateTable
 CREATE TABLE "project_members" (
-    "id" BIGSERIAL NOT NULL,
-    "project_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "project_id" UUID NOT NULL,
     "student_id" UUID NOT NULL,
     "role" "ProjectMemberRole" NOT NULL,
     "joined_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -163,8 +198,8 @@ CREATE TABLE "project_members" (
 
 -- CreateTable
 CREATE TABLE "repositories" (
-    "id" BIGSERIAL NOT NULL,
-    "project_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "project_id" UUID NOT NULL,
     "url" VARCHAR(500) NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "organization" VARCHAR(255) NOT NULL,
@@ -186,9 +221,9 @@ CREATE TABLE "repositories" (
 
 -- CreateTable
 CREATE TABLE "commits" (
-    "id" BIGSERIAL NOT NULL,
-    "repository_id" BIGINT NOT NULL,
-    "project_member_id" BIGINT,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "repository_id" UUID NOT NULL,
+    "project_member_id" UUID NOT NULL,
     "message" TEXT,
     "author_name_raw" VARCHAR(255),
     "author_email_raw" VARCHAR(255),
@@ -205,8 +240,8 @@ CREATE TABLE "commits" (
 
 -- CreateTable
 CREATE TABLE "sync_logs" (
-    "id" BIGSERIAL NOT NULL,
-    "repository_id" BIGINT NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "repository_id" UUID NOT NULL,
     "trigger_type" VARCHAR(50),
     "started_at" TIMESTAMP(3),
     "completed_at" TIMESTAMP(3),
@@ -223,16 +258,118 @@ CREATE TABLE "sync_logs" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE INDEX "users_email_idx" ON "users"("email");
+
+-- CreateIndex
+CREATE INDEX "users_role_is_active_idx" ON "users"("role", "is_active");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_provider_provider_id_key" ON "users"("provider", "provider_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "refresh_tokens_jti_key" ON "refresh_tokens"("jti");
+
+-- CreateIndex
+CREATE INDEX "refresh_tokens_user_id_device_id_idx" ON "refresh_tokens"("user_id", "device_id");
+
+-- CreateIndex
+CREATE INDEX "refresh_tokens_expires_at_idx" ON "refresh_tokens"("expires_at");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "students_student_code_key" ON "students"("student_code");
 
 -- CreateIndex
+CREATE INDEX "students_student_code_idx" ON "students"("student_code");
+
+-- CreateIndex
+CREATE INDEX "students_university_email_idx" ON "students"("university_email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "lecturers_employee_code_key" ON "lecturers"("employee_code");
+
+-- CreateIndex
+CREATE INDEX "github_mappings_student_id_is_verified_idx" ON "github_mappings"("student_id", "is_verified");
+
+-- CreateIndex
+CREATE INDEX "github_mappings_is_verified_idx" ON "github_mappings"("is_verified");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "github_mappings_github_email_key" ON "github_mappings"("github_email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "github_mappings_github_username_key" ON "github_mappings"("github_username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "semesters_code_key" ON "semesters"("code");
+
+-- CreateIndex
+CREATE INDEX "semesters_is_active_idx" ON "semesters"("is_active");
+
+-- CreateIndex
+CREATE INDEX "semesters_start_date_end_date_idx" ON "semesters"("start_date", "end_date");
+
+-- CreateIndex
+CREATE INDEX "classes_semester_id_idx" ON "classes"("semester_id");
+
+-- CreateIndex
+CREATE INDEX "classes_lecturer_id_idx" ON "classes"("lecturer_id");
+
+-- CreateIndex
+CREATE INDEX "classes_class_code_idx" ON "classes"("class_code");
+
+-- CreateIndex
+CREATE INDEX "classes_course_id_idx" ON "classes"("course_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "classes_course_id_semester_id_class_code_key" ON "classes"("course_id", "semester_id", "class_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "courses_code_key" ON "courses"("code");
+
+-- CreateIndex
+CREATE INDEX "courses_code_idx" ON "courses"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "enrollments_class_id_student_id_key" ON "enrollments"("class_id", "student_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "project_members_project_id_student_id_key" ON "project_members"("project_id", "student_id");
+
+-- CreateIndex
+CREATE INDEX "repositories_project_id_idx" ON "repositories"("project_id");
+
+-- CreateIndex
+CREATE INDEX "repositories_scan_status_idx" ON "repositories"("scan_status");
+
+-- CreateIndex
+CREATE INDEX "repositories_last_scanned_at_idx" ON "repositories"("last_scanned_at");
+
+-- CreateIndex
+CREATE INDEX "repositories_project_id_scan_status_idx" ON "repositories"("project_id", "scan_status");
+
+-- CreateIndex
+CREATE INDEX "commits_repository_id_committed_date_idx" ON "commits"("repository_id", "committed_date");
+
+-- CreateIndex
+CREATE INDEX "commits_author_email_raw_idx" ON "commits"("author_email_raw");
+
+-- CreateIndex
+CREATE INDEX "commits_committed_date_idx" ON "commits"("committed_date");
+
+-- CreateIndex
+CREATE INDEX "commits_hash_idx" ON "commits"("hash");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "commits_repository_id_hash_key" ON "commits"("repository_id", "hash");
+
+-- CreateIndex
+CREATE INDEX "sync_logs_repository_id_idx" ON "sync_logs"("repository_id");
+
+-- CreateIndex
+CREATE INDEX "sync_logs_status_idx" ON "sync_logs"("status");
+
+-- CreateIndex
+CREATE INDEX "sync_logs_started_at_idx" ON "sync_logs"("started_at");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_deleted_by_id_fkey" FOREIGN KEY ("deleted_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
@@ -242,6 +379,9 @@ ALTER TABLE "users" ADD CONSTRAINT "users_created_by_id_fkey" FOREIGN KEY ("crea
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_updated_by_id_fkey" FOREIGN KEY ("updated_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "students" ADD CONSTRAINT "students_deleted_by_id_fkey" FOREIGN KEY ("deleted_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
@@ -304,6 +444,18 @@ ALTER TABLE "classes" ADD CONSTRAINT "classes_semester_id_fkey" FOREIGN KEY ("se
 ALTER TABLE "classes" ADD CONSTRAINT "classes_lecturer_id_fkey" FOREIGN KEY ("lecturer_id") REFERENCES "lecturers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "classes" ADD CONSTRAINT "classes_course_id_fkey" FOREIGN KEY ("course_id") REFERENCES "courses"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "courses" ADD CONSTRAINT "courses_deleted_by_id_fkey" FOREIGN KEY ("deleted_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "courses" ADD CONSTRAINT "courses_created_by_id_fkey" FOREIGN KEY ("created_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "courses" ADD CONSTRAINT "courses_updated_by_id_fkey" FOREIGN KEY ("updated_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "enrollments" ADD CONSTRAINT "enrollments_deleted_by_id_fkey" FOREIGN KEY ("deleted_by_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -361,7 +513,7 @@ ALTER TABLE "repositories" ADD CONSTRAINT "repositories_project_id_fkey" FOREIGN
 ALTER TABLE "commits" ADD CONSTRAINT "commits_repository_id_fkey" FOREIGN KEY ("repository_id") REFERENCES "repositories"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "commits" ADD CONSTRAINT "commits_project_member_id_fkey" FOREIGN KEY ("project_member_id") REFERENCES "project_members"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "commits" ADD CONSTRAINT "commits_project_member_id_fkey" FOREIGN KEY ("project_member_id") REFERENCES "project_members"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "sync_logs" ADD CONSTRAINT "sync_logs_repository_id_fkey" FOREIGN KEY ("repository_id") REFERENCES "repositories"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -27,7 +27,7 @@ generator dbml {
 // ============================================================================
 
 model User {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String    @id @default(uuid()) @db.Uuid
   email         String    @unique @db.VarChar(255)
   password_hash String?   @db.VarChar(255)
   full_name     String?   @db.VarChar(255)
@@ -138,7 +138,7 @@ model User {
 }
 
 model RefreshToken {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String   @id @default(uuid()) @db.Uuid
   jti         String   @unique @db.VarChar(36) // JWT ID - UUID embedded in token
   
   // Device identification
@@ -153,7 +153,7 @@ model RefreshToken {
   user_agent  String?  @db.Text
   
   created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  updated_at  DateTime @default(now()) @updatedAt
   expires_at  DateTime
   revoked_at  DateTime? // Null = active, has value = revoked
 
@@ -283,7 +283,7 @@ model Semester {
 }
 
 model Class {
-  id            String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  id            String    @id @db.Uuid @default(uuid())
   semester_id   BigInt
   lecturer_id   String    @db.Uuid
   course_id     String    @db.Uuid
@@ -323,7 +323,7 @@ model Class {
   @@map("classes")
 }
 model Course {
-  id          String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  id          String   @id @default(uuid()) @db.Uuid
   code        String   @unique @db.VarChar(20) // Ví dụ: SWD392
   name        String   @db.VarChar(255)        // Software Architecture and Design
   deleted_at  DateTime?
@@ -379,7 +379,7 @@ model Enrollment {
 // ============================================================================
 
 model Project {
-  id            String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  id            String    @id @db.Uuid @default(uuid())
   class_id      String    @db.Uuid
   name          String?   @db.VarChar(255)
   topic         String?   @db.VarChar(255)
@@ -410,7 +410,7 @@ model Project {
 }
 
 model ProjectMember {
-  id            String            @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  id            String            @id @db.Uuid @default(uuid())
   project_id    String            @db.Uuid
   student_id    String            @db.Uuid
   role          ProjectMemberRole
@@ -442,7 +442,7 @@ model ProjectMember {
 }
 
 model Repository {
-  id                     String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  id                     String    @id @db.Uuid @default(uuid())
   project_id             String    @db.Uuid
   url                    String    @db.VarChar(500)
   name                   String    @db.VarChar(255)
@@ -482,7 +482,7 @@ model Repository {
 }
 
 model Commit {
-  id                String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  id                String    @id @db.Uuid @default(uuid())
   repository_id     String    @db.Uuid
   project_member_id String    @db.Uuid
   message           String?   @db.Text
@@ -511,7 +511,7 @@ model Commit {
 }
 
 model SyncLog {
-  id                String    @id @db.Uuid @default(dbgenerated("uuid_generate_v7()"))
+  id                String    @id @db.Uuid @default(uuid())
   repository_id     String    @db.Uuid
   trigger_type      String?   @db.VarChar(50)
   started_at        DateTime?

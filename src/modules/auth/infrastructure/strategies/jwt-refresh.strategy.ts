@@ -32,7 +32,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: jwtConfig.secret,
+      secretOrKey: jwtConfig.refreshSecret,
     });
   }
 

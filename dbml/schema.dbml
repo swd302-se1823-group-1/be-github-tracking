@@ -78,7 +78,7 @@ Table refresh_tokens {
   ip_address String
   user_agent String
   created_at DateTime [default: `now()`, not null]
-  updated_at DateTime [not null]
+  updated_at DateTime [default: `now()`, not null]
   expires_at DateTime [not null]
   revoked_at DateTime
 }

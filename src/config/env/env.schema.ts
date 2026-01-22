@@ -9,6 +9,11 @@ export const envSchema = z.object({
   JWT_ACCESS_EXPIRES: z.string().default('15m'),
   JWT_REFRESH_SECRET: z.string(),
   JWT_REFRESH_EXPIRES: z.string().default('7d'),
+
+  // Google OAuth Configuration
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_CALLBACK_URL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
