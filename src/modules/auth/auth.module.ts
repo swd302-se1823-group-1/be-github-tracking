@@ -24,13 +24,11 @@ import {
 import { TokenService } from './application/services/token.service';
 import { IUserRepository } from './domain/repositories/user.repository';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
-import {
-  IRefreshTokenRepository,
-  PrismaRefreshTokenRepository,
-} from './infrastructure/repositories/refresh-token.repository';
 
 import { InfrastructureModule } from '@/infrastructure';
 import { googleConfig } from '@/config';
+import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
+import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
 
 @Module({
   controllers: [AuthController],

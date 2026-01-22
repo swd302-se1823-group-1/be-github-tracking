@@ -1,16 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
-
-export interface IRefreshTokenRepository {
-  create(data: {
-    jti: string;
-    userId: string;
-    deviceId: string;
-    expiresAt: Date;
-  }): Promise<void>;
-}
-
-export const IRefreshTokenRepository = Symbol('IRefreshTokenRepository');
+import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 
 @Injectable()
 export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
