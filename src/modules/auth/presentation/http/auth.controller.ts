@@ -5,6 +5,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { GoogleAuthGuard } from '@/modules/auth/infrastructure';
 import { GoogleLoginCommand } from '@/modules/auth/application/commands/google-login.command';
+import { Public } from '@/shared';
 
 export interface GoogleUser {
   email: string;
@@ -24,6 +25,7 @@ export class AuthController {
   ) {}
 
   @Get('google')
+  @Public()
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   @ApiResponse({ status: 302, description: 'Redirect to Google OAuth' })
@@ -32,6 +34,7 @@ export class AuthController {
   }
 
   @Get('google/callback')
+  @Public()
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({ status: 302, description: 'Redirect to Dashboard' })
