@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DomainException } from '../exceptions/domain.exception';
-import { Prisma } from '../../../generated/prisma/client';
+import { Prisma } from '@generated/prisma/client';
 
 /**
  * Standardized error response format
@@ -45,6 +45,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    // Bypass Swagger routes - let Swagger handle its own routing
+    if (request.url.includes('/docs') || request.url.includes('swagger')) {
+      throw exception;
+    }
 
     // Build error response based on exception type
     const errorResponse = this.buildErrorResponse(exception, request);

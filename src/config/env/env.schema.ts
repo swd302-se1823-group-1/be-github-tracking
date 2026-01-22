@@ -3,6 +3,17 @@ import { z } from 'zod';
 export const envSchema = z.object({
   DATABASE_URL: z.url(),
   DIRECT_URL: z.url(),
+
+  // JWT Configuration
+  JWT_ACCESS_SECRET: z.string(),
+  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+  JWT_REFRESH_SECRET: z.string(),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+
+  // Google OAuth Configuration
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
+  GOOGLE_CALLBACK_URL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
