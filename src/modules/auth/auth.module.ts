@@ -29,6 +29,7 @@ import { InfrastructureModule } from '@/infrastructure';
 import { googleConfig } from '@/config';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
+import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
 
 @Module({
   controllers: [AuthController],
@@ -74,6 +75,7 @@ import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repo
     GoogleAuthGuard,
     // Handlers
     GoogleLoginHandler,
+    RolesGuard,
   ],
   exports: [
     JwtModule,
@@ -86,6 +88,7 @@ import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repo
     JwtRefreshGuard,
     GoogleAuthGuard,
     GoogleStrategy,
+    RolesGuard,
   ],
 })
 export class AuthModule {}
