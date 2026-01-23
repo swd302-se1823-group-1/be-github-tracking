@@ -2,7 +2,7 @@ import { UserRole } from '@/modules/auth/domain/enums/user-role.enum';
 import 'express';
 
 interface UserPayload {
-  userId: string;
+  id: string;
   deviceId: string;
   jti: string;
   role: UserRole;
