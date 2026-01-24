@@ -7,6 +7,7 @@ import { Request } from 'express';
 export const fromCookie = (cookieName: string) => {
   return (request: Request): string | null => {
     const cookies = request?.cookies as Record<string, string> | undefined;
+    console.log('cookies', cookies?.[cookieName]);
     return cookies?.[cookieName] ?? null;
   };
 };

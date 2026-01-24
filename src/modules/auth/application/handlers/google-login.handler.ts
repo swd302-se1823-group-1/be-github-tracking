@@ -7,6 +7,7 @@ import { TokenService } from '@/modules/auth/application/services/token.service'
 import { User } from '@/modules/auth/domain/aggregates/user.aggregate';
 import { UserRole } from '@/modules/auth/domain/enums/user-role.enum';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
+import { RefreshToken } from '@/modules/auth/domain/aggregates/refresh-token.aggregate';
 
 @CommandHandler(GoogleLoginCommand)
 export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {
@@ -63,12 +64,18 @@ export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {
       role: user.role,
     });
 
-    await this.refreshTokenRepository.create({
+    const refreshToken = new RefreshToken({
+      id: generateId(),
       jti: tokens.jti,
       userId: user.id,
-      deviceId: 'google-oauth',
+      deviceId: 'google-oauth', // Or from req if available?
       expiresAt: tokens.refreshTokenExpiresAt,
+      revokedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+
+    await this.refreshTokenRepository.create(refreshToken);
 
     return {
       accessToken: tokens.accessToken,
