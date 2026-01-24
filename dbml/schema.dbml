@@ -10,7 +10,6 @@ Project "GitHub Tracking System" {
 Table users {
   id String [pk]
   email String [unique, not null]
-  password_hash String
   full_name String
   role UserRole [not null, default: 'STUDENT']
   avatar_url String
