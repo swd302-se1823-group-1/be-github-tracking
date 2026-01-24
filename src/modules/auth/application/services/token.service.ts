@@ -10,6 +10,7 @@ export interface TokenPayload {
   email: string;
   role: UserRole;
   jti?: string;
+  deviceId?: string;
 }
 
 export interface AuthTokens {
@@ -30,6 +31,7 @@ export class TokenService {
     id: string;
     email: string;
     role: UserRole;
+    deviceId?: string;
   }): Promise<AuthTokens> {
     const jwtConfig = this.configService.get<JwtConfig>(JWT_CONFIG_KEY)!;
 
@@ -51,7 +53,8 @@ export class TokenService {
     };
 
     const jti = generateId();
-    const refreshPayload: TokenPayload = { ...payload, jti };
+    const deviceId = user.deviceId || 'browser-' + generateId().slice(0, 8);
+    const refreshPayload: TokenPayload = { ...payload, jti, deviceId };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, accessOptions),

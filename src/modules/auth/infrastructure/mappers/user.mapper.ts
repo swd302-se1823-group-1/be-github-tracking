@@ -47,7 +47,7 @@ export class UserMapper {
       // Audit fields - technically Aggregate might not hold all of them if not needed,
       // but for full persistence mapping we might need them.
       // For now we map what we have in Aggregate.
-      password_hash: null, // Aggregate might not have loaded password hash if unnecessary
+
       deleted_at: null,
       deleted_by_id: null,
       created_by_id: null,

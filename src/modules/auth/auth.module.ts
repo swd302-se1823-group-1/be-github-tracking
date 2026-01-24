@@ -7,6 +7,8 @@ import { JWT_CONFIG_KEY, jwtConfig, JwtConfig } from '@/config/jwt';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AuthController } from './presentation/http/auth.controller';
 import { GoogleLoginHandler } from './application/handlers/google-login.handler';
+import { RefreshTokenHandler } from './application/handlers/refresh-token.handler';
+import { LogoutHandler } from './application/handlers/logout.handler';
 // Strategies
 import {
   JwtAccessStrategy,
@@ -75,6 +77,8 @@ import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
     GoogleAuthGuard,
     // Handlers
     GoogleLoginHandler,
+    RefreshTokenHandler,
+    LogoutHandler,
     RolesGuard,
   ],
   exports: [

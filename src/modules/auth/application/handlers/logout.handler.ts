@@ -1,0 +1,24 @@
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
+import { LogoutCommand } from '../commands/logout.command';
+import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';
+
+@CommandHandler(LogoutCommand)
+export class LogoutHandler implements ICommandHandler<LogoutCommand> {
+  constructor(
+    @Inject(IRefreshTokenRepository)
+    private readonly refreshTokenRepo: IRefreshTokenRepository,
+  ) {}
+
+  async execute(command: LogoutCommand): Promise<void> {
+    const { userId, jti } = command;
+
+    if (jti) {
+      // Logout from specific session only
+      await this.refreshTokenRepo.revoke(jti);
+    } else {
+      // Logout from all sessions
+      await this.refreshTokenRepo.revokeAllForUser(userId);
+    }
+  }
+}

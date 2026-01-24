@@ -9,7 +9,7 @@ export interface JwtTokenPayload {
 }
 
 export interface TokenUserPayload {
-  userId: string;
+  id: string;
   deviceId: string;
   jti: string;
 }

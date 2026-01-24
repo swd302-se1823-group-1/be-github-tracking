@@ -1,33 +1,39 @@
 services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nest-api
-    env_file:
-      - .env
+    image: ${ACR_LOGIN_SERVER}/be-github-tracking:latest # Azure sẽ lấy từ Registry
+    container_name: be-github-tracking
     ports:
       - '3000:3000'
     environment:
-      # LƯU Ý: host là tên service 'postgres', không phải localhost
+      # Database & Redis
       DATABASE_URL: ${DATABASE_URL}
       DIRECT_URL: ${DIRECT_URL}
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Auth & JWT
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
+
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+
+      # Google OAuth
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+
+      # Các biến khác
+      NODE_ENV: production
+      PORT: 3000
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       - redis
+
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: be-redis
-    ports:
-      - '${REDIS_PORT:-6379}:6379'
-    volumes:
-      - ./redis_data:/data
-    command: >
-      redis-server 
-      --appendonly yes 
-      --save 900 1 
-      --save 300 10 
-      --save 60 1000
-volumes:
-  redis_data:
+    command: redis-server --appendonly yes

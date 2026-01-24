@@ -3,7 +3,11 @@ import { z } from 'zod';
 export const envSchema = z.object({
   DATABASE_URL: z.url(),
   DIRECT_URL: z.url(),
-
+  COOKIE_DOMAIN: z.string(),
+  COOKIE_SAMESITE: z
+    .string()
+    .transform((value) => value.toLowerCase() as 'lax' | 'strict' | 'none'),
+  COOKIE_SECURE: z.string().transform((value) => value === 'true'),
   // JWT Configuration
   JWT_ACCESS_SECRET: z.string(),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
