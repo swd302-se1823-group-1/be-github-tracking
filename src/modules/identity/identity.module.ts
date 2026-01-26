@@ -2,7 +2,9 @@ import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { InfrastructureModule } from '@/infrastructure';
 import { CreateLecturerHandler } from './application/handlers/create-lecturer.handler';
+import { CreateAdminHandler } from './application/handlers/create-admin.handler';
 import { LecturerController } from './presentation/http/lecturer.controller';
+import { AdminController } from './presentation/http/admin.controller';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { IUserRepository } from './domain/repositories/user.repository';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
@@ -35,8 +37,9 @@ const repositories = [
     GetCurrentUserHandler,
     CreateUserHandler,
     UpdateUserGoogleInfoHandler,
+    CreateAdminHandler,
   ],
-  controllers: [LecturerController],
+  controllers: [LecturerController, AdminController],
   exports: [IUserRepository],
 })
 export class IdentityModule {}
