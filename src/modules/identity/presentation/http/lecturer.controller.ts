@@ -10,7 +10,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateLecturerDto } from '../dtos/create-lecturer.dto';
 import { LecturerResponseDto } from '../dtos/lecturer-response.dto';
 import { CreateLecturerCommand } from '../../application/commands/create-lecturer.command';
-import { Lecturer } from '../../domain/aggregates/lecturer.aggregate';
+import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 
 @ApiTags('Identity')
 @Controller('lecturers')
@@ -26,9 +26,9 @@ export class LecturerController {
     type: LecturerResponseDto,
   })
   async create(@Body() dto: CreateLecturerDto): Promise<LecturerResponseDto> {
-    const lecturer = await this.commandBus.execute<
+    const user = await this.commandBus.execute<
       CreateLecturerCommand,
-      Lecturer
+      UserAggregate
     >(
       new CreateLecturerCommand(
         dto.email,
@@ -40,17 +40,19 @@ export class LecturerController {
       ),
     );
 
-    // Map Domain Aggregate to Response DTO
-    // Since Aggregate encapsulates props in _props (private), we need a way to extract them or use getter
-    // Assuming Aggregate getters match DTO properties
+    // Map UserAggregate to LecturerResponseDto
+    // Note: UserAggregate now has nested profiles
     return new LecturerResponseDto({
-      id: lecturer.id,
-      employeeCode: lecturer.employeeCode ?? null,
-      degree: lecturer.degree ?? null,
-      department: lecturer.department ?? null,
-      phoneNumber: lecturer.phoneNumber ?? null,
-      createdAt: lecturer.createdAt,
-      updatedAt: lecturer.updatedAt,
+      id: user.id.toString(),
+      email: user.email,
+      fullName: user.fullName || '',
+      avatarUrl: user.avatarUrl || null,
+      employeeCode: user.lecturerProfile?.employeeCode || null,
+      degree: user.lecturerProfile?.degree || null,
+      department: user.lecturerProfile?.department || null,
+      phoneNumber: user.lecturerProfile?.phoneNumber || null,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     });
   }
 }

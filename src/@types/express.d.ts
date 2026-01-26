@@ -1,4 +1,4 @@
-import { UserRole } from '@/modules/auth/domain/enums/user-role.enum';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import 'express';
 
 interface UserPayload {
