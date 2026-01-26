@@ -9,6 +9,10 @@ export class StudentProfileDto {
   @ApiPropertyOptional({ example: 'student@university.edu.vn' })
   @Expose()
   universityEmail: string | null;
+
+  constructor(partial: Partial<StudentProfileDto>) {
+    Object.assign(this, partial);
+  }
 }
 
 export class LecturerProfileDto {
@@ -27,9 +31,13 @@ export class LecturerProfileDto {
   @ApiPropertyOptional({ example: '+84123456789' })
   @Expose()
   phoneNumber?: string;
+
+  constructor(partial: Partial<LecturerProfileDto>) {
+    Object.assign(this, partial);
+  }
 }
 
-export class CurrentUserDto {
+export class CurrentUserResponseDto {
   @ApiProperty({ example: 'uuid-here' })
   @Expose()
   id: string;
@@ -63,4 +71,8 @@ export class CurrentUserDto {
   @Expose()
   @Type(() => LecturerProfileDto)
   lecturerProfile?: LecturerProfileDto;
+
+  constructor(partial: Partial<CurrentUserResponseDto>) {
+    Object.assign(this, partial);
+  }
 }

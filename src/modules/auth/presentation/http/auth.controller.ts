@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  Body,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import type { Request, Response, CookieOptions } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -9,13 +17,19 @@ import {
   JwtAccessGuard,
 } from '@/modules/auth/infrastructure';
 import { GoogleLoginCommand } from '@/modules/auth/application/commands/google-login.command';
+import { GoogleLoginResult } from '@/modules/auth/application/dtos/google-login.result';
+import { AuthResponseDto } from '@/modules/auth/application/dtos/auth-response.dto';
 import { RefreshTokenCommand } from '@/modules/auth/application/commands/refresh-token.command';
+import { RefreshTokenResult } from '@/modules/auth/application/dtos/refresh-token.result';
 import { LogoutCommand } from '@/modules/auth/application/commands/logout.command';
 import { GetCurrentUserQuery } from '@/modules/identity/application/queries/get-current-user.query';
-import { CurrentUserDto } from '@/modules/identity/application/dto/current-user.dto';
+import { CurrentUserResponseDto } from '@/modules/identity/application/dto/current-user.dto';
 import { Public, ActiveUser, ResponseMessage } from '@/shared';
 import { TokenResponseDto } from '@/modules/auth/application/dtos/token-response.dto';
 import { GoogleProfileDto } from '@/modules/auth/application/dtos/google-profile.dto';
+import { GoogleExchangeCodeDto } from '@/modules/auth/application/dtos/google-exchange-code.dto';
+import { GoogleService } from '@/modules/auth/infrastructure/services/google.service';
+import { CurrentUserResult } from '@/modules/identity/application/dto/current-user.result';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,6 +38,7 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly configService: ConfigService,
+    private readonly googleService: GoogleService,
   ) {}
 
   @Get('google')
@@ -117,10 +132,10 @@ export class AuthController {
       this.configService.get<string>('NODE_ENV') === 'production';
 
     // Execute refresh command
-    const result: { accessToken: string; refreshToken: string } =
-      await this.commandBus.execute(
-        new RefreshTokenCommand(user.id, user.jti, user.deviceId),
-      );
+    const result = await this.commandBus.execute<
+      RefreshTokenCommand,
+      RefreshTokenResult
+    >(new RefreshTokenCommand(user.id, user.jti, user.deviceId));
 
     // Configure cookies
     const commonCookieOptions: CookieOptions = {
@@ -139,7 +154,52 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return new TokenResponseDto(result.accessToken);
+    return new TokenResponseDto({ accessToken: result.accessToken });
+  }
+
+  @Post('google/exchange')
+  @Public()
+  @ApiOperation({ summary: 'Exchange Google authorization code for tokens' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens and user info issued',
+    type: AuthResponseDto,
+  })
+  async exchange(
+    @Body() dto: GoogleExchangeCodeDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
+
+    // 1. Exchange code for Google User Profile
+    const googleUser = await this.googleService.exchangeCode(dto.code);
+
+    // 2. Reuse GoogleLoginHandler via CommandBus
+    const result = await this.commandBus.execute<
+      GoogleLoginCommand,
+      GoogleLoginResult
+    >(new GoogleLoginCommand(googleUser));
+
+    // 3. Configure Cookies
+    const commonCookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+    };
+
+    res.cookie('accessToken', result.accessToken, {
+      ...commonCookieOptions,
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refreshToken', result.refreshToken, {
+      ...commonCookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // 4. Return JSON
+    return new AuthResponseDto(result);
   }
 
   @Get('me')
@@ -148,16 +208,18 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Current user profile with role-specific data',
-    type: CurrentUserDto,
+    type: CurrentUserResponseDto,
   })
   @ResponseMessage('User profile retrieved successfully')
   async getCurrentUser(
     @ActiveUser('id') userId: string,
-  ): Promise<CurrentUserDto> {
-    const user: CurrentUserDto = await this.queryBus.execute(
-      new GetCurrentUserQuery(userId),
-    );
-    return user;
+  ): Promise<CurrentUserResponseDto> {
+    const result = await this.queryBus.execute<
+      GetCurrentUserQuery,
+      CurrentUserResult
+    >(new GetCurrentUserQuery(userId));
+
+    return new CurrentUserResponseDto(result);
   }
 
   @Post('logout')
