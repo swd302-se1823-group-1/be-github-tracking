@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictException, Inject } from '@nestjs/common';
+import { Transactional } from '@nestjs-cls/transactional';
 import { CreateLecturerCommand } from '../commands/create-lecturer.command';
 import { IUserRepository } from '../../domain/repositories/user.repository';
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
@@ -11,6 +12,7 @@ export class CreateLecturerHandler implements ICommandHandler<CreateLecturerComm
     private readonly userRepository: IUserRepository,
   ) {}
 
+  @Transactional()
   async execute(command: CreateLecturerCommand): Promise<UserAggregate> {
     const { email, fullName, employeeCode, degree, department, phoneNumber } =
       command;

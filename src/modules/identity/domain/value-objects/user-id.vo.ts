@@ -1,9 +1,10 @@
 import { v7 as uuidv7, validate as uuidValidate } from 'uuid';
+import { InvalidUserIdException } from '../exceptions/user.exceptions';
 
 export class UserId {
   constructor(private readonly value: string) {
     if (!uuidValidate(value)) {
-      throw new Error('Invalid UUID for UserId');
+      throw new InvalidUserIdException(value);
     }
   }
 

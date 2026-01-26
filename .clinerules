@@ -1,0 +1,157 @@
+# Project Rules: be-github-tracking
+
+## Architecture Principles
+
+### DDD (Domain-Driven Design)
+- Bounded contexts: Auth, Identity, GitHub Tracking
+- Rich domain models with business logic in aggregates
+- Repository pattern: Interface in domain, implementation in infrastructure
+- Domain services for complex business logic spanning multiple aggregates
+
+### CQRS (Command Query Responsibility Segregation)
+- Commands: Write operations (Create, Update, Delete)
+- Queries: Read operations (Find, Get, List)
+- Handlers: One handler per command/query
+- Cross-context communication: ONLY via CommandBus/QueryBus
+
+### Bounded Context Rules
+- ✅ Auth context can use QueryBus/CommandBus to Identity context
+- ❌ Auth context CANNOT inject IUserRepository directly
+- ✅ Each context manages its own repositories
+- ✅ Use forwardRef() to prevent circular dependencies
+
+## Code Standards
+
+### Transaction Management
+- Use @Transactional() decorator for multi-step operations
+- Single DB operations don't need @Transactional()
+- All handlers with multiple DB writes MUST be transactional
+
+### Exception Handling
+- Domain layer: Use domain exceptions (extend DomainException)
+- Application layer: Can use NestJS exceptions
+- Never use NestJS exceptions in domain aggregates
+- Domain exceptions: TokenRevokedException, ValidationException, etc.
+
+### Repository Pattern
+```typescript
+// ✅ CORRECT
+// Domain layer: Interface
+export interface IUserRepository {
+  findById(id: UserId): Promise<UserAggregate | null>;
+}
+
+// Infrastructure layer: Implementation
+@Injectable()
+export class PrismaUserRepository implements IUserRepository {
+  // Prisma-specific code here
+}
+```
+
+### Handler Pattern
+```typescript
+@CommandHandler(SomeCommand)
+export class SomeHandler implements ICommandHandler<SomeCommand> {
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+    @Inject(ISomeRepository) private readonly repo: ISomeRepository,
+  ) {}
+
+  @Transactional() // If multi-step operation
+  async execute(command: SomeCommand): Promise<Result> {
+    // Implementation
+  }
+}
+```
+
+## Database Rules
+
+### Prisma
+- Use UUIDs for all primary keys (gen_random_uuid())
+- Soft delete pattern: deleted_at, deleted_by_id
+- Audit fields: created_at, created_by_id, updated_at, updated_by_id
+- Use @map() for snake_case database columns
+- Use @@map() for table names
+
+### Migrations
+- Always review migrations before applying
+- Test migrations on development database first
+- Never modify existing migrations
+- Use descriptive migration names
+
+## Security Rules
+
+### Authentication
+- Token rotation on refresh
+- Revocation support (single session & all sessions)
+- Device tracking for refresh tokens
+- Expiration validation
+
+### Authorization
+- Role-based access control (ADMIN, LECTURER, STUDENT)
+- Use @Roles() decorator for endpoints
+- RolesGuard for role checking
+- Default role for new OAuth users: STUDENT
+
+### Data Protection
+- No sensitive data in logs
+- No passwords in plain text
+- Hash sensitive data before storage
+- Sanitize error messages in production
+
+## Testing Standards
+
+### Unit Tests
+- Test domain logic in aggregates
+- Test business rules
+- Mock external dependencies
+- Aim for >80% coverage
+
+### Integration Tests
+- Test handlers with real database
+- Test CQRS flow
+- Test transaction rollback
+
+### E2E Tests
+- Test critical user flows
+- Test authentication flow
+- Test authorization
+
+## Performance
+
+### Database Optimization
+- Use indexes on frequently queried fields
+- Avoid N+1 queries
+- Use select only needed fields
+- Batch operations when possible
+
+### Caching (Future)
+- Cache user data (5 minutes)
+- Cache role permissions
+- Invalidate on updates
+
+## Git Workflow
+
+### Commit Messages
+- Format: `type(scope): message`
+- Types: feat, fix, refactor, test, docs, chore
+- Example: `feat(auth): add Google OAuth login`
+
+### Branch Naming
+- Format: `type/description`
+- Example: `feat/google-oauth`, `fix/token-expiration`
+
+## Documentation
+
+### Code Comments
+- Document WHY, not WHAT
+- Use JSDoc for public APIs
+- Document complex business logic
+- Keep comments up-to-date
+
+### API Documentation
+- Use Swagger decorators
+- Document all endpoints
+- Include request/response examples
+- Document error codes
