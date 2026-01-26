@@ -7,6 +7,11 @@ export interface IUserRepository {
   findByProviderId(providerId: string): Promise<UserAggregate | null>;
   create(user: UserAggregate): Promise<UserAggregate>;
   update(user: UserAggregate): Promise<UserAggregate>;
+  findAll(params: any): Promise<{
+    users: UserAggregate[];
+    nextCursor: string | null;
+    total: number;
+  }>;
 }
 
 export const IUserRepository = Symbol('IUserRepository');

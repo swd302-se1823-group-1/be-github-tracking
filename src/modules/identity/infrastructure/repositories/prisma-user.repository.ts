@@ -3,7 +3,9 @@ import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
 import { IUserRepository } from '../../domain/repositories/user.repository';
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 import { UserId } from '../../domain/value-objects/user-id.vo';
+import { UserRole } from '../../domain/enums/user-role.enum';
 import { UserMapper } from '../mappers/user.mapper';
+import { Prisma } from '@generated/prisma/client';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
@@ -86,5 +88,57 @@ export class PrismaUserRepository implements IUserRepository {
     }
 
     return user;
+  }
+
+  async findAll(params: {
+    cursor?: string;
+    take: number;
+    order: 'ASC' | 'DESC';
+    searchEmail?: string;
+    role?: UserRole;
+    isActive?: boolean;
+  }): Promise<{
+    users: UserAggregate[];
+    nextCursor: string | null;
+    total: number;
+  }> {
+    const { cursor, take, order, searchEmail, role, isActive } = params;
+
+    const where: Prisma.UserWhereInput = {};
+
+    if (searchEmail) {
+      where.email = { contains: searchEmail, mode: 'insensitive' };
+    }
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (isActive !== undefined) {
+      where.is_active = isActive;
+    }
+
+    const [total, users] = await Promise.all([
+      this.prisma.user.count({ where }),
+      this.prisma.user.findMany({
+        where,
+        take: take + 1, // Fetch one extra to determine next cursor
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: { created_at: order.toLowerCase() as 'asc' | 'desc' },
+        include: { student: true, lecturer: true },
+      }),
+    ]);
+
+    let nextCursor: string | null = null;
+    if (users.length > take) {
+      const nextItem = users.pop(); // Remove the extra item
+      nextCursor = nextItem?.id || null;
+    }
+
+    return {
+      users: users.map((u) => UserMapper.toDomain(u)),
+      nextCursor,
+      total,
+    };
   }
 }
