@@ -1,65 +1,90 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
-import { IUserRepository } from '@/modules/auth/domain/repositories/user.repository';
-import { generateId } from '@/shared/utils/uuid';
+import {
+  CommandHandler,
+  ICommandHandler,
+  QueryBus,
+  CommandBus,
+} from '@nestjs/cqrs';
+import { BadRequestException, Inject } from '@nestjs/common';
+import { Transactional } from '@nestjs-cls/transactional';
 import { GoogleLoginCommand } from '@/modules/auth/application/commands/google-login.command';
+import { GoogleLoginResult } from '@/modules/auth/application/dtos/google-login.result';
 import { TokenService } from '@/modules/auth/application/services/token.service';
-import { User } from '@/modules/auth/domain/aggregates/user.aggregate';
-import { UserRole } from '@/modules/auth/domain/enums/user-role.enum';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 import { RefreshToken } from '@/modules/auth/domain/aggregates/refresh-token.aggregate';
+import { FindUserByProviderIdQuery } from '@/modules/identity/application/queries/find-user-by-provider-id.query';
+import { FindUserByEmailQuery } from '@/modules/identity/application/queries/find-user-by-email.query';
+import { CreateUserCommand } from '@/modules/identity/application/commands/create-user.command';
+import { UpdateUserGoogleInfoCommand } from '@/modules/identity/application/commands/update-user-google-info.command';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { generateId } from '@/shared/utils/uuid';
 
 @CommandHandler(GoogleLoginCommand)
-export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {
+export class GoogleLoginHandler implements ICommandHandler<
+  GoogleLoginCommand,
+  GoogleLoginResult
+> {
   constructor(
-    @Inject(IUserRepository)
-    private readonly userRepository: IUserRepository,
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+    private readonly tokenService: TokenService,
     @Inject(IRefreshTokenRepository)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
-    private readonly tokenService: TokenService,
   ) {}
 
-  async execute(
-    command: GoogleLoginCommand,
-  ): Promise<{ accessToken: string; refreshToken: string; user: User }> {
+  @Transactional()
+  async execute(command: GoogleLoginCommand): Promise<GoogleLoginResult> {
     const { profile } = command;
     const { email, providerId, firstName, lastName, picture } = profile;
 
     if (!email) {
-      throw new Error('Email not found from Google provider');
+      throw new BadRequestException('Email not found from Google provider');
     }
 
-    let user = await this.userRepository.findByProviderId(providerId);
+    // 1. Try to find user by provider ID (already linked to Google)
+    let user = await this.queryBus.execute<
+      FindUserByProviderIdQuery,
+      UserAggregate | null
+    >(new FindUserByProviderIdQuery(providerId));
 
+    // 2. If not found, try by email (user might exist but not linked to Google yet)
     if (!user) {
-      user = await this.userRepository.findByEmail(email);
+      user = await this.queryBus.execute<
+        FindUserByEmailQuery,
+        UserAggregate | null
+      >(new FindUserByEmailQuery(email));
+
+      // If user exists by email, link their Google account via CommandBus
+      if (user) {
+        user = await this.commandBus.execute<
+          UpdateUserGoogleInfoCommand,
+          UserAggregate
+        >(
+          new UpdateUserGoogleInfoCommand(
+            user.id.toString(),
+            providerId,
+            picture,
+          ),
+        );
+      }
     }
 
-    if (user) {
-      if (!user.providerId || user.provider !== 'google') {
-        // Use Domain Method
-        user.updateGoogleInfo(providerId, picture || undefined);
-        await this.userRepository.update(user);
-      }
-    } else {
-      // Create new user using Aggregate
-      user = new User({
-        id: generateId(), // Generate ID here (Domain Service/Factory pattern)
-        email,
-        fullName: [firstName, lastName].filter(Boolean).join(' '),
-        avatarUrl: picture,
-        provider: 'google',
-        providerId: providerId,
-        role: UserRole.STUDENT,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-      await this.userRepository.create(user);
+    // 3. If user still doesn't exist, create new STUDENT user
+    if (!user) {
+      user = await this.commandBus.execute<CreateUserCommand, UserAggregate>(
+        new CreateUserCommand(
+          email,
+          `${firstName} ${lastName}`,
+          'google',
+          providerId,
+          picture,
+          UserRole.STUDENT, // Default role for new OAuth users
+        ),
+      );
     }
 
     const tokens = await this.tokenService.generateAuthTokens({
-      id: user.id,
+      id: user.id.toString(),
       email: user.email,
       role: user.role,
     });
@@ -67,8 +92,8 @@ export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {
     const refreshToken = new RefreshToken({
       id: generateId(),
       jti: tokens.jti,
-      userId: user.id,
-      deviceId: 'google-oauth', // Or from req if available?
+      userId: user.id.toString(),
+      deviceId: 'google-oauth', // Or pass from command if available
       expiresAt: tokens.refreshTokenExpiresAt,
       revokedAt: null,
       createdAt: new Date(),
@@ -80,7 +105,13 @@ export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      user, // Return aggregate, or map to DTO? specific DTO is better but Aggregate works for now
+      user: {
+        id: user.id.toString(),
+        email: user.email,
+        fullName: user.fullName || null,
+        avatarUrl: user.avatarUrl || null,
+        role: user.role,
+      },
     };
   }
 }

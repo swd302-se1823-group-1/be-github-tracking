@@ -4,7 +4,7 @@ import { LogoutCommand } from '../commands/logout.command';
 import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';
 
 @CommandHandler(LogoutCommand)
-export class LogoutHandler implements ICommandHandler<LogoutCommand> {
+export class LogoutHandler implements ICommandHandler<LogoutCommand, void> {
   constructor(
     @Inject(IRefreshTokenRepository)
     private readonly refreshTokenRepo: IRefreshTokenRepository,

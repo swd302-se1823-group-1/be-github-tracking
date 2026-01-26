@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -24,14 +24,14 @@ import {
 } from './infrastructure/guards';
 
 import { TokenService } from './application/services/token.service';
-import { IUserRepository } from './domain/repositories/user.repository';
-import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
 
 import { InfrastructureModule } from '@/infrastructure';
 import { googleConfig } from '@/config';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
 import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
+import { IdentityModule } from '@/modules/identity/identity.module';
+import { GoogleService } from '@/modules/auth/infrastructure/services/google.service';
 
 @Module({
   controllers: [AuthController],
@@ -54,15 +54,12 @@ import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
         } as JwtModuleOptions;
       },
     }),
+    forwardRef(() => IdentityModule), // IdentityModule exports IUserRepository
   ],
   providers: [
     // Services
     TokenService,
     // Repositories
-    {
-      provide: IUserRepository,
-      useClass: PrismaUserRepository,
-    },
     {
       provide: IRefreshTokenRepository,
       useClass: PrismaRefreshTokenRepository,
@@ -79,13 +76,13 @@ import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
     GoogleLoginHandler,
     RefreshTokenHandler,
     LogoutHandler,
+    GoogleService,
     RolesGuard,
   ],
   exports: [
     JwtModule,
     PassportModule,
     TokenService,
-    IUserRepository,
     JwtAccessStrategy,
     JwtRefreshStrategy,
     JwtAccessGuard,
