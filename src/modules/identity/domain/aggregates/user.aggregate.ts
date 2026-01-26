@@ -21,6 +21,8 @@ export type UserProps = {
   updatedAt: Date;
   studentProfile?: StudentProfile;
   lecturerProfile?: LecturerProfile;
+  createdBy?: string | null;
+  updatedBy?: string | null;
 };
 
 export class UserAggregate extends AggregateRoot {
@@ -64,6 +66,12 @@ export class UserAggregate extends AggregateRoot {
   get lecturerProfile(): LecturerProfile | undefined {
     return this._props.lecturerProfile;
   }
+  get createdBy(): string | null | undefined {
+    return this._props.createdBy;
+  }
+  get updatedBy(): string | null | undefined {
+    return this._props.updatedBy;
+  }
 
   // Reconstitute from persistence
   public static reconstitute(props: UserProps): UserAggregate {
@@ -79,6 +87,7 @@ export class UserAggregate extends AggregateRoot {
     providerId?: string,
     avatarUrl?: string,
     universityEmail?: string,
+    createdBy?: string,
   ): UserAggregate {
     const id = UserId.generate();
     const user = new UserAggregate({
@@ -94,6 +103,8 @@ export class UserAggregate extends AggregateRoot {
       providerId: providerId || null,
       avatarUrl: avatarUrl || null,
       lecturerProfile: undefined,
+      createdBy: createdBy || null,
+      updatedBy: createdBy || null,
     });
 
     user.apply(new UserCreatedEvent(id, email, UserRole.STUDENT));
@@ -111,6 +122,7 @@ export class UserAggregate extends AggregateRoot {
     provider?: string,
     providerId?: string,
     avatarUrl?: string,
+    createdBy?: string,
   ): UserAggregate {
     const id = UserId.generate();
     const user = new UserAggregate({
@@ -131,6 +143,8 @@ export class UserAggregate extends AggregateRoot {
       providerId: providerId || null,
       avatarUrl: avatarUrl || null,
       studentProfile: undefined,
+      createdBy: createdBy || null,
+      updatedBy: createdBy || null,
     });
 
     user.apply(new UserCreatedEvent(id, email, UserRole.LECTURER));
@@ -144,6 +158,7 @@ export class UserAggregate extends AggregateRoot {
     provider?: string,
     providerId?: string,
     avatarUrl?: string,
+    createdBy?: string,
   ): UserAggregate {
     const id = UserId.generate();
     const user = new UserAggregate({
@@ -159,6 +174,8 @@ export class UserAggregate extends AggregateRoot {
       avatarUrl: avatarUrl || null,
       studentProfile: undefined,
       lecturerProfile: undefined,
+      createdBy: createdBy || null,
+      updatedBy: createdBy || null,
     });
 
     user.apply(new UserCreatedEvent(id, email, UserRole.ADMIN));

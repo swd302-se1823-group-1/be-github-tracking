@@ -1,16 +1,12 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseInterceptors,
-  ClassSerializerInterceptor,
-} from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateLecturerDto } from '../dtos/create-lecturer.dto';
 import { LecturerResponseDto } from '../dtos/lecturer-response.dto';
 import { CreateLecturerCommand } from '../../application/commands/create-lecturer.command';
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
+import { ResponseMessage, ActiveUser, Roles } from '@/shared';
+import { UserRole } from '../../domain/enums/user-role.enum';
 
 @ApiTags('Identity')
 @Controller('lecturers')
@@ -18,14 +14,18 @@ export class LecturerController {
   constructor(private readonly commandBus: CommandBus) {}
 
   @Post()
-  @UseInterceptors(ClassSerializerInterceptor)
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Create a new Lecturer profile' })
+  @ResponseMessage('Lecturer created successfully')
   @ApiResponse({
     status: 201,
     description: 'Lecturer created successfully',
     type: LecturerResponseDto,
   })
-  async create(@Body() dto: CreateLecturerDto): Promise<LecturerResponseDto> {
+  async create(
+    @Body() dto: CreateLecturerDto,
+    @ActiveUser('id') userId: string,
+  ): Promise<LecturerResponseDto> {
     const user = await this.commandBus.execute<
       CreateLecturerCommand,
       UserAggregate
@@ -37,6 +37,7 @@ export class LecturerController {
         dto.degree,
         dto.department,
         dto.phoneNumber,
+        userId,
       ),
     );
 

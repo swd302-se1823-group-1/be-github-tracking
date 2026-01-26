@@ -14,8 +14,15 @@ export class CreateLecturerHandler implements ICommandHandler<CreateLecturerComm
 
   @Transactional()
   async execute(command: CreateLecturerCommand): Promise<UserAggregate> {
-    const { email, fullName, employeeCode, degree, department, phoneNumber } =
-      command;
+    const {
+      email,
+      fullName,
+      employeeCode,
+      degree,
+      department,
+      phoneNumber,
+      createdBy,
+    } = command;
 
     let user = await this.userRepository.findByEmail(email);
 
@@ -32,6 +39,10 @@ export class CreateLecturerHandler implements ICommandHandler<CreateLecturerComm
       degree,
       department,
       phoneNumber,
+      undefined, // provider
+      undefined, // providerId
+      undefined, // avatarUrl
+      createdBy,
     );
 
     return this.userRepository.create(user);
