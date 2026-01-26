@@ -11,6 +11,7 @@ import { FindUserByEmailHandler } from './application/handlers/find-user-by-emai
 import { FindUserByIdHandler } from './application/handlers/find-user-by-id.handler';
 import { CreateUserHandler } from './application/handlers/create-user.handler';
 import { UpdateUserGoogleInfoHandler } from './application/handlers/update-user-google-info.handler';
+import { GetCurrentUserHandler } from './application/handlers/get-current-user.handler';
 
 const repositories = [
   {
@@ -31,6 +32,7 @@ const repositories = [
     FindUserByProviderIdHandler,
     FindUserByEmailHandler,
     FindUserByIdHandler,
+    GetCurrentUserHandler,
     CreateUserHandler,
     UpdateUserGoogleInfoHandler,
   ],

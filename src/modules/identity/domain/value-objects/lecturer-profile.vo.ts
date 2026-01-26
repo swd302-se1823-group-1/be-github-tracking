@@ -1,3 +1,5 @@
+import { RequiredFieldException } from '../exceptions/user.exceptions';
+
 export class LecturerProfile {
   private constructor(
     public readonly employeeCode: string,
@@ -13,10 +15,10 @@ export class LecturerProfile {
     phoneNumber?: string,
   ): LecturerProfile {
     if (!employeeCode) {
-      throw new Error('Employee code is required for Lecturer');
+      throw new RequiredFieldException('employeeCode', 'Lecturer');
     }
     if (!degree) {
-      throw new Error('Degree is required for Lecturer');
+      throw new RequiredFieldException('degree', 'Lecturer');
     }
     return new LecturerProfile(employeeCode, degree, department, phoneNumber);
   }

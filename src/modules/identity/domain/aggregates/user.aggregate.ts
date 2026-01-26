@@ -6,6 +6,7 @@ import { LecturerProfile } from '../value-objects/lecturer-profile.vo';
 import { UserCreatedEvent } from '../events/user-created.event';
 import { StudentCodeUpdatedEvent } from '../events/student-code-updated.event';
 import { LecturerDegreeUpdatedEvent } from '../events/lecturer-degree-updated.event';
+import { InvalidRoleOperationException } from '../exceptions/user.exceptions';
 
 export type UserProps = {
   id: UserId;
@@ -77,6 +78,7 @@ export class UserAggregate extends AggregateRoot {
     provider?: string,
     providerId?: string,
     avatarUrl?: string,
+    universityEmail?: string,
   ): UserAggregate {
     const id = UserId.generate();
     const user = new UserAggregate({
@@ -84,7 +86,7 @@ export class UserAggregate extends AggregateRoot {
       email,
       fullName,
       role: UserRole.STUDENT,
-      studentProfile: StudentProfile.create(studentCode),
+      studentProfile: StudentProfile.create(studentCode, universityEmail),
       isActive: true, // Default active
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -177,7 +179,10 @@ export class UserAggregate extends AggregateRoot {
       ) {
         this._props.studentProfile = StudentProfile.create(newCode);
       } else {
-        throw new Error('Only students can have student code');
+        throw new InvalidRoleOperationException(
+          this._props.role,
+          'update student code',
+        );
       }
     } else {
       this._props.studentProfile =
@@ -198,7 +203,10 @@ export class UserAggregate extends AggregateRoot {
       this._props.role !== UserRole.LECTURER ||
       !this._props.lecturerProfile
     ) {
-      throw new Error('Only lecturers can have lecturer profile');
+      throw new InvalidRoleOperationException(
+        this._props.role,
+        'update lecturer profile',
+      );
     }
 
     this._props.lecturerProfile = this._props.lecturerProfile.updateProfile(

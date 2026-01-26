@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import type { Request, Response, CookieOptions } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
@@ -11,22 +11,18 @@ import {
 import { GoogleLoginCommand } from '@/modules/auth/application/commands/google-login.command';
 import { RefreshTokenCommand } from '@/modules/auth/application/commands/refresh-token.command';
 import { LogoutCommand } from '@/modules/auth/application/commands/logout.command';
+import { GetCurrentUserQuery } from '@/modules/identity/application/queries/get-current-user.query';
+import { CurrentUserDto } from '@/modules/identity/application/dto/current-user.dto';
 import { Public, ActiveUser, ResponseMessage } from '@/shared';
-
-export interface GoogleUser {
-  email: string;
-  firstName: string;
-  lastName: string;
-  picture: string;
-  providerId: string;
-  accessToken: string;
-}
+import { TokenResponseDto } from '@/modules/auth/application/dtos/token-response.dto';
+import { GoogleProfileDto } from '@/modules/auth/application/dtos/google-profile.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
     private readonly configService: ConfigService,
   ) {}
 
@@ -45,7 +41,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({ status: 302, description: 'Redirect to Dashboard' })
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as GoogleUser;
+    const user = req.user as GoogleProfileDto;
     if (!user) {
       return res.redirect(
         `${this.configService.get('FRONTEND_URL')}/login?error=unauthorized`,
@@ -105,14 +101,17 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   @ResponseMessage('Refresh token successfully')
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
-  @ApiResponse({ status: 200, description: 'New tokens issued' })
+  @ApiResponse({
+    status: 200,
+    description: 'New tokens issued',
+    type: TokenResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<TokenResponseDto> {
     const user = req.user as { id: string; jti: string; deviceId: string };
-    console.log(user);
 
     const isProduction =
       this.configService.get<string>('NODE_ENV') === 'production';
@@ -139,19 +138,39 @@ export class AuthController {
       ...commonCookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    return {
-      accessToken: result.accessToken,
-    };
+
+    return new TokenResponseDto(result.accessToken);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAccessGuard)
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user profile with role-specific data',
+    type: CurrentUserDto,
+  })
+  @ResponseMessage('User profile retrieved successfully')
+  async getCurrentUser(
+    @ActiveUser('id') userId: string,
+  ): Promise<CurrentUserDto> {
+    const user: CurrentUserDto = await this.queryBus.execute(
+      new GetCurrentUserQuery(userId),
+    );
+    return user;
   }
 
   @Post('logout')
   @UseGuards(JwtAccessGuard)
-  @ResponseMessage('Logout successfully')
-  @ApiOperation({ summary: 'Logout user and revoke all sessions' })
+  @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
-  async logout(@ActiveUser('id') userId: string, @Res() res: Response) {
-    // Revoke all refresh tokens for this user
-    await this.commandBus.execute(new LogoutCommand(userId));
+  @ResponseMessage('Logout successful')
+  async logout(
+    @ActiveUser('id') userId: string,
+    @ActiveUser('jti') jti: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.commandBus.execute(new LogoutCommand(userId, jti));
 
     // Clear cookies
     res.clearCookie('accessToken');

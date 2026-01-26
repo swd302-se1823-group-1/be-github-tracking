@@ -1,8 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
+import { Transactional } from '@nestjs-cls/transactional';
 import { IUserRepository } from '../../domain/repositories/user.repository';
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 import { CreateUserCommand } from '../commands/create-user.command';
+import { UserRole } from '../../domain/enums/user-role.enum';
+import { InvalidRoleOperationException } from '../../domain/exceptions/user.exceptions';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
@@ -11,25 +14,51 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     private readonly userRepository: IUserRepository,
   ) {}
 
+  @Transactional()
   async execute(command: CreateUserCommand): Promise<UserAggregate> {
-    const { email, fullName, provider, providerId, avatarUrl } = command;
+    const { email, fullName, provider, providerId, avatarUrl, role } = command;
 
-    // Use the factory method from UserAggregate.
-    // Assuming default strategy is to create a STUDENT if not specified,
-    // or generic user. Based on UserAggregate logic, we can use createStudent
-    // or we might need a more generic create method if roles aren't decided yet.
-    // For Google Login, it's often a Student (or we need to update UserAggregate to support generic creation).
-    // Let's use createStudent for now as it's the most common case for external signup,
-    // or add a TODO to handle roles better.
+    // Default to STUDENT if role not specified
+    const userRole = role || UserRole.STUDENT;
 
-    const user = UserAggregate.createStudent(
-      email,
-      fullName,
-      undefined, // studentCode - likely empty initially
-      provider,
-      providerId,
-      avatarUrl,
-    );
+    let user: UserAggregate;
+
+    // Create user based on role
+    switch (userRole) {
+      case UserRole.STUDENT:
+        user = UserAggregate.createStudent(
+          email,
+          fullName,
+          undefined, // studentCode - empty initially
+          provider,
+          providerId,
+          avatarUrl,
+        );
+        break;
+
+      case UserRole.LECTURER:
+        user = UserAggregate.createLecturer(
+          email,
+          fullName,
+          provider,
+          providerId,
+          avatarUrl,
+        );
+        break;
+
+      case UserRole.ADMIN:
+        user = UserAggregate.createAdmin(
+          email,
+          fullName,
+          provider,
+          providerId,
+          avatarUrl,
+        );
+        break;
+
+      default:
+        throw new InvalidRoleOperationException(userRole, 'create user');
+    }
 
     return this.userRepository.create(user);
   }
