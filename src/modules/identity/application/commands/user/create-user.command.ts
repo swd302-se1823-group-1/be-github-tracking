@@ -1,5 +1,5 @@
 import { ICommand } from '@nestjs/cqrs';
-import { UserRole } from '../../domain/enums/user-role.enum';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 
 export class CreateUserCommand implements ICommand {
   constructor(

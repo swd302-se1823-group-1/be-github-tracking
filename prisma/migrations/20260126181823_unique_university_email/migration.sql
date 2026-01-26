@@ -6,9 +6,8 @@ CREATE TYPE "ProjectMemberRole" AS ENUM ('LEADER', 'MEMBER');
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL,
     "email" VARCHAR(255) NOT NULL,
-    "password_hash" VARCHAR(255),
     "full_name" VARCHAR(255),
     "role" "UserRole" NOT NULL DEFAULT 'STUDENT',
     "avatar_url" VARCHAR(500),
@@ -27,7 +26,7 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "refresh_tokens" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL,
     "jti" VARCHAR(36) NOT NULL,
     "device_id" VARCHAR(255) NOT NULL,
     "device_name" VARCHAR(255),
@@ -35,7 +34,7 @@ CREATE TABLE "refresh_tokens" (
     "ip_address" VARCHAR(45),
     "user_agent" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expires_at" TIMESTAMP(3) NOT NULL,
     "revoked_at" TIMESTAMP(3),
 
@@ -111,8 +110,9 @@ CREATE TABLE "semesters" (
 
 -- CreateTable
 CREATE TABLE "classes" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "id" UUID NOT NULL,
     "semester_id" BIGINT NOT NULL,
+    "enroll_password" VARCHAR(255) NOT NULL,
     "lecturer_id" UUID NOT NULL,
     "course_id" UUID NOT NULL,
     "class_code" VARCHAR(50) NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE "classes" (
 
 -- CreateTable
 CREATE TABLE "courses" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "id" UUID NOT NULL,
     "code" VARCHAR(20) NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -162,7 +162,7 @@ CREATE TABLE "enrollments" (
 
 -- CreateTable
 CREATE TABLE "projects" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "id" UUID NOT NULL,
     "class_id" UUID NOT NULL,
     "name" VARCHAR(255),
     "topic" VARCHAR(255),
@@ -180,7 +180,7 @@ CREATE TABLE "projects" (
 
 -- CreateTable
 CREATE TABLE "project_members" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "id" UUID NOT NULL,
     "project_id" UUID NOT NULL,
     "student_id" UUID NOT NULL,
     "role" "ProjectMemberRole" NOT NULL,
@@ -198,7 +198,7 @@ CREATE TABLE "project_members" (
 
 -- CreateTable
 CREATE TABLE "repositories" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "id" UUID NOT NULL,
     "project_id" UUID NOT NULL,
     "url" VARCHAR(500) NOT NULL,
     "name" VARCHAR(255) NOT NULL,
@@ -221,7 +221,7 @@ CREATE TABLE "repositories" (
 
 -- CreateTable
 CREATE TABLE "commits" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "id" UUID NOT NULL,
     "repository_id" UUID NOT NULL,
     "project_member_id" UUID NOT NULL,
     "message" TEXT,
@@ -240,7 +240,7 @@ CREATE TABLE "commits" (
 
 -- CreateTable
 CREATE TABLE "sync_logs" (
-    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "id" UUID NOT NULL,
     "repository_id" UUID NOT NULL,
     "trigger_type" VARCHAR(50),
     "started_at" TIMESTAMP(3),
@@ -277,6 +277,9 @@ CREATE INDEX "refresh_tokens_expires_at_idx" ON "refresh_tokens"("expires_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "students_student_code_key" ON "students"("student_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "students_university_email_key" ON "students"("university_email");
 
 -- CreateIndex
 CREATE INDEX "students_student_code_idx" ON "students"("student_code");

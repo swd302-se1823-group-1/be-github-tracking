@@ -11,13 +11,13 @@ import { GoogleLoginResult } from '@/modules/auth/application/dtos/google-login.
 import { TokenService } from '@/modules/auth/application/services/token.service';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 import { RefreshToken } from '@/modules/auth/domain/aggregates/refresh-token.aggregate';
-import { FindUserByProviderIdQuery } from '@/modules/identity/application/queries/find-user-by-provider-id.query';
-import { FindUserByEmailQuery } from '@/modules/identity/application/queries/find-user-by-email.query';
-import { CreateUserCommand } from '@/modules/identity/application/commands/create-user.command';
-import { UpdateUserGoogleInfoCommand } from '@/modules/identity/application/commands/update-user-google-info.command';
 import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { generateId } from '@/shared/utils/uuid';
+import { FindUserByEmailQuery } from '@/modules/identity/application/queries/user/find-user-by-email.query';
+import { UpdateUserGoogleInfoCommand } from '@/modules/identity/application/commands/user/update-user-google-info.command';
+import { CreateUserCommand } from '@/modules/identity/application/commands/user/create-user.command';
+import { FindUserByProviderIdQuery } from '@/modules/identity/application/queries/user/find-user-by-provider-id.query';
 
 @CommandHandler(GoogleLoginCommand)
 export class GoogleLoginHandler implements ICommandHandler<
