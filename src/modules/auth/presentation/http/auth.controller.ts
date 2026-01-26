@@ -22,7 +22,7 @@ import { AuthResponseDto } from '@/modules/auth/application/dtos/auth-response.d
 import { RefreshTokenCommand } from '@/modules/auth/application/commands/refresh-token.command';
 import { RefreshTokenResult } from '@/modules/auth/application/dtos/refresh-token.result';
 import { LogoutCommand } from '@/modules/auth/application/commands/logout.command';
-import { GetCurrentUserQuery } from '@/modules/identity/application/queries/get-current-user.query';
+import { GetCurrentUserQuery } from '@/modules/identity/application/queries/user/get-current-user.query';
 import { CurrentUserResponseDto } from '@/modules/identity/application/dto/current-user.dto';
 import { Public, ActiveUser, ResponseMessage } from '@/shared';
 import { TokenResponseDto } from '@/modules/auth/application/dtos/token-response.dto';

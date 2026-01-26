@@ -1,4 +1,4 @@
-import { UserRole } from '../../domain/enums/user-role.enum';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { Order } from '@/shared/dtos/cursor-page-options.dto';
 
 export class GetUsersQuery {

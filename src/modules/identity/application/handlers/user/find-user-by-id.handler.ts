@@ -1,9 +1,9 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { FindUserByIdQuery } from '../queries/find-user-by-id.query';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { UserAggregate } from '../../domain/aggregates/user.aggregate';
-import { UserId } from '../../domain/value-objects/user-id.vo';
+import { FindUserByIdQuery } from '@/modules/identity/application/queries/user/find-user-by-id.query';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
+import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
 
 @QueryHandler(FindUserByIdQuery)
 export class FindUserByIdHandler implements IQueryHandler<FindUserByIdQuery> {

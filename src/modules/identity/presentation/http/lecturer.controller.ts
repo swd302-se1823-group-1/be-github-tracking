@@ -1,16 +1,16 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateLecturerDto } from '../dtos/create-lecturer.dto';
-import { LecturerResponseDto } from '../dtos/lecturer-response.dto';
-import { CreateLecturerCommand } from '../../application/commands/create-lecturer.command';
+import { CreateLecturerDto } from '../dtos/lecturer/create-lecturer.dto';
+import { LecturerResponseDto } from '../dtos/lecturer/lecturer-response.dto';
+import { CreateLecturerCommand } from '../../application/commands/lecturer/create-lecturer.command';
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 import { ResponseMessage, ActiveUser, Roles } from '@/shared';
 import { UserRole } from '../../domain/enums/user-role.enum';
-import { GetLecturersQuery } from '../../application/queries/get-lecturers.query';
-import { GetLecturerByIdQuery } from '../../application/queries/get-lecturer-by-id.query';
-import { GetLecturerByEmailQuery } from '../../application/queries/get-lecturer-by-email.query';
-import { GetUsersDto } from '../dtos/get-users.dto';
+import { GetLecturersQuery } from '../../application/queries/lecturer/get-lecturers.query';
+import { GetLecturerByIdQuery } from '../../application/queries/lecturer/get-lecturer-by-id.query';
+import { GetLecturerByEmailQuery } from '../../application/queries/lecturer/get-lecturer-by-email.query';
+import { GetUsersDto } from '../dtos/user/get-users.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
 
@@ -70,6 +70,7 @@ export class LecturerController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get list of lecturers' })
+  @ResponseMessage('Get lecturers successfully')
   @ApiResponse({
     status: 200,
     description: 'List of lecturers retrieved successfully',
@@ -93,6 +94,7 @@ export class LecturerController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get lecturer by email' })
+  @ResponseMessage('Get lecturer successfully')
   @ApiResponse({
     status: 200,
     description: 'Lecturer detail retrieved successfully',
@@ -109,6 +111,7 @@ export class LecturerController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get lecturer by ID' })
+  @ResponseMessage('Get lecturer successfully')
   @ApiResponse({
     status: 200,
     description: 'Lecturer detail retrieved successfully',

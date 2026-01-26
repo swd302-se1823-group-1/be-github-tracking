@@ -1,6 +1,6 @@
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { UserRole } from '../../domain/enums/user-role.enum';
 
 @Exclude()
 export class UserResponseDto {

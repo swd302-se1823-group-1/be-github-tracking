@@ -1,10 +1,10 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
-import { GetStudentByIdQuery } from '../queries/get-student-by-id.query';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { StudentResponseDto } from '../../presentation/dtos/student-response.dto';
-import { UserId } from '../../domain/value-objects/user-id.vo';
-import { UserRole } from '../../domain/enums/user-role.enum';
+import { GetStudentByIdQuery } from '@/modules/identity/application/queries/student/get-student-by-id.query';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { StudentResponseDto } from '@/modules/identity/presentation/dtos/student/student-response.dto';
+import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 
 @QueryHandler(GetStudentByIdQuery)
 export class GetStudentByIdHandler implements IQueryHandler<GetStudentByIdQuery> {

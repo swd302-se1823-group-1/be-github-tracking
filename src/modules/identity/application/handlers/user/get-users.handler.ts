@@ -1,42 +1,40 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { GetStudentsQuery } from '../queries/get-students.query';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
-import { StudentResponseDto } from '../../presentation/dtos/student-response.dto';
-import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
-import { UserRole } from '../../domain/enums/user-role.enum';
 
-@QueryHandler(GetStudentsQuery)
-export class GetStudentsHandler implements IQueryHandler<GetStudentsQuery> {
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
+import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
+import { GetUsersQuery } from '@/modules/identity/application/queries/user/get-users.query';
+import { UserResponseDto } from '@/modules/identity/presentation/dtos/user/user-response.dto';
+
+@QueryHandler(GetUsersQuery)
+export class GetUsersHandler implements IQueryHandler<GetUsersQuery> {
   constructor(
     @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async execute(
-    query: GetStudentsQuery,
-  ): Promise<CursorPageDto<StudentResponseDto>> {
-    const { cursor, take, order, searchEmail, isActive } = query;
+  async execute(query: GetUsersQuery): Promise<CursorPageDto<UserResponseDto>> {
+    const { cursor, take, order, searchEmail, role, isActive } = query;
 
     const { users, nextCursor, total } = await this.userRepository.findAll({
       cursor,
       take,
       order,
       searchEmail,
-      role: UserRole.STUDENT,
+      role,
       isActive,
     });
 
-    const studentDtos = users.map(
+    const userDtos = users.map(
       (user) =>
-        new StudentResponseDto({
+        new UserResponseDto({
           id: user.id.toString(),
           email: user.email,
           fullName: user.fullName || '',
           avatarUrl: user.avatarUrl,
-          studentCode: user.studentProfile?.studentCode || null,
-          universityEmail: user.studentProfile?.universityEmail || null,
+          role: user.role,
+          isActive: user.isActive,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         }),
@@ -48,6 +46,6 @@ export class GetStudentsHandler implements IQueryHandler<GetStudentsQuery> {
       hasNextPage: !!nextCursor,
     });
 
-    return new CursorPageDto(studentDtos, meta);
+    return new CursorPageDto(userDtos, meta);
   }
 }

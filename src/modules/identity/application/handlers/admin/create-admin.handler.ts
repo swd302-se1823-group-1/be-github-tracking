@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictException, Inject } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
-import { CreateAdminCommand } from '../commands/create-admin.command';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { UserAggregate } from '../../domain/aggregates/user.aggregate';
+import { CreateAdminCommand } from '@/modules/identity/application/commands/admin/create-admin.command';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
 
 @CommandHandler(CreateAdminCommand)
 export class CreateAdminHandler implements ICommandHandler<CreateAdminCommand> {

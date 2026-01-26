@@ -1,22 +1,23 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { GetLecturersQuery } from '../queries/get-lecturers.query';
-import { IUserRepository } from '../../domain/repositories/user.repository';
+import { GetStudentsQuery } from '@/modules/identity/application/queries/student/get-students.query';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
-import { LecturerResponseDto } from '../../presentation/dtos/lecturer-response.dto';
-import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
-import { UserRole } from '../../domain/enums/user-role.enum';
 
-@QueryHandler(GetLecturersQuery)
-export class GetLecturersHandler implements IQueryHandler<GetLecturersQuery> {
+import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { StudentResponseDto } from '@/modules/identity/presentation/dtos/student/student-response.dto';
+
+@QueryHandler(GetStudentsQuery)
+export class GetStudentsHandler implements IQueryHandler<GetStudentsQuery> {
   constructor(
     @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
   ) {}
 
   async execute(
-    query: GetLecturersQuery,
-  ): Promise<CursorPageDto<LecturerResponseDto>> {
+    query: GetStudentsQuery,
+  ): Promise<CursorPageDto<StudentResponseDto>> {
     const { cursor, take, order, searchEmail, isActive } = query;
 
     const { users, nextCursor, total } = await this.userRepository.findAll({
@@ -24,21 +25,19 @@ export class GetLecturersHandler implements IQueryHandler<GetLecturersQuery> {
       take,
       order,
       searchEmail,
-      role: UserRole.LECTURER,
+      role: UserRole.STUDENT,
       isActive,
     });
 
-    const lecturerDtos = users.map(
+    const studentDtos = users.map(
       (user) =>
-        new LecturerResponseDto({
+        new StudentResponseDto({
           id: user.id.toString(),
           email: user.email,
           fullName: user.fullName || '',
           avatarUrl: user.avatarUrl,
-          employeeCode: user.lecturerProfile?.employeeCode || null,
-          degree: user.lecturerProfile?.degree || null,
-          department: user.lecturerProfile?.department || null,
-          phoneNumber: user.lecturerProfile?.phoneNumber || null,
+          studentCode: user.studentProfile?.studentCode || null,
+          universityEmail: user.studentProfile?.universityEmail || null,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         }),
@@ -50,6 +49,6 @@ export class GetLecturersHandler implements IQueryHandler<GetLecturersQuery> {
       hasNextPage: !!nextCursor,
     });
 
-    return new CursorPageDto(lecturerDtos, meta);
+    return new CursorPageDto(studentDtos, meta);
   }
 }

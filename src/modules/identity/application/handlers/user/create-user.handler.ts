@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { UserAggregate } from '../../domain/aggregates/user.aggregate';
-import { CreateUserCommand } from '../commands/create-user.command';
-import { UserRole } from '../../domain/enums/user-role.enum';
-import { InvalidRoleOperationException } from '../../domain/exceptions/user.exceptions';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
+import { CreateUserCommand } from '@/modules/identity/application/commands/user/create-user.command';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { InvalidRoleOperationException } from '@/modules/identity/domain/exceptions/user.exceptions';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
@@ -27,7 +27,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     } = command;
 
     // Default to STUDENT if role not specified
-    const userRole = role || UserRole.STUDENT;
+    const userRole = role ?? UserRole.STUDENT;
 
     let user: UserAggregate;
 

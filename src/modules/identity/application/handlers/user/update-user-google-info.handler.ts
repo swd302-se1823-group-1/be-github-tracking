@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { UpdateUserGoogleInfoCommand } from '../commands/update-user-google-info.command';
-import { UserAggregate } from '../../domain/aggregates/user.aggregate';
-import { UserId } from '../../domain/value-objects/user-id.vo';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
+import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
+import { UpdateUserGoogleInfoCommand } from '@/modules/identity/application/commands/user/update-user-google-info.command';
 
 @CommandHandler(UpdateUserGoogleInfoCommand)
 export class UpdateUserGoogleInfoHandler implements ICommandHandler<UpdateUserGoogleInfoCommand> {

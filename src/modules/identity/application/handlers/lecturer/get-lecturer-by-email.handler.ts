@@ -1,9 +1,9 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
-import { GetLecturerByEmailQuery } from '../queries/get-lecturer-by-email.query';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { LecturerResponseDto } from '../../presentation/dtos/lecturer-response.dto';
-import { UserRole } from '../../domain/enums/user-role.enum';
+import { GetLecturerByEmailQuery } from '@/modules/identity/application/queries/lecturer/get-lecturer-by-email.query';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { LecturerResponseDto } from '@/modules/identity/presentation/dtos/lecturer/lecturer-response.dto';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 
 @QueryHandler(GetLecturerByEmailQuery)
 export class GetLecturerByEmailHandler implements IQueryHandler<GetLecturerByEmailQuery> {

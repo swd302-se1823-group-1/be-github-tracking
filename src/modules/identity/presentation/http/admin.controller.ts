@@ -1,9 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateAdminDto } from '../dtos/create-admin.dto';
-import { AdminResponseDto } from '../dtos/admin-response.dto';
-import { CreateAdminCommand } from '../../application/commands/create-admin.command';
+import { CreateAdminDto } from '../dtos/admin/create-admin.dto';
+import { AdminResponseDto } from '../dtos/admin/admin-response.dto';
+import { CreateAdminCommand } from '../../application/commands/admin/create-admin.command';
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 import { ActiveUser, ResponseMessage, Roles } from '@/shared';
 import { UserRole } from '../../domain/enums/user-role.enum';
