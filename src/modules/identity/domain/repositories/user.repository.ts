@@ -6,7 +6,7 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<UserAggregate | null>;
   findByProviderId(providerId: string): Promise<UserAggregate | null>;
   create(user: UserAggregate): Promise<UserAggregate>;
-  update(user: UserAggregate): Promise<void>;
+  update(user: UserAggregate): Promise<UserAggregate>;
 }
 
 export const IUserRepository = Symbol('IUserRepository');

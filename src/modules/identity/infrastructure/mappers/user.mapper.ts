@@ -52,11 +52,51 @@ export class UserMapper {
       updatedAt: prismaUser.updated_at,
       studentProfile,
       lecturerProfile,
+      createdBy: prismaUser.created_by_id,
+      updatedBy: prismaUser.updated_by_id,
     };
 
     return UserAggregate.reconstitute(props);
   }
 
-  // toPersistence often splits data into multiple tables for ORM
-  // Since we are using Prisma, we might return a structure that the Repo uses
+  static toPersistence(user: UserAggregate) {
+    return {
+      user: {
+        id: user.id.toString(),
+        email: user.email,
+        full_name: user.fullName || null,
+        avatar_url: user.avatarUrl || null,
+        provider: user.provider || null,
+        provider_id: user.providerId || null,
+        role: user.role,
+        is_active: user.isActive,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+        created_by_id: user.createdBy || null,
+        updated_by_id: user.updatedBy || null,
+      },
+      student:
+        user.role === UserRole.STUDENT && user.studentProfile
+          ? {
+              id: user.id.toString(),
+              student_code: user.studentProfile.studentCode,
+              university_email: user.studentProfile.universityEmail,
+              created_by_id: user.createdBy || null,
+              updated_by_id: user.updatedBy || null,
+            }
+          : null,
+      lecturer:
+        user.role === UserRole.LECTURER && user.lecturerProfile
+          ? {
+              id: user.id.toString(),
+              employee_code: user.lecturerProfile.employeeCode,
+              degree: user.lecturerProfile.degree,
+              department: user.lecturerProfile.department,
+              phone_number: user.lecturerProfile.phoneNumber,
+              created_by_id: user.createdBy || null,
+              updated_by_id: user.updatedBy || null,
+            }
+          : null,
+    };
+  }
 }

@@ -7,6 +7,7 @@ import {
 import { BadRequestException, Inject } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { GoogleLoginCommand } from '@/modules/auth/application/commands/google-login.command';
+import { GoogleLoginResult } from '@/modules/auth/application/dtos/google-login.result';
 import { TokenService } from '@/modules/auth/application/services/token.service';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 import { RefreshToken } from '@/modules/auth/domain/aggregates/refresh-token.aggregate';
@@ -19,7 +20,10 @@ import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { generateId } from '@/shared/utils/uuid';
 
 @CommandHandler(GoogleLoginCommand)
-export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {
+export class GoogleLoginHandler implements ICommandHandler<
+  GoogleLoginCommand,
+  GoogleLoginResult
+> {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
@@ -29,17 +33,7 @@ export class GoogleLoginHandler implements ICommandHandler<GoogleLoginCommand> {
   ) {}
 
   @Transactional()
-  async execute(command: GoogleLoginCommand): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    user: {
-      id: string;
-      email: string;
-      fullName: string | null;
-      avatarUrl: string | null;
-      role: string;
-    };
-  }> {
+  async execute(command: GoogleLoginCommand): Promise<GoogleLoginResult> {
     const { profile } = command;
     const { email, providerId, firstName, lastName, picture } = profile;
 

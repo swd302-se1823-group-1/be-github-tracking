@@ -16,7 +16,15 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
   @Transactional()
   async execute(command: CreateUserCommand): Promise<UserAggregate> {
-    const { email, fullName, provider, providerId, avatarUrl, role } = command;
+    const {
+      email,
+      fullName,
+      provider,
+      providerId,
+      avatarUrl,
+      role,
+      createdBy,
+    } = command;
 
     // Default to STUDENT if role not specified
     const userRole = role || UserRole.STUDENT;
@@ -33,6 +41,8 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
           provider,
           providerId,
           avatarUrl,
+          undefined, // universityEmail
+          createdBy,
         );
         break;
 
@@ -43,6 +53,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
           provider,
           providerId,
           avatarUrl,
+          createdBy,
         );
         break;
 
@@ -53,6 +64,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
           provider,
           providerId,
           avatarUrl,
+          createdBy,
         );
         break;
 

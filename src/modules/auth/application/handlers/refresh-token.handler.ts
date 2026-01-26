@@ -9,8 +9,13 @@ import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggrega
 import { RefreshToken } from '../../domain/aggregates/refresh-token.aggregate';
 import { generateId } from '@/shared/utils/uuid';
 
+import { RefreshTokenResult } from '@/modules/auth/application/dtos/refresh-token.result';
+
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand> {
+export class RefreshTokenHandler implements ICommandHandler<
+  RefreshTokenCommand,
+  RefreshTokenResult
+> {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly tokenService: TokenService,
@@ -19,10 +24,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
   ) {}
 
   @Transactional()
-  async execute(command: RefreshTokenCommand): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
+  async execute(command: RefreshTokenCommand): Promise<RefreshTokenResult> {
     const { userId, jti, deviceId } = command;
 
     // 1. Validate refresh token exists in DB and not revoked

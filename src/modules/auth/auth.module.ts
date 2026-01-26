@@ -31,6 +31,7 @@ import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refr
 import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
 import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
 import { IdentityModule } from '@/modules/identity/identity.module';
+import { GoogleService } from '@/modules/auth/infrastructure/services/google.service';
 
 @Module({
   controllers: [AuthController],
@@ -75,6 +76,7 @@ import { IdentityModule } from '@/modules/identity/identity.module';
     GoogleLoginHandler,
     RefreshTokenHandler,
     LogoutHandler,
+    GoogleService,
     RolesGuard,
   ],
   exports: [

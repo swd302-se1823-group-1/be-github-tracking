@@ -4,7 +4,6 @@ import { IUserRepository } from '../../domain/repositories/user.repository';
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 import { UserId } from '../../domain/value-objects/user-id.vo';
 import { UserMapper } from '../mappers/user.mapper';
-import { UserRole } from '../../domain/enums/user-role.enum';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
@@ -35,96 +34,57 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async create(user: UserAggregate): Promise<UserAggregate> {
-    const data = {
-      id: user.id.toString(),
-      email: user.email,
-      full_name: user.fullName || null,
-      avatar_url: user.avatarUrl || null,
-      provider: user.provider || null,
-      provider_id: user.providerId || null,
-      role: user.role,
-      is_active: user.isActive,
-      created_at: user.createdAt,
-      updated_at: user.updatedAt,
-    };
+    const persistence = UserMapper.toPersistence(user);
 
     // No manual transaction - managed by @Transactional() decorator
-    await this.prisma.user.create({ data });
+    await this.prisma.user.create({ data: persistence.user });
 
-    if (user.role === UserRole.STUDENT && user.studentProfile) {
+    if (persistence.student) {
       await this.prisma.student.create({
-        data: {
-          id: user.id.toString(),
-          student_code: user.studentProfile.studentCode,
-          university_email: user.studentProfile.universityEmail,
-        },
+        data: persistence.student,
       });
     }
 
-    if (user.role === UserRole.LECTURER && user.lecturerProfile) {
+    if (persistence.lecturer) {
       await this.prisma.lecturer.create({
-        data: {
-          id: user.id.toString(),
-          employee_code: user.lecturerProfile.employeeCode,
-          degree: user.lecturerProfile.degree,
-          department: user.lecturerProfile.department,
-          phone_number: user.lecturerProfile.phoneNumber,
-        },
+        data: persistence.lecturer,
       });
     }
 
     return user;
   }
 
-  async update(user: UserAggregate): Promise<void> {
-    const data = {
-      full_name: user.fullName || null,
-      avatar_url: user.avatarUrl || null,
-      provider: user.provider || null,
-      provider_id: user.providerId || null,
-      role: user.role,
-      is_active: user.isActive,
-      updated_at: user.updatedAt,
-    };
+  async update(user: UserAggregate): Promise<UserAggregate> {
+    const persistence = UserMapper.toPersistence(user);
 
     // No manual transaction - managed by @Transactional() decorator
     await this.prisma.user.update({
       where: { id: user.id.toString() },
-      data,
+      data: persistence.user,
     });
 
-    if (user.role === UserRole.STUDENT && user.studentProfile) {
+    if (persistence.student) {
       await this.prisma.student.upsert({
         where: { id: user.id.toString() },
-        create: {
-          id: user.id.toString(),
-          student_code: user.studentProfile.studentCode,
-          university_email: user.studentProfile.universityEmail,
-        },
+        create: persistence.student,
         update: {
-          student_code: user.studentProfile.studentCode,
-          university_email: user.studentProfile.universityEmail,
+          ...persistence.student,
+          created_by_id: undefined,
         },
       });
     }
 
-    if (user.role === UserRole.LECTURER && user.lecturerProfile) {
+    if (persistence.lecturer) {
       await this.prisma.lecturer.upsert({
         where: { id: user.id.toString() },
-        create: {
-          id: user.id.toString(),
-          employee_code: user.lecturerProfile.employeeCode,
-          degree: user.lecturerProfile.degree,
-          department: user.lecturerProfile.department,
-          phone_number: user.lecturerProfile.phoneNumber,
-        },
+        create: persistence.lecturer,
         update: {
-          employee_code: user.lecturerProfile.employeeCode,
-          degree: user.lecturerProfile.degree,
-          department: user.lecturerProfile.department,
-          phone_number: user.lecturerProfile.phoneNumber,
+          ...persistence.lecturer,
+          created_by_id: undefined,
         },
       });
     }
+
+    return user;
   }
 }

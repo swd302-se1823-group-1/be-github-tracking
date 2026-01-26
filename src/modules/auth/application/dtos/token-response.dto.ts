@@ -6,7 +6,7 @@ export class TokenResponseDto {
   @Expose()
   accessToken: string;
 
-  constructor(accessToken: string) {
-    this.accessToken = accessToken;
+  constructor(partial: Partial<TokenResponseDto>) {
+    Object.assign(this, partial);
   }
 }

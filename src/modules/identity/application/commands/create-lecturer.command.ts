@@ -6,5 +6,6 @@ export class CreateLecturerCommand {
     public readonly degree: string,
     public readonly department?: string,
     public readonly phoneNumber?: string,
+    public readonly createdBy?: string,
   ) {}
 }

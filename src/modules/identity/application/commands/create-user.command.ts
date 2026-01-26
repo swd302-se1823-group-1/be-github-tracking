@@ -9,5 +9,6 @@ export class CreateUserCommand implements ICommand {
     public readonly providerId: string,
     public readonly avatarUrl?: string,
     public readonly role?: UserRole,
+    public readonly createdBy?: string,
   ) {}
 }
