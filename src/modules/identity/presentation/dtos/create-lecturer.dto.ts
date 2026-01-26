@@ -20,10 +20,9 @@ export class CreateLecturerDto {
   @IsString()
   employeeCode: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty({ example: 'PhD' })
   @IsString()
-  degree?: string;
+  degree: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

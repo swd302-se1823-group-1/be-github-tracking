@@ -1,5 +1,9 @@
 import { AggregateRoot } from '@nestjs/cqrs';
-import { UnauthorizedException } from '@nestjs/common';
+import {
+  TokenRevokedException,
+  TokenExpiredException,
+  TokenUserMismatchException,
+} from '../exceptions/token.exceptions';
 
 export class RefreshToken extends AggregateRoot {
   private _id: string;
@@ -86,15 +90,15 @@ export class RefreshToken extends AggregateRoot {
 
   public validate(userId: string): void {
     if (this.isRevoked()) {
-      throw new UnauthorizedException('Refresh token has been revoked');
+      throw new TokenRevokedException(this._jti);
     }
 
     if (this.isExpired()) {
-      throw new UnauthorizedException('Refresh token has expired');
+      throw new TokenExpiredException(this._expiresAt);
     }
 
     if (this._userId !== userId) {
-      throw new UnauthorizedException('Token user mismatch');
+      throw new TokenUserMismatchException(this._userId, userId);
     }
   }
 }

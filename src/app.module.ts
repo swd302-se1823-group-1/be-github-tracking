@@ -1,4 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ClsModule } from 'nestjs-cls';
+import { ClsPluginTransactional } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppConfigModule, ThrottlerConfig } from '@/config';
@@ -17,6 +21,18 @@ import { JwtAccessGuard } from '@/modules/auth/infrastructure';
     SharedModule,
     AuthModule,
     IdentityModule,
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true },
+      plugins: [
+        new ClsPluginTransactional({
+          imports: [InfrastructureModule],
+          adapter: new TransactionalAdapterPrisma({
+            prismaInjectionToken: PrismaService,
+          }),
+        }),
+      ],
+    }),
   ],
   controllers: [AppController],
   providers: [

@@ -23,7 +23,7 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       email: process.env.ADMIN_EMAIL || '',
-      full_name: process.env.ADMIN_NAME || '',
+      full_name: process.env.ADMIN_FULLNAME || '',
       role: UserRole.ADMIN,
     },
   });

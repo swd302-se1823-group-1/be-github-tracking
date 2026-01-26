@@ -11,6 +11,18 @@ export class LecturerResponseDto {
   @Expose()
   employeeCode: string | null;
 
+  @ApiProperty({ description: 'Email' })
+  @Expose()
+  email: string;
+
+  @ApiProperty({ description: 'Full Name' })
+  @Expose()
+  fullName: string;
+
+  @ApiProperty({ description: 'Avatar URL' })
+  @Expose()
+  avatarUrl: string | null | undefined;
+
   @ApiProperty({ description: 'Degree' })
   @Expose()
   degree: string | null;
