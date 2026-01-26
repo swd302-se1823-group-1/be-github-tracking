@@ -10,6 +10,9 @@ import { UserController } from './presentation/http/user.controller';
 import { StudentController } from './presentation/http/student.controller';
 import { GetStudentsHandler } from './application/handlers/get-students.handler';
 import { GetStudentByIdHandler } from './application/handlers/get-student-by-id.handler';
+import { GetLecturersHandler } from './application/handlers/get-lecturers.handler';
+import { GetLecturerByIdHandler } from './application/handlers/get-lecturer-by-id.handler';
+import { GetLecturerByEmailHandler } from './application/handlers/get-lecturer-by-email.handler';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { IUserRepository } from './domain/repositories/user.repository';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
@@ -46,6 +49,9 @@ const repositories = [
     GetUsersHandler,
     GetStudentsHandler,
     GetStudentByIdHandler,
+    GetLecturersHandler,
+    GetLecturerByIdHandler,
+    GetLecturerByEmailHandler,
   ],
   controllers: [
     LecturerController,

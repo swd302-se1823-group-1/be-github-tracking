@@ -1,5 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateLecturerDto } from '../dtos/create-lecturer.dto';
 import { LecturerResponseDto } from '../dtos/lecturer-response.dto';
@@ -7,11 +7,20 @@ import { CreateLecturerCommand } from '../../application/commands/create-lecture
 import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 import { ResponseMessage, ActiveUser, Roles } from '@/shared';
 import { UserRole } from '../../domain/enums/user-role.enum';
+import { GetLecturersQuery } from '../../application/queries/get-lecturers.query';
+import { GetLecturerByIdQuery } from '../../application/queries/get-lecturer-by-id.query';
+import { GetLecturerByEmailQuery } from '../../application/queries/get-lecturer-by-email.query';
+import { GetUsersDto } from '../dtos/get-users.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
 
 @ApiTags('Identity/lecturers')
 @Controller('lecturers')
 export class LecturerController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Post()
   @Roles(UserRole.ADMIN)
@@ -55,5 +64,58 @@ export class LecturerController {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
+  }
+
+  @Get()
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get list of lecturers' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of lecturers retrieved successfully',
+    type: CursorPageDto<LecturerResponseDto>,
+  })
+  async findAll(
+    @Query() dto: GetUsersDto,
+  ): Promise<CursorPageDto<LecturerResponseDto>> {
+    return this.queryBus.execute(
+      new GetLecturersQuery(
+        dto.cursor,
+        dto.take,
+        dto.order,
+        dto.searchEmail,
+        dto.isActive,
+      ),
+    );
+  }
+
+  @Get('email/:email')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get lecturer by email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lecturer detail retrieved successfully',
+    type: LecturerResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Lecturer not found' })
+  async findByEmail(
+    @Param('email') email: string,
+  ): Promise<LecturerResponseDto> {
+    return this.queryBus.execute(new GetLecturerByEmailQuery(email));
+  }
+
+  @Get(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get lecturer by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lecturer detail retrieved successfully',
+    type: LecturerResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Lecturer not found' })
+  async findOne(@Param('id') id: string): Promise<LecturerResponseDto> {
+    return this.queryBus.execute(new GetLecturerByIdQuery(id));
   }
 }
