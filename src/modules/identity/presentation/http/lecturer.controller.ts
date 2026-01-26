@@ -8,7 +8,7 @@ import { UserAggregate } from '../../domain/aggregates/user.aggregate';
 import { ResponseMessage, ActiveUser, Roles } from '@/shared';
 import { UserRole } from '../../domain/enums/user-role.enum';
 
-@ApiTags('Identity')
+@ApiTags('Identity/lecturers')
 @Controller('lecturers')
 export class LecturerController {
   constructor(private readonly commandBus: CommandBus) {}

@@ -7,6 +7,9 @@ import { GetUsersHandler } from './application/handlers/get-users.handler';
 import { LecturerController } from './presentation/http/lecturer.controller';
 import { AdminController } from './presentation/http/admin.controller';
 import { UserController } from './presentation/http/user.controller';
+import { StudentController } from './presentation/http/student.controller';
+import { GetStudentsHandler } from './application/handlers/get-students.handler';
+import { GetStudentByIdHandler } from './application/handlers/get-student-by-id.handler';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { IUserRepository } from './domain/repositories/user.repository';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
@@ -41,8 +44,15 @@ const repositories = [
     UpdateUserGoogleInfoHandler,
     CreateAdminHandler,
     GetUsersHandler,
+    GetStudentsHandler,
+    GetStudentByIdHandler,
   ],
-  controllers: [LecturerController, AdminController, UserController],
+  controllers: [
+    LecturerController,
+    AdminController,
+    UserController,
+    StudentController,
+  ],
   exports: [IUserRepository],
 })
 export class IdentityModule {}
