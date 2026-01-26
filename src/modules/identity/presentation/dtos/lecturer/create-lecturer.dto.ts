@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 
 export class CreateLecturerDto {
   @ApiProperty({
@@ -32,5 +32,6 @@ export class CreateLecturerDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+  @IsPhoneNumber()
   phoneNumber?: string;
 }

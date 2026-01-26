@@ -4,7 +4,6 @@ import { UserRole } from '../enums/user-role.enum';
 import { StudentProfile } from '../value-objects/student-profile.vo';
 import { LecturerProfile } from '../value-objects/lecturer-profile.vo';
 import { UserCreatedEvent } from '../events/user-created.event';
-import { StudentCodeUpdatedEvent } from '../events/student-code-updated.event';
 import { LecturerDegreeUpdatedEvent } from '../events/lecturer-degree-updated.event';
 import { InvalidRoleOperationException } from '../exceptions/user.exceptions';
 
@@ -187,26 +186,38 @@ export class UserAggregate extends AggregateRoot {
   // We will assume default Student for OAuth if not specified.
 
   // Business logic cho Student
-  updateStudentCode(newCode: string): void {
-    if (this._props.role !== UserRole.STUDENT || !this._props.studentProfile) {
-      // Logic for if profile is missing but role is student (migration case?)
-      if (
-        this._props.role === UserRole.STUDENT &&
-        !this._props.studentProfile
-      ) {
-        this._props.studentProfile = StudentProfile.create(newCode);
+  updateStudent(
+    fullName?: string,
+    studentCode?: string,
+    universityEmail?: string,
+  ): void {
+    if (this._props.role !== UserRole.STUDENT) {
+      throw new InvalidRoleOperationException(
+        this._props.role,
+        'update student profile',
+      );
+    }
+
+    if (fullName) {
+      this._props.fullName = fullName;
+    }
+
+    if (studentCode || universityEmail) {
+      if (!this._props.studentProfile) {
+        this._props.studentProfile = StudentProfile.create(
+          studentCode,
+          universityEmail,
+        );
       } else {
-        throw new InvalidRoleOperationException(
-          this._props.role,
-          'update student code',
+        this._props.studentProfile = this._props.studentProfile.updateProfile(
+          studentCode,
+          universityEmail,
         );
       }
-    } else {
-      this._props.studentProfile =
-        this._props.studentProfile.updateCode(newCode);
     }
+
     this._props.updatedAt = new Date();
-    this.apply(new StudentCodeUpdatedEvent(this.id, newCode));
+    // Emit event if needed, e.g., StudentProfileUpdatedEvent
   }
 
   // Business logic cho Lecturer

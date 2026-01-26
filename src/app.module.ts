@@ -39,11 +39,11 @@ import { JwtAccessGuard } from '@/modules/auth/infrastructure';
     AppService,
     {
       provide: 'APP_GUARD',
-      useClass: RolesGuard,
+      useClass: JwtAccessGuard,
     },
     {
       provide: 'APP_GUARD',
-      useClass: JwtAccessGuard,
+      useClass: RolesGuard,
     },
   ],
 })

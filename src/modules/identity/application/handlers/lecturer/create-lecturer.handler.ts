@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictException, Inject } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
-import { CreateLecturerCommand } from '../commands/create-lecturer.command';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { UserAggregate } from '../../domain/aggregates/user.aggregate';
+import { CreateLecturerCommand } from '@/modules/identity/application/commands/lecturer/create-lecturer.command';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
 
 @CommandHandler(CreateLecturerCommand)
 export class CreateLecturerHandler implements ICommandHandler<CreateLecturerCommand> {

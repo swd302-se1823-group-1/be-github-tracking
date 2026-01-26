@@ -12,6 +12,16 @@ export class StudentProfile {
     return new StudentProfile(studentCode, universityEmail);
   }
 
+  updateProfile(
+    studentCode?: string,
+    universityEmail?: string,
+  ): StudentProfile {
+    return new StudentProfile(
+      studentCode || this.studentCode,
+      universityEmail || this.universityEmail,
+    );
+  }
+
   updateCode(newCode: string): StudentProfile {
     return new StudentProfile(newCode, this.universityEmail);
   }

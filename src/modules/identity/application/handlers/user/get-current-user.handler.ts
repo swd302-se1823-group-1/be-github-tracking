@@ -1,15 +1,14 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
-import { GetCurrentUserQuery } from '../queries/get-current-user.query';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { UserId } from '../../domain/value-objects/user-id.vo';
-import { UserRole } from '../../domain/enums/user-role.enum';
-
+import { GetCurrentUserQuery } from '@/modules/identity/application/queries/user/get-current-user.query';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import {
   CurrentUserResult,
-  StudentProfileResult,
   LecturerProfileResult,
-} from '../dto/current-user.result';
+  StudentProfileResult,
+} from '@/modules/identity/application/dto/current-user.result';
 
 @QueryHandler(GetCurrentUserQuery)
 export class GetCurrentUserHandler implements IQueryHandler<

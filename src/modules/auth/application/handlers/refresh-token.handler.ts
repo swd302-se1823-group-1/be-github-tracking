@@ -4,7 +4,7 @@ import { Transactional } from '@nestjs-cls/transactional';
 import { RefreshTokenCommand } from '../commands/refresh-token.command';
 import { TokenService } from '../services/token.service';
 import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';
-import { FindUserByIdQuery } from '@/modules/identity/application/queries/find-user-by-id.query';
+import { FindUserByIdQuery } from '@/modules/identity/application/queries/user/find-user-by-id.query';
 import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
 import { RefreshToken } from '../../domain/aggregates/refresh-token.aggregate';
 import { generateId } from '@/shared/utils/uuid';
