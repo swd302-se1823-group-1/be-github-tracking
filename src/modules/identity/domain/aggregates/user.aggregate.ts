@@ -258,4 +258,13 @@ export class UserAggregate extends AggregateRoot {
     }
     this._props.updatedAt = new Date();
   }
+
+  public updateAvatar(avatarUrl: string): void {
+    this._props.avatarUrl = avatarUrl;
+    this._props.updatedAt = new Date();
+  }
+
+  public setUpdatedBy(userId: string): void {
+    this._props.updatedBy = userId;
+  }
 }
