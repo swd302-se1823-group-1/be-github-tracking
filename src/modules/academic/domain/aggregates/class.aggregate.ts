@@ -1,0 +1,76 @@
+import { AggregateRoot } from '@nestjs/cqrs';
+
+export class ClassAggregate extends AggregateRoot {
+  private constructor(
+    public readonly id: string,
+    public readonly semesterId: bigint,
+    public readonly enrollPassword: string,
+    public readonly lecturerId: string,
+    public readonly courseId: string,
+    public readonly classCode: string,
+    public readonly className: string,
+    public readonly description: string | null,
+    public readonly createdBy: string | null,
+    public readonly updatedBy: string | null,
+    public readonly createdAt: Date,
+    public readonly updatedAt: Date,
+  ) {
+    super();
+  }
+
+  static create(
+    semesterId: bigint,
+    enrollPassword: string,
+    lecturerId: string,
+    courseId: string,
+    classCode: string,
+    className: string,
+    description?: string,
+    createdBy?: string,
+  ): ClassAggregate {
+    return new ClassAggregate(
+      '', // ID from DB
+      semesterId,
+      enrollPassword,
+      lecturerId,
+      courseId,
+      classCode,
+      className,
+      description || null,
+      createdBy || null,
+      createdBy || null,
+      new Date(),
+      new Date(),
+    );
+  }
+
+  static reconstitute(
+    id: string,
+    semesterId: bigint,
+    enrollPassword: string,
+    lecturerId: string,
+    courseId: string,
+    classCode: string,
+    className: string,
+    description: string | null,
+    createdBy: string | null,
+    updatedBy: string | null,
+    createdAt: Date,
+    updatedAt: Date,
+  ): ClassAggregate {
+    return new ClassAggregate(
+      id,
+      semesterId,
+      enrollPassword,
+      lecturerId,
+      courseId,
+      classCode,
+      className,
+      description,
+      createdBy,
+      updatedBy,
+      createdAt,
+      updatedAt,
+    );
+  }
+}
