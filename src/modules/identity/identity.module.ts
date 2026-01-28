@@ -14,6 +14,7 @@ import { GetLecturersHandler } from './application/handlers/lecturer/get-lecture
 import { GetLecturerByIdHandler } from './application/handlers/lecturer/get-lecturer-by-id.handler';
 import { GetLecturerByEmailHandler } from './application/handlers/lecturer/get-lecturer-by-email.handler';
 import { UpdateStudentHandler } from './application/handlers/student/update-student.handler';
+import { UpdateLecturerHandler } from './application/handlers/lecturer/update-lecturer.handler';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { IUserRepository } from './domain/repositories/user.repository';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
@@ -58,6 +59,7 @@ const repositories = [
     GetLecturerByIdHandler,
     GetLecturerByEmailHandler,
     UpdateStudentHandler,
+    UpdateLecturerHandler,
   ],
   controllers: [
     LecturerController,

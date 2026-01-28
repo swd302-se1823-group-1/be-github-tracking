@@ -63,9 +63,6 @@ export class AuthController {
       );
     }
 
-    const isProduction =
-      this.configService.get<string>('NODE_ENV') === 'production';
-
     // 2. Thực thi Command
     const result: { accessToken: string; refreshToken: string } =
       await this.commandBus.execute(
@@ -82,8 +79,8 @@ export class AuthController {
     // 3. Cấu hình Cookie
     const commonCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax', // Tăng bảo mật cho production
+      secure: true,
+      sameSite: 'none',
     };
 
     res.cookie('accessToken', result.accessToken, {
@@ -128,9 +125,6 @@ export class AuthController {
   ): Promise<TokenResponseDto> {
     const user = req.user as { id: string; jti: string; deviceId: string };
 
-    const isProduction =
-      this.configService.get<string>('NODE_ENV') === 'production';
-
     // Execute refresh command
     const result = await this.commandBus.execute<
       RefreshTokenCommand,
@@ -140,8 +134,8 @@ export class AuthController {
     // Configure cookies
     const commonCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: true,
+      sameSite: 'none',
     };
 
     res.cookie('accessToken', result.accessToken, {
@@ -169,9 +163,6 @@ export class AuthController {
     @Body() dto: GoogleExchangeCodeDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
-    const isProduction =
-      this.configService.get<string>('NODE_ENV') === 'production';
-
     // 1. Exchange code for Google User Profile
     const googleUser = await this.googleService.exchangeCode(dto.code);
 
@@ -184,8 +175,8 @@ export class AuthController {
     // 3. Configure Cookies
     const commonCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: true,
+      sameSite: 'none',
     };
 
     res.cookie('accessToken', result.accessToken, {
@@ -234,8 +225,13 @@ export class AuthController {
   ) {
     await this.commandBus.execute(new LogoutCommand(userId, jti));
 
-    // Clear cookies
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    // Clear cookies with matching options
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    };
+    res.clearCookie('accessToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
   }
 }

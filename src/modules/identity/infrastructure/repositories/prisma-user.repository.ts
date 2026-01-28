@@ -21,7 +21,10 @@ export class PrismaUserRepository implements IUserRepository {
 
   async findByEmail(email: string): Promise<UserAggregate | null> {
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: {
+        email,
+        deleted_at: null,
+      },
       include: { student: true, lecturer: true },
     });
     return user ? UserMapper.toDomain(user) : null;
@@ -29,7 +32,10 @@ export class PrismaUserRepository implements IUserRepository {
 
   async findByProviderId(providerId: string): Promise<UserAggregate | null> {
     const user = await this.prisma.user.findFirst({
-      where: { provider_id: providerId },
+      where: {
+        provider_id: providerId,
+        deleted_at: null,
+      },
       include: { student: true, lecturer: true },
     });
     return user ? UserMapper.toDomain(user) : null;
