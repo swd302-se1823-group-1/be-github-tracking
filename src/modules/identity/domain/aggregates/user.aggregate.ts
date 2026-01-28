@@ -264,6 +264,11 @@ export class UserAggregate extends AggregateRoot {
     this._props.updatedAt = new Date();
   }
 
+  public updateFullName(fullName: string): void {
+    this._props.fullName = fullName;
+    this._props.updatedAt = new Date();
+  }
+
   public setUpdatedBy(userId: string): void {
     this._props.updatedBy = userId;
   }
