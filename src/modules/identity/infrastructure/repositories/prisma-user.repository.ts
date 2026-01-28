@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
-import { IUserRepository } from '../../domain/repositories/user.repository';
-import { UserAggregate } from '../../domain/aggregates/user.aggregate';
-import { UserId } from '../../domain/value-objects/user-id.vo';
-import { UserRole } from '../../domain/enums/user-role.enum';
-import { UserMapper } from '../mappers/user.mapper';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
+import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { UserMapper } from '@/modules/identity/infrastructure/mappers/user.mapper';
 import { Prisma } from '@generated/prisma/client';
 
 @Injectable()

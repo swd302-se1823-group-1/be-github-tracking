@@ -1,5 +1,5 @@
 import { v7 as uuidv7, validate as uuidValidate } from 'uuid';
-import { InvalidUserIdException } from '../exceptions/user.exceptions';
+import { InvalidUserIdException } from '@/modules/identity/domain/exceptions/user.exceptions';
 
 export class UserId {
   constructor(private readonly value: string) {
