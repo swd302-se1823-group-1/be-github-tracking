@@ -20,6 +20,10 @@ export async function bootstrapHttp() {
   // Config Lib
   // -------------------------------------------------------------------------------------------
   app.setGlobalPrefix('api/v1');
+  app.enableCors({
+    origin: [process.env.FRONTEND_URL, 'https://api.hoaiphuong.io.vn'],
+    credentials: true,
+  });
   app.use(cookieParser());
 
   app.enableShutdownHooks();

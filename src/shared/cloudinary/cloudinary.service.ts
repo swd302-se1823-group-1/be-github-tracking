@@ -44,21 +44,6 @@ export class CloudinaryService {
     this.logger.log('Cloudinary configured successfully');
   }
 
-  /**
-   * Type guard to ensure file has a valid buffer
-   */
-  private hasValidBuffer(
-    file: UploadedFile,
-  ): file is UploadedFile & { buffer: Buffer } {
-    return (
-      file !== null &&
-      file !== undefined &&
-      typeof file === 'object' &&
-      'buffer' in file &&
-      Buffer.isBuffer(file.buffer)
-    );
-  }
-
   async uploadFile(
     file: UploadedFile,
     folder?: string,
