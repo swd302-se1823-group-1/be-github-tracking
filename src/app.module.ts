@@ -12,6 +12,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { IdentityModule } from '@/modules/identity/identity.module';
 import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
 import { JwtAccessGuard } from '@/modules/auth/infrastructure';
+import { AcademicModule } from './modules/academic/academic.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { JwtAccessGuard } from '@/modules/auth/infrastructure';
     SharedModule,
     AuthModule,
     IdentityModule,
+    AcademicModule,
     ClsModule.forRoot({
       global: true,
       middleware: { mount: true },
