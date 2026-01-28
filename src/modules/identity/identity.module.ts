@@ -23,6 +23,8 @@ import { FindUserByIdHandler } from './application/handlers/user/find-user-by-id
 import { CreateUserHandler } from './application/handlers/user/create-user.handler';
 import { UpdateUserGoogleInfoHandler } from './application/handlers/user/update-user-google-info.handler';
 import { GetCurrentUserHandler } from './application/handlers/user/get-current-user.handler';
+import { UpdateUserAvatarHandler } from './application/handlers/user/update-user-avatar.handler';
+import { CloudinaryModule } from '@/shared/cloudinary/cloudinary.module';
 
 const repositories = [
   {
@@ -35,6 +37,7 @@ const repositories = [
   imports: [
     CqrsModule,
     InfrastructureModule,
+    CloudinaryModule,
     forwardRef(() => AuthModule), // Fix circular dependency
   ],
   providers: [
@@ -46,6 +49,7 @@ const repositories = [
     GetCurrentUserHandler,
     CreateUserHandler,
     UpdateUserGoogleInfoHandler,
+    UpdateUserAvatarHandler,
     CreateAdminHandler,
     GetUsersHandler,
     GetStudentsHandler,
