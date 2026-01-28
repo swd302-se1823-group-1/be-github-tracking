@@ -78,6 +78,8 @@ export class PrismaUserRepository implements IUserRepository {
         update: {
           ...persistence.student,
           created_by_id: undefined,
+          deleted_at: user.deletedAt,
+          deleted_by_id: user.deletedById,
         },
       });
     }
@@ -89,6 +91,8 @@ export class PrismaUserRepository implements IUserRepository {
         update: {
           ...persistence.lecturer,
           created_by_id: undefined,
+          deleted_at: user.deletedAt,
+          deleted_by_id: user.deletedById,
         },
       });
     }

@@ -6,15 +6,15 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { GetStudentsQuery } from '../../application/queries/student/get-students.query';
-import { GetStudentByIdQuery } from '../../application/queries/student/get-student-by-id.query';
-import { StudentResponseDto } from '../dtos/student/student-response.dto';
-import { UpdateStudentDto } from '../dtos/student/update-student.dto';
-import { UpdateStudentCommand } from '../../application/commands/student/update-student.command';
+import { GetStudentsQuery } from '@/modules/identity/application/queries/student/get-students.query';
+import { GetStudentByIdQuery } from '@/modules/identity/application/queries/student/get-student-by-id.query';
+import { StudentResponseDto } from '@/modules/identity/presentation/dtos/student/student-response.dto';
+import { UpdateStudentDto } from '@/modules/identity/presentation/dtos/student/update-student.dto';
+import { UpdateStudentCommand } from '@/modules/identity/application/commands/student/update-student.command';
 import { Roles, ActiveUser, ResponseMessage } from '@/shared';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
-import { UserRole } from '../../domain/enums/user-role.enum';
-import { GetUsersDto } from '../dtos/user/get-users.dto';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { GetUsersDto } from '@/modules/identity/presentation/dtos/user/get-users.dto';
 
 @ApiTags('Identity/students')
 @Controller('students')

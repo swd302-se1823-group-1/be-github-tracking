@@ -22,6 +22,8 @@ export type UserProps = {
   lecturerProfile?: LecturerProfile;
   createdBy?: string | null;
   updatedBy?: string | null;
+  deletedAt?: Date | null;
+  deletedById?: string | null;
 };
 
 export class UserAggregate extends AggregateRoot {
@@ -71,6 +73,12 @@ export class UserAggregate extends AggregateRoot {
   get updatedBy(): string | null | undefined {
     return this._props.updatedBy;
   }
+  get deletedAt(): Date | null | undefined {
+    return this._props.deletedAt;
+  }
+  get deletedById(): string | null | undefined {
+    return this._props.deletedById;
+  }
 
   // Reconstitute from persistence
   public static reconstitute(props: UserProps): UserAggregate {
@@ -104,6 +112,8 @@ export class UserAggregate extends AggregateRoot {
       lecturerProfile: undefined,
       createdBy: createdBy || null,
       updatedBy: createdBy || null,
+      deletedAt: null,
+      deletedById: null,
     });
 
     user.apply(new UserCreatedEvent(id, email, UserRole.STUDENT));
@@ -144,6 +154,8 @@ export class UserAggregate extends AggregateRoot {
       studentProfile: undefined,
       createdBy: createdBy || null,
       updatedBy: createdBy || null,
+      deletedAt: null,
+      deletedById: null,
     });
 
     user.apply(new UserCreatedEvent(id, email, UserRole.LECTURER));
@@ -175,6 +187,8 @@ export class UserAggregate extends AggregateRoot {
       lecturerProfile: undefined,
       createdBy: createdBy || null,
       updatedBy: createdBy || null,
+      deletedAt: null,
+      deletedById: null,
     });
 
     user.apply(new UserCreatedEvent(id, email, UserRole.ADMIN));
@@ -271,5 +285,25 @@ export class UserAggregate extends AggregateRoot {
 
   public setUpdatedBy(userId: string): void {
     this._props.updatedBy = userId;
+  }
+
+  public softDelete(deletedById: string): void {
+    this._props.deletedAt = new Date();
+    this._props.deletedById = deletedById;
+    this._props.isActive = false; // Optionally deactivate on delete
+    this._props.updatedAt = new Date();
+    this._props.updatedBy = deletedById;
+  }
+
+  public ban(updatedById: string): void {
+    this._props.isActive = false;
+    this._props.updatedBy = updatedById;
+    this._props.updatedAt = new Date();
+  }
+
+  public unban(updatedById: string): void {
+    this._props.isActive = true;
+    this._props.updatedBy = updatedById;
+    this._props.updatedAt = new Date();
   }
 }

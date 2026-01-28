@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { InfrastructureModule } from '@/infrastructure';
 import { CreateLecturerHandler } from './application/handlers/lecturer/create-lecturer.handler';
 import { CreateAdminHandler } from './application/handlers/admin/create-admin.handler';
+import { UpdateAdminHandler } from './application/handlers/admin/update-admin.handler';
 import { GetUsersHandler } from './application/handlers/user/get-users.handler';
 import { LecturerController } from './presentation/http/lecturer.controller';
 import { AdminController } from './presentation/http/admin.controller';
@@ -25,6 +26,9 @@ import { CreateUserHandler } from './application/handlers/user/create-user.handl
 import { UpdateUserGoogleInfoHandler } from './application/handlers/user/update-user-google-info.handler';
 import { GetCurrentUserHandler } from './application/handlers/user/get-current-user.handler';
 import { UpdateUserAvatarHandler } from './application/handlers/user/update-user-avatar.handler';
+import { DeleteUserHandler } from './application/handlers/user/delete-user.handler';
+import { BanUserHandler } from './application/handlers/user/ban-user.handler';
+import { UnbanUserHandler } from './application/handlers/user/unban-user.handler';
 import { CloudinaryModule } from '@/shared/cloudinary/cloudinary.module';
 
 const repositories = [
@@ -52,6 +56,7 @@ const repositories = [
     UpdateUserGoogleInfoHandler,
     UpdateUserAvatarHandler,
     CreateAdminHandler,
+    UpdateAdminHandler,
     GetUsersHandler,
     GetStudentsHandler,
     GetStudentByIdHandler,
@@ -60,6 +65,9 @@ const repositories = [
     GetLecturerByEmailHandler,
     UpdateStudentHandler,
     UpdateLecturerHandler,
+    DeleteUserHandler,
+    BanUserHandler,
+    UnbanUserHandler,
   ],
   controllers: [
     LecturerController,

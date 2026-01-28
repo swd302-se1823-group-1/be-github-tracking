@@ -10,21 +10,21 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateLecturerDto } from '../dtos/lecturer/create-lecturer.dto';
-import { LecturerResponseDto } from '../dtos/lecturer/lecturer-response.dto';
-import { CreateLecturerCommand } from '../../application/commands/lecturer/create-lecturer.command';
-import { UserAggregate } from '../../domain/aggregates/user.aggregate';
+import { CreateLecturerDto } from '@/modules/identity/presentation/dtos/lecturer/create-lecturer.dto';
+import { LecturerResponseDto } from '@/modules/identity/presentation/dtos/lecturer/lecturer-response.dto';
+import { CreateLecturerCommand } from '@/modules/identity/application/commands/lecturer/create-lecturer.command';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
 import { ResponseMessage, ActiveUser, Roles } from '@/shared';
-import { UserRole } from '../../domain/enums/user-role.enum';
-import { GetLecturersQuery } from '../../application/queries/lecturer/get-lecturers.query';
-import { GetLecturerByIdQuery } from '../../application/queries/lecturer/get-lecturer-by-id.query';
-import { GetLecturerByEmailQuery } from '../../application/queries/lecturer/get-lecturer-by-email.query';
-import { GetUsersDto } from '../dtos/user/get-users.dto';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { GetLecturersQuery } from '@/modules/identity/application/queries/lecturer/get-lecturers.query';
+import { GetLecturerByIdQuery } from '@/modules/identity/application/queries/lecturer/get-lecturer-by-id.query';
+import { GetLecturerByEmailQuery } from '@/modules/identity/application/queries/lecturer/get-lecturer-by-email.query';
+import { GetUsersDto } from '@/modules/identity/presentation/dtos/user/get-users.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
-import { UpdateLecturerDto } from '../dtos/lecturer/update-lecturer.dto';
+import { UpdateLecturerDto } from '@/modules/identity/presentation/dtos/lecturer/update-lecturer.dto';
 import { JwtAccessGuard } from '@/modules/auth/infrastructure/guards/jwt-access.guard';
-import { UpdateLecturerCommand } from '../../application/commands/lecturer/update-lecturer.command';
+import { UpdateLecturerCommand } from '@/modules/identity/application/commands/lecturer/update-lecturer.command';
 
 @ApiTags('Identity/lecturers')
 @Controller('lecturers')

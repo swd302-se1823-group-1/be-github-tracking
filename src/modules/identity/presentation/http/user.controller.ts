@@ -3,6 +3,9 @@ import {
   Get,
   Query,
   Put,
+  Patch,
+  Delete,
+  Param,
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
@@ -18,16 +21,19 @@ import {
   ApiConsumes,
   ApiBody,
 } from '@nestjs/swagger';
-import { GetUsersDto } from '../dtos/user/get-users.dto';
-import { UserResponseDto } from '../dtos/user/user-response.dto';
-import { GetUsersQuery } from '../../application/queries/user/get-users.query';
+import { GetUsersDto } from '@/modules/identity/presentation/dtos/user/get-users.dto';
+import { UserResponseDto } from '@/modules/identity/presentation/dtos/user/user-response.dto';
+import { GetUsersQuery } from '@/modules/identity/application/queries/user/get-users.query';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
 import { ResponseMessage, Roles, ActiveUser } from '@/shared';
-import { UserRole } from '../../domain/enums/user-role.enum';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { CloudinaryService } from '@/shared/cloudinary/cloudinary.service';
 import type { UploadedFile as UploadedFileType } from '@/shared/types/uploaded-file.interface';
 import { UploadAvatarResponseDto } from '@/shared/cloudinary/dtos/upload-avatar-response.dto';
-import { UpdateUserAvatarCommand } from '../../application/commands/user/update-user-avatar.command';
+import { UpdateUserAvatarCommand } from '@/modules/identity/application/commands/user/update-user-avatar.command';
+import { DeleteUserCommand } from '@/modules/identity/application/commands/user/delete-user.command';
+import { BanUserCommand } from '@/modules/identity/application/commands/user/ban-user.command';
+import { UnbanUserCommand } from '@/modules/identity/application/commands/user/unban-user.command';
 import { CustomImageValidator } from './validators/custom-image.validator';
 
 @ApiTags('Identity')
@@ -115,5 +121,41 @@ export class UserController {
     );
 
     return new UploadAvatarResponseDto(uploadResult);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Soft delete a user' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ResponseMessage('User deleted successfully')
+  async deleteUser(
+    @Param('id') id: string,
+    @ActiveUser('id') deletedById: string,
+  ): Promise<void> {
+    await this.commandBus.execute(new DeleteUserCommand(id, deletedById));
+  }
+
+  @Patch(':id/ban')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Ban a user' })
+  @ApiResponse({ status: 200, description: 'User banned successfully' })
+  @ResponseMessage('User banned successfully')
+  async banUser(
+    @Param('id') id: string,
+    @ActiveUser('id') bannedById: string,
+  ): Promise<void> {
+    await this.commandBus.execute(new BanUserCommand(id, bannedById));
+  }
+
+  @Patch(':id/unban')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Unban a user' })
+  @ApiResponse({ status: 200, description: 'User unbanned successfully' })
+  @ResponseMessage('User unbanned successfully')
+  async unbanUser(
+    @Param('id') id: string,
+    @ActiveUser('id') unbannedById: string,
+  ): Promise<void> {
+    await this.commandBus.execute(new UnbanUserCommand(id, unbannedById));
   }
 }
