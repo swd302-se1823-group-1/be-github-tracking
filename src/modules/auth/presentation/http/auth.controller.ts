@@ -14,7 +14,6 @@ import { ConfigService } from '@nestjs/config';
 import {
   GoogleAuthGuard,
   JwtRefreshGuard,
-  JwtAccessGuard,
 } from '@/modules/auth/infrastructure';
 import { GoogleLoginCommand } from '@/modules/auth/application/commands/google-login.command';
 import { GoogleLoginResult } from '@/modules/auth/application/dtos/google-login.result';
@@ -194,7 +193,6 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAccessGuard)
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
     status: 200,
@@ -214,7 +212,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(JwtAccessGuard)
+  @UseGuards(JwtRefreshGuard)
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
   @ResponseMessage('Logout successful')
@@ -223,6 +221,7 @@ export class AuthController {
     @ActiveUser('jti') jti: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log(userId, jti);
     await this.commandBus.execute(new LogoutCommand(userId, jti));
 
     // Clear cookies with matching options
