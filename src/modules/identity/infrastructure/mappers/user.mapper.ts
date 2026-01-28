@@ -6,11 +6,11 @@ import {
 import {
   UserAggregate,
   UserProps,
-} from '../../domain/aggregates/user.aggregate';
-import { UserId } from '../../domain/value-objects/user-id.vo';
-import { UserRole } from '../../domain/enums/user-role.enum';
-import { StudentProfile } from '../../domain/value-objects/student-profile.vo';
-import { LecturerProfile } from '../../domain/value-objects/lecturer-profile.vo';
+} from '@/modules/identity/domain/aggregates/user.aggregate';
+import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { StudentProfile } from '@/modules/identity/domain/value-objects/student-profile.vo';
+import { LecturerProfile } from '@/modules/identity/domain/value-objects/lecturer-profile.vo';
 
 type PrismaUserWithProfiles = PrismaUser & {
   student?: PrismaStudent | null;

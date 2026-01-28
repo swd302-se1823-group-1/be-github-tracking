@@ -1,4 +1,4 @@
-import { RequiredFieldException } from '../exceptions/user.exceptions';
+import { RequiredFieldException } from '@/modules/identity/domain/exceptions/user.exceptions';
 
 export class LecturerProfile {
   private constructor(
