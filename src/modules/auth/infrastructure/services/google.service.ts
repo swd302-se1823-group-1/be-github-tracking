@@ -35,7 +35,7 @@ export class GoogleService {
         redirect_uri: redirectUri ?? undefined,
       });
       const effectiveRedirectUri = redirectUri ?? 'postmessage';
-      this.logger.log('Exchange code with redirect_uri:', effectiveRedirectUri);
+      console.log('Exchange code with redirect_uri:', effectiveRedirectUri);
 
       if (!tokens.id_token) {
         throw new BadRequestException('ID Token not found in Google response');
@@ -71,7 +71,7 @@ export class GoogleService {
         accessToken: tokens.access_token || '', // Access token might be needed for other API calls
       };
     } catch (error: any) {
-      this.logger.error('Google authentication failed:', error);
+      console.log('Google authentication failed:', error);
       throw new BadRequestException(`Google authentication failed: ${error}`);
     }
   }
