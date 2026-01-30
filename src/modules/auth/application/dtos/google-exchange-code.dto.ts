@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class GoogleExchangeCodeDto {
   @ApiProperty({ example: '4/0AeaYSH...' })
@@ -11,9 +11,4 @@ export class GoogleExchangeCodeDto {
   @IsString()
   @IsNotEmpty()
   redirectUri?: string;
-
-  @ApiProperty({ example: true, required: false })
-  @IsOptional()
-  @IsBoolean()
-  isMobile?: boolean;
 }

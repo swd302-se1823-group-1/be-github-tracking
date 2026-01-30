@@ -7,7 +7,6 @@ import { OAuth2Client } from 'google-auth-library';
 @Injectable()
 export class GoogleService {
   private client: OAuth2Client;
-  private mobileClient: OAuth2Client;
 
   constructor(private readonly configService: ConfigService) {
     const googleConfig =
@@ -19,27 +18,18 @@ export class GoogleService {
     this.client = new OAuth2Client(
       googleConfig.clientId,
       googleConfig.clientSecret,
-      'postmessage', // Important for flow exchange code from client
-    );
-
-    this.mobileClient = new OAuth2Client(
-      googleConfig.mobileClientId,
-      '', // Mobile clients usually don't have secrets
-      'postmessage', // Redirect Url
     );
   }
 
   async exchangeCode(
     code: string,
-    isMobile = false,
     redirectUri?: string,
   ): Promise<GoogleProfileDto> {
     try {
       // 1. Exchange code for tokens
-      const client = isMobile ? this.mobileClient : this.client;
-      const { tokens } = await client.getToken({
+      const { tokens } = await this.client.getToken({
         code,
-        redirect_uri: redirectUri,
+        redirect_uri: redirectUri || undefined,
       });
 
       if (!tokens.id_token) {
@@ -47,7 +37,7 @@ export class GoogleService {
       }
 
       // 2. Verify ID Token to get profile
-      const ticket = await client.verifyIdToken({
+      const ticket = await this.client.verifyIdToken({
         idToken: tokens.id_token,
         audience: [
           this.configService.get<GoogleConfig>(GOOGLE_CONFIG_KEY)!.clientId,
