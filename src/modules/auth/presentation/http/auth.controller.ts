@@ -163,7 +163,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
     // 1. Exchange code for Google User Profile
-    const googleUser = await this.googleService.exchangeCode(dto.code);
+    const googleUser = await this.googleService.exchangeCode(
+      dto.code,
+      dto.isMobile,
+    );
 
     // 2. Reuse GoogleLoginHandler via CommandBus
     const result = await this.commandBus.execute<

@@ -1,4 +1,4 @@
-import { UserId } from '../value-objects/user-id.vo';
+import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
 
 export class LecturerDegreeUpdatedEvent {
   constructor(
