@@ -6,9 +6,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateCourseDto } from '../dtos/course/create-course.dto';
-import { CourseResponseDto } from '../dtos/course/course-response.dto';
-import { CreateCourseCommand } from '../../application/commands/course/create-course.command';
+import { CreateCourseDto } from '@/modules/academic/presentation/dtos/course/create-course.dto';
+import { CourseResponseDto } from '@/modules/academic/presentation/dtos/course/course-response.dto';
+import { CreateCourseCommand } from '@/modules/academic/application/commands/course/create-course.command';
 import { ActiveUser, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { CourseAggregate } from '@/modules/academic/domain/aggregates/course.aggregate';

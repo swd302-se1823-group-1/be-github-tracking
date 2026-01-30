@@ -1,9 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateClassDto } from '../dtos/class/create-class.dto';
-import { ClassResponseDto } from '../dtos/class/class-response.dto';
-import { CreateClassCommand } from '../../application/commands/class/create-class.command';
+import { CreateClassDto } from '@/modules/academic/presentation/dtos/class/create-class.dto';
+import { ClassResponseDto } from '@/modules/academic/presentation/dtos/class/class-response.dto';
+import { CreateClassCommand } from '@/modules/academic/application/commands/class/create-class.command';
 import { ActiveUser, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { ClassAggregate } from '@/modules/academic/domain/aggregates/class.aggregate';

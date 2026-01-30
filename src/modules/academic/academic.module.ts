@@ -1,25 +1,30 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { SemesterController } from './presentation/http/semester.controller';
-import { CourseController } from './presentation/http/course.controller';
-import { ClassController } from './presentation/http/class.controller';
-import { CreateSemesterHandler } from './application/handlers/semester/create-semester.handler';
-import { CreateCourseHandler } from './application/handlers/course/create-course.handler';
-import { CreateClassHandler } from './application/handlers/class/create-class.handler';
-import { SemesterRepository } from './infrastructure/repositories/semester.repository';
-import { CourseRepository } from './infrastructure/repositories/course.repository';
-import { ClassRepository } from './infrastructure/repositories/class.repository';
+import { SemesterController } from '@/modules/academic/presentation/http/semester.controller';
+import { CourseController } from '@/modules/academic/presentation/http/course.controller';
+import { ClassController } from '@/modules/academic/presentation/http/class.controller';
+import { GetSemestersHandler } from '@/modules/academic/application/handlers/semester/get-semesters.handler';
+import { CreateSemesterHandler } from '@/modules/academic/application/handlers/semester/create-semester.handler';
+import { CreateCourseHandler } from '@/modules/academic/application/handlers/course/create-course.handler';
+import { CreateClassHandler } from '@/modules/academic/application/handlers/class/create-class.handler';
+import { SemesterRepository } from '@/modules/academic/infrastructure/repositories/semester.repository';
+import { CourseRepository } from '@/modules/academic/infrastructure/repositories/course.repository';
+import { ClassRepository } from '@/modules/academic/infrastructure/repositories/class.repository';
 
-import { ISemesterRepository } from './domain/repositories/semester.repository';
-import { ICourseRepository } from './domain/repositories/course.repository';
-import { IClassRepository } from './domain/repositories/class.repository';
+import { ISemesterRepository } from '@/modules/academic/domain/repositories/semester.repository';
+import { ICourseRepository } from '@/modules/academic/domain/repositories/course.repository';
+import { IClassRepository } from '@/modules/academic/domain/repositories/class.repository';
 import { InfrastructureModule } from '@/infrastructure';
+
+import { UpdateSemesterHandler } from '@/modules/academic/application/handlers/semester/update-semester.handler';
 
 @Module({
   imports: [CqrsModule, InfrastructureModule],
   controllers: [SemesterController, CourseController, ClassController],
   providers: [
+    GetSemestersHandler,
     CreateSemesterHandler,
+    UpdateSemesterHandler,
     CreateCourseHandler,
     CreateClassHandler,
     {

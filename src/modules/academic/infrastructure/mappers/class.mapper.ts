@@ -21,6 +21,7 @@ export class ClassMapper {
 
   static toPersistence(aggregate: ClassAggregate) {
     return {
+      id: aggregate.id,
       semester_id: aggregate.semesterId,
       enroll_password: aggregate.enrollPassword,
       lecturer_id: aggregate.lecturerId,

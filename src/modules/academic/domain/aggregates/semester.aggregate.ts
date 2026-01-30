@@ -1,5 +1,9 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
 export class SemesterAggregate extends AggregateRoot {
   private constructor(
     public readonly id: bigint,
@@ -14,6 +18,24 @@ export class SemesterAggregate extends AggregateRoot {
     public readonly updatedAt: Date,
   ) {
     super();
+  }
+
+  update(
+    code?: string,
+    name?: string,
+    startDate?: Date,
+    endDate?: Date,
+    isActive?: boolean,
+    updatedBy?: string,
+  ): void {
+    const that = this as Mutable<SemesterAggregate>;
+    if (code !== undefined) that.code = code;
+    if (name !== undefined) that.name = name;
+    if (startDate !== undefined) that.startDate = startDate;
+    if (endDate !== undefined) that.endDate = endDate;
+    if (isActive !== undefined) that.isActive = isActive;
+    if (updatedBy !== undefined) that.updatedBy = updatedBy;
+    that.updatedAt = new Date();
   }
 
   static create(

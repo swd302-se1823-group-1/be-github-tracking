@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsDateString,
+  IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -18,13 +18,19 @@ export class CreateSemesterDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty()
-  @IsDateString()
+  @ApiProperty({
+    example: '2024-01-01T00:00:00Z',
+    description: 'ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)',
+  })
+  @IsISO8601()
   @IsOptional()
   startDate?: string;
 
-  @ApiProperty()
-  @IsDateString()
+  @ApiProperty({
+    example: '2024-01-01T00:00:00Z',
+    description: 'ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)',
+  })
+  @IsISO8601()
   @IsOptional()
   endDate?: string;
 
