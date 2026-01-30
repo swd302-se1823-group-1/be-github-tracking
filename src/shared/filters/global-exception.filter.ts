@@ -107,6 +107,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           typeof exceptionResponse === 'object' && 'error' in exceptionResponse
             ? String(exceptionResponse.error)
             : exception.name,
+        // Preserve validation messages if they exist
+        ...((typeof exceptionResponse === 'object' &&
+          'messages' in exceptionResponse && {
+            metadata: exceptionResponse['messages'],
+          }) ||
+          {}),
         ...(this.isDevelopment && { stack: exception.stack }),
       } as ErrorResponse;
     }

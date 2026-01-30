@@ -85,7 +85,7 @@ Table refresh_tokens {
 Table students {
   id String [pk]
   student_code String [unique]
-  university_email String
+  university_email String [unique]
   deleted_at DateTime
   deleted_by_id String
   deleted_by users [note: '@hide']
@@ -334,6 +334,7 @@ Table sync_logs {
 }
 
 Enum UserRole {
+  SUPERADMIN
   ADMIN
   STUDENT
   LECTURER

@@ -21,7 +21,7 @@ export class AdminController {
   constructor(private readonly commandBus: CommandBus) {}
 
   @Post()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new Admin user' })
   @ResponseMessage('Admin created successfully')
   @ApiResponse({
@@ -78,8 +78,7 @@ export class AdminController {
   }
 
   @Patch(':id')
-  @Patch(':id')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update admin profile by ID' })
   @ResponseMessage('Update admin successfully')
