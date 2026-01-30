@@ -349,7 +349,7 @@ model Course {
 }
 
 model Enrollment {
-  id            BigInt    @id @default(autoincrement())
+  id            String    @id @default(uuid()) @db.Uuid
   class_id      String    @db.Uuid
   student_id    String    @db.Uuid
   enrolled_at   DateTime  @default(now())

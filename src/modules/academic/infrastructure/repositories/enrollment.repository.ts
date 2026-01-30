@@ -10,11 +10,9 @@ export class EnrollmentRepository implements IEnrollmentRepository {
 
   async create(enrollment: EnrollmentAggregate): Promise<EnrollmentAggregate> {
     const data = EnrollmentMapper.toPersistence(enrollment);
-    // Remove ID from creation data since it's autoincrement
-    const { ...createData } = data;
 
     const newEnrollment = await this.prisma.enrollment.create({
-      data: createData,
+      data: data as any,
     });
     return EnrollmentMapper.toDomain(newEnrollment);
   }

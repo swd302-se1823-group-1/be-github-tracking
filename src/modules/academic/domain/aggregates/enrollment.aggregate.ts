@@ -1,8 +1,9 @@
 import { AggregateRoot } from '@nestjs/cqrs';
+import { generateId } from '@/shared/utils/uuid';
 
 export class EnrollmentAggregate extends AggregateRoot {
   private constructor(
-    public readonly id: bigint,
+    public readonly id: string,
     public readonly classId: string,
     public readonly studentId: string,
     public readonly enrolledAt: Date,
@@ -20,7 +21,7 @@ export class EnrollmentAggregate extends AggregateRoot {
     createdBy?: string,
   ): EnrollmentAggregate {
     return new EnrollmentAggregate(
-      BigInt(0), // Placeholder, actual ID assigned by DB
+      generateId(),
       classId,
       studentId,
       new Date(),
@@ -32,7 +33,7 @@ export class EnrollmentAggregate extends AggregateRoot {
   }
 
   static reconstitute(
-    id: bigint,
+    id: string,
     classId: string,
     studentId: string,
     enrolledAt: Date,

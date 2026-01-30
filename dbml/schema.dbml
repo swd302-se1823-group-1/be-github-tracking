@@ -203,7 +203,7 @@ Table courses {
 }
 
 Table enrollments {
-  id BigInt [pk, increment]
+  id String [pk]
   class_id String [not null]
   student_id String [not null]
   enrolled_at DateTime [default: `now()`, not null]

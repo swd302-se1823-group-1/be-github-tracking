@@ -17,7 +17,7 @@ export class EnrollmentMapper {
 
   static toPersistence(aggregate: EnrollmentAggregate) {
     return {
-      // id is autoincrement, typically handled by DB on create if not provided or 0
+      id: aggregate.id,
       class_id: aggregate.classId,
       student_id: aggregate.studentId,
       enrolled_at: aggregate.enrolledAt,
