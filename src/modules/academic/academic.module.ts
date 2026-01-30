@@ -17,6 +17,11 @@ import { IClassRepository } from '@/modules/academic/domain/repositories/class.r
 import { InfrastructureModule } from '@/infrastructure';
 
 import { UpdateSemesterHandler } from '@/modules/academic/application/handlers/semester/update-semester.handler';
+import { GetCoursesHandler } from '@/modules/academic/application/handlers/course/get-courses.handler';
+import { GetCourseByIdHandler } from '@/modules/academic/application/handlers/course/get-course-by-id.handler';
+import { GetCourseByCodeHandler } from '@/modules/academic/application/handlers/course/get-course-by-code.handler';
+import { GetSemesterByIdHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-id.handler';
+import { GetSemesterByCodeHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-code.handler';
 
 @Module({
   imports: [CqrsModule, InfrastructureModule],
@@ -25,7 +30,13 @@ import { UpdateSemesterHandler } from '@/modules/academic/application/handlers/s
     GetSemestersHandler,
     CreateSemesterHandler,
     UpdateSemesterHandler,
+    UpdateSemesterHandler,
+    GetSemesterByIdHandler,
+    GetSemesterByCodeHandler,
     CreateCourseHandler,
+    GetCoursesHandler,
+    GetCourseByIdHandler,
+    GetCourseByCodeHandler,
     CreateClassHandler,
     {
       provide: ISemesterRepository,

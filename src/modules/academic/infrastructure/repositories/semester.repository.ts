@@ -76,4 +76,11 @@ export class SemesterRepository implements ISemesterRepository {
     });
     return SemesterMapper.toDomain(updatedSemester);
   }
+
+  async findByCode(code: string): Promise<SemesterAggregate | null> {
+    const semester = await this.prisma.semester.findUnique({
+      where: { code, deleted_at: null },
+    });
+    return semester ? SemesterMapper.toDomain(semester) : null;
+  }
 }

@@ -1,10 +1,8 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { ISemesterRepository } from '@/modules/academic/domain/repositories/semester.repository';
-import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
-import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
+import { SemesterAggregate } from '@/modules/academic/domain/aggregates/semester.aggregate';
 import { GetSemestersQuery } from '../../queries/semester/get-semesters.query';
-import { SemesterResponseDto } from '@/modules/academic/presentation/dtos/semester/semester-response.dto';
+import { ISemesterRepository } from '@/modules/academic/domain/repositories/semester.repository';
 
 @QueryHandler(GetSemestersQuery)
 export class GetSemestersHandler implements IQueryHandler<GetSemestersQuery> {
@@ -13,20 +11,11 @@ export class GetSemestersHandler implements IQueryHandler<GetSemestersQuery> {
     private readonly semesterRepository: ISemesterRepository,
   ) {}
 
-  async execute(
-    query: GetSemestersQuery,
-  ): Promise<CursorPageDto<SemesterResponseDto>> {
-    const { semesters, total, nextCursor } =
-      await this.semesterRepository.findAll(query);
-
-    const dtos = semesters.map((semester) => new SemesterResponseDto(semester));
-
-    const meta = new CursorPageMetaDto({
-      total,
-      nextCursor,
-      hasNextPage: !!nextCursor,
-    });
-
-    return new CursorPageDto(dtos, meta);
+  async execute(query: GetSemestersQuery): Promise<{
+    semesters: SemesterAggregate[];
+    total: number;
+    nextCursor: string | null;
+  }> {
+    return this.semesterRepository.findAll(query);
   }
 }

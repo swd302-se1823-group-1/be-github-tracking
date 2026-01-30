@@ -11,6 +11,7 @@ export interface ISemesterRepository {
   }>;
   findById(id: string): Promise<SemesterAggregate | null>;
   update(semester: SemesterAggregate): Promise<SemesterAggregate>;
+  findByCode(code: string): Promise<SemesterAggregate | null>;
 }
 
 export const ISemesterRepository = Symbol('ISemesterRepository');

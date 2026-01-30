@@ -25,6 +25,9 @@ import { ActiveUser, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { SemesterAggregate } from '@/modules/academic/domain/aggregates/semester.aggregate';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
+import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
+import { GetSemesterByIdQuery } from '@/modules/academic/application/queries/semester/get-semester-by-id.query';
+import { GetSemesterByCodeQuery } from '@/modules/academic/application/queries/semester/get-semester-by-code.query';
 
 @ApiTags('Academic/semesters')
 @Controller('semesters')
@@ -74,7 +77,25 @@ export class SemesterController {
   async findAll(
     @Query() dto: GetSemestersDto,
   ): Promise<CursorPageDto<SemesterResponseDto>> {
-    return this.queryBus.execute(GetSemestersQuery.fromDto(dto));
+    const result = await this.queryBus.execute<
+      GetSemestersQuery,
+      {
+        semesters: SemesterAggregate[];
+        total: number;
+        nextCursor: string | null;
+      }
+    >(GetSemestersQuery.fromDto(dto));
+
+    const meta = new CursorPageMetaDto({
+      total: result.total,
+      nextCursor: result.nextCursor,
+      hasNextPage: !!result.nextCursor,
+    });
+
+    return new CursorPageDto(
+      result.semesters.map((semester) => new SemesterResponseDto(semester)),
+      meta,
+    );
   }
 
   @Patch(':id')
@@ -105,6 +126,37 @@ export class SemesterController {
         userId,
       ),
     );
+    return new SemesterResponseDto(semester);
+  }
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a semester by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return a semester',
+    type: SemesterResponseDto,
+  })
+  @ApiBearerAuth()
+  async findOne(@Param('id') id: string): Promise<SemesterResponseDto> {
+    const semester = await this.queryBus.execute<
+      GetSemesterByIdQuery,
+      SemesterAggregate
+    >(new GetSemesterByIdQuery(id));
+    return new SemesterResponseDto(semester);
+  }
+
+  @Get('code/:code')
+  @ApiOperation({ summary: 'Get a semester by Code' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return a semester',
+    type: SemesterResponseDto,
+  })
+  @ApiBearerAuth()
+  async findByCode(@Param('code') code: string): Promise<SemesterResponseDto> {
+    const semester = await this.queryBus.execute<
+      GetSemesterByCodeQuery,
+      SemesterAggregate
+    >(new GetSemesterByCodeQuery(code));
     return new SemesterResponseDto(semester);
   }
 }
