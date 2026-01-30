@@ -147,7 +147,10 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return new TokenResponseDto({ accessToken: result.accessToken });
+    return new TokenResponseDto({
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    });
   }
 
   @Post('google/exchange')

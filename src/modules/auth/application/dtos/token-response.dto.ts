@@ -6,6 +6,10 @@ export class TokenResponseDto {
   @Expose()
   accessToken: string;
 
+  @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
+  @Expose()
+  refreshToken: string;
+
   constructor(partial: Partial<TokenResponseDto>) {
     Object.assign(this, partial);
   }
