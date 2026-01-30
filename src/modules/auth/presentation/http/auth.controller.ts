@@ -166,6 +166,7 @@ export class AuthController {
     const googleUser = await this.googleService.exchangeCode(
       dto.code,
       dto.isMobile,
+      dto.redirectUri,
     );
 
     // 2. Reuse GoogleLoginHandler via CommandBus

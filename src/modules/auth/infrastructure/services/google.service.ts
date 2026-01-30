@@ -25,18 +25,22 @@ export class GoogleService {
     this.mobileClient = new OAuth2Client(
       googleConfig.mobileClientId,
       '', // Mobile clients usually don't have secrets
-      '', // Redirect Url
+      'postmessage', // Redirect Url
     );
   }
 
   async exchangeCode(
     code: string,
     isMobile = false,
+    redirectUri?: string,
   ): Promise<GoogleProfileDto> {
     try {
       // 1. Exchange code for tokens
       const client = isMobile ? this.mobileClient : this.client;
-      const { tokens } = await client.getToken(code);
+      const { tokens } = await client.getToken({
+        code,
+        redirect_uri: redirectUri,
+      });
 
       if (!tokens.id_token) {
         throw new BadRequestException('ID Token not found in Google response');
