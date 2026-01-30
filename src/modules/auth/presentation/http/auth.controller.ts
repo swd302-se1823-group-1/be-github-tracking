@@ -165,7 +165,6 @@ export class AuthController {
     // 1. Exchange code for Google User Profile
     const googleUser = await this.googleService.exchangeCode(
       dto.code,
-      dto.isMobile,
       dto.redirectUri,
     );
 
