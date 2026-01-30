@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GOOGLE_CONFIG_KEY, GoogleConfig } from '@/config/google';
 import { GoogleProfileDto } from '@/modules/auth/application/dtos/google-profile.dto';
@@ -8,10 +8,7 @@ import { OAuth2Client } from 'google-auth-library';
 export class GoogleService {
   private client: OAuth2Client;
 
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly logger: Logger,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     const googleConfig =
       this.configService.get<GoogleConfig>(GOOGLE_CONFIG_KEY);
     if (!googleConfig) {
@@ -51,10 +48,7 @@ export class GoogleService {
         ],
       });
 
-      this.logger.log(
-        'Verify ID Success Token with redirect_uri:',
-        redirectUri,
-      );
+      console.log('Verify ID Success Token with redirect_uri:', redirectUri);
 
       const payload = ticket.getPayload();
 
