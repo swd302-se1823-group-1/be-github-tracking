@@ -71,6 +71,7 @@ export class GoogleService {
         accessToken: tokens.access_token || '', // Access token might be needed for other API calls
       };
     } catch (error: any) {
+      this.logger.error('Google authentication failed:', error);
       throw new BadRequestException(`Google authentication failed: ${error}`);
     }
   }
