@@ -536,6 +536,7 @@ model SyncLog {
 }
 
 enum UserRole {
+  SUPERADMIN
   ADMIN
   STUDENT
   LECTURER

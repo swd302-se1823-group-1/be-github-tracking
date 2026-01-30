@@ -10,31 +10,31 @@ const prisma = new PrismaClient({ adapter });
 export { prisma };
 
 async function main() {
-  const admin = await prisma.user.findFirst({
+  const superAdmin = await prisma.user.findFirst({
     where: {
-      role: UserRole.ADMIN,
+      role: UserRole.SUPERADMIN,
     },
   });
 
-  if (admin) {
-    console.log('✅ Admin user already exists:', admin.email);
-    throw new Error('Admin user already exists');
+  if (superAdmin) {
+    console.log('✅ Super admin user already exists:', superAdmin.email);
+    throw new Error('Super admin user already exists');
   }
-  const adminUser = await prisma.user.create({
+  const superAdminUser = await prisma.user.create({
     data: {
-      email: process.env.ADMIN_EMAIL || '',
-      full_name: process.env.ADMIN_FULLNAME || '',
-      role: UserRole.ADMIN,
+      email: process.env.SUPER_ADMIN_EMAIL || '',
+      full_name: process.env.SUPER_ADMIN_FULLNAME || '',
+      role: UserRole.SUPERADMIN,
     },
   });
   return {
-    adminUser,
+    superAdminUser,
   };
 }
 
 main()
-  .then(async ({ adminUser }) => {
-    console.log(`✅ Admin user created: ${adminUser.email}`);
+  .then(async ({ superAdminUser }) => {
+    console.log(`✅ Super admin user created: ${superAdminUser.email}`);
     await prisma.$disconnect();
   })
   .catch(async (e) => {

@@ -19,6 +19,14 @@ export class RolesGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest<Request>();
 
     if (user && 'role' in user) {
+      if (user.role === UserRole.SUPERADMIN) {
+        // SUPERADMIN has access to everything except if specific roles are required (e.g. STUDENT only)
+        // However, based on requirements, SUPERADMIN inherits ADMIN rights.
+        if (requiredRoles.includes(UserRole.ADMIN)) {
+          return true;
+        }
+        // If the endpoint specifically requires SUPERADMIN, it will be in requiredRoles
+      }
       return requiredRoles.includes(user.role as UserRole);
     }
     return false;
