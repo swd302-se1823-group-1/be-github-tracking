@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GOOGLE_CONFIG_KEY, GoogleConfig } from '@/config/google';
 import { GoogleProfileDto } from '@/modules/auth/application/dtos/google-profile.dto';
@@ -8,10 +8,7 @@ import { OAuth2Client } from 'google-auth-library';
 export class GoogleService {
   private client: OAuth2Client;
 
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly logger: Logger,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     const googleConfig =
       this.configService.get<GoogleConfig>(GOOGLE_CONFIG_KEY);
     if (!googleConfig) {
@@ -35,7 +32,7 @@ export class GoogleService {
         redirect_uri: redirectUri ?? undefined,
       });
       const effectiveRedirectUri = redirectUri ?? 'postmessage';
-      this.logger.log('Exchange code with redirect_uri:', effectiveRedirectUri);
+      console.log('Exchange code with redirect_uri:', effectiveRedirectUri);
 
       if (!tokens.id_token) {
         throw new BadRequestException('ID Token not found in Google response');
@@ -51,10 +48,7 @@ export class GoogleService {
         ],
       });
 
-      this.logger.log(
-        'Verify ID Success Token with redirect_uri:',
-        redirectUri,
-      );
+      console.log('Verify ID Success Token with redirect_uri:', redirectUri);
 
       const payload = ticket.getPayload();
 
@@ -71,7 +65,7 @@ export class GoogleService {
         accessToken: tokens.access_token || '', // Access token might be needed for other API calls
       };
     } catch (error: any) {
-      this.logger.error('Google authentication failed:', error);
+      console.log('Google authentication failed:', error);
       throw new BadRequestException(`Google authentication failed: ${error}`);
     }
   }
