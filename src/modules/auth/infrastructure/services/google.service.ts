@@ -7,6 +7,7 @@ import { OAuth2Client } from 'google-auth-library';
 @Injectable()
 export class GoogleService {
   private client: OAuth2Client;
+  private mobileClient: OAuth2Client;
 
   constructor(private readonly configService: ConfigService) {
     const googleConfig =
@@ -20,22 +21,35 @@ export class GoogleService {
       googleConfig.clientSecret,
       'postmessage', // Important for flow exchange code from client
     );
+
+    this.mobileClient = new OAuth2Client(
+      googleConfig.mobileClientId,
+      '', // Mobile clients usually don't have secrets
+      '', // Redirect Url
+    );
   }
 
-  async exchangeCode(code: string): Promise<GoogleProfileDto> {
+  async exchangeCode(
+    code: string,
+    isMobile = false,
+  ): Promise<GoogleProfileDto> {
     try {
       // 1. Exchange code for tokens
-      const { tokens } = await this.client.getToken(code);
+      const client = isMobile ? this.mobileClient : this.client;
+      const { tokens } = await client.getToken(code);
 
       if (!tokens.id_token) {
         throw new BadRequestException('ID Token not found in Google response');
       }
 
       // 2. Verify ID Token to get profile
-      const ticket = await this.client.verifyIdToken({
+      const ticket = await client.verifyIdToken({
         idToken: tokens.id_token,
-        audience:
+        audience: [
           this.configService.get<GoogleConfig>(GOOGLE_CONFIG_KEY)!.clientId,
+          this.configService.get<GoogleConfig>(GOOGLE_CONFIG_KEY)!
+            .mobileClientId,
+        ],
       });
 
       const payload = ticket.getPayload();

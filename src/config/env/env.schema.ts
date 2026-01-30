@@ -18,6 +18,7 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_CALLBACK_URL: z.string().optional(),
+  GOOGLE_MOBILE_CLIENT_ID: z.string(),
 
   // Cloudinary Configuration
   CLOUDINARY_CLOUD_NAME: z.string(),
