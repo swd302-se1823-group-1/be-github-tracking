@@ -255,6 +255,7 @@ export class UserAggregate extends AggregateRoot {
       degree,
       department,
       phoneNumber,
+      employeeCode,
     );
 
     this._props.updatedAt = new Date();

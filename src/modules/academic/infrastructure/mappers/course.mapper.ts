@@ -16,6 +16,7 @@ export class CourseMapper {
 
   static toPersistence(aggregate: CourseAggregate) {
     return {
+      id: aggregate.id,
       code: aggregate.code,
       name: aggregate.name,
       created_by_id: aggregate.createdBy,

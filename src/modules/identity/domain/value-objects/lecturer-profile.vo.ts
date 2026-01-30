@@ -36,9 +36,10 @@ export class LecturerProfile {
     degree?: string,
     department?: string,
     phoneNumber?: string,
+    employeeCode?: string,
   ): LecturerProfile {
     return new LecturerProfile(
-      this.employeeCode,
+      employeeCode ?? this.employeeCode,
       degree ?? this.degree,
       department ?? this.department,
       phoneNumber ?? this.phoneNumber,
