@@ -206,7 +206,6 @@ Table enrollments {
   id BigInt [pk, increment]
   class_id String [not null]
   student_id String [not null]
-  total_score Decimal
   enrolled_at DateTime [default: `now()`, not null]
   deleted_at DateTime
   deleted_by_id String

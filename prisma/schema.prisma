@@ -352,7 +352,6 @@ model Enrollment {
   id            BigInt    @id @default(autoincrement())
   class_id      String    @db.Uuid
   student_id    String    @db.Uuid
-  total_score   Decimal?  @db.Decimal(5, 2)
   enrolled_at   DateTime  @default(now())
   deleted_at    DateTime?
   deleted_by_id String?   @db.Uuid

@@ -14,6 +14,9 @@ import { ClassRepository } from '@/modules/academic/infrastructure/repositories/
 import { ISemesterRepository } from '@/modules/academic/domain/repositories/semester.repository';
 import { ICourseRepository } from '@/modules/academic/domain/repositories/course.repository';
 import { IClassRepository } from '@/modules/academic/domain/repositories/class.repository';
+import { IEnrollmentRepository } from '@/modules/academic/domain/repositories/enrollment.repository';
+import { EnrollmentRepository } from '@/modules/academic/infrastructure/repositories/enrollment.repository';
+import { EnrollStudentHandler } from '@/modules/academic/application/handlers/enrollment/enroll-student.handler';
 import { InfrastructureModule } from '@/infrastructure';
 
 import { UpdateSemesterHandler } from '@/modules/academic/application/handlers/semester/update-semester.handler';
@@ -22,6 +25,7 @@ import { GetCourseByIdHandler } from '@/modules/academic/application/handlers/co
 import { GetCourseByCodeHandler } from '@/modules/academic/application/handlers/course/get-course-by-code.handler';
 import { GetSemesterByIdHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-id.handler';
 import { GetSemesterByCodeHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-code.handler';
+import { GetClassesHandler } from '@/modules/academic/application/handlers/class/get-classes.handler';
 
 @Module({
   imports: [CqrsModule, InfrastructureModule],
@@ -38,6 +42,7 @@ import { GetSemesterByCodeHandler } from '@/modules/academic/application/handler
     GetCourseByIdHandler,
     GetCourseByCodeHandler,
     CreateClassHandler,
+    GetClassesHandler,
     {
       provide: ISemesterRepository,
       useClass: SemesterRepository,
@@ -49,6 +54,11 @@ import { GetSemesterByCodeHandler } from '@/modules/academic/application/handler
     {
       provide: IClassRepository,
       useClass: ClassRepository,
+    },
+    EnrollStudentHandler,
+    {
+      provide: IEnrollmentRepository,
+      useClass: EnrollmentRepository,
     },
   ],
 })
