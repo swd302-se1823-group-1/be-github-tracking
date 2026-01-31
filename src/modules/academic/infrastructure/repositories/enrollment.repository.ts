@@ -12,7 +12,7 @@ export class EnrollmentRepository implements IEnrollmentRepository {
     const data = EnrollmentMapper.toPersistence(enrollment);
 
     const newEnrollment = await this.prisma.enrollment.create({
-      data: data as any,
+      data,
     });
     return EnrollmentMapper.toDomain(newEnrollment);
   }
