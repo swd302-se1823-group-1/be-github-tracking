@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Get, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Query,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ApiResponse,
@@ -9,6 +17,7 @@ import {
 import { CreateClassDto } from '@/modules/academic/presentation/dtos/class/create-class.dto';
 import { ClassResponseDto } from '@/modules/academic/presentation/dtos/class/class-response.dto';
 import { CreateClassCommand } from '@/modules/academic/application/commands/class/create-class.command';
+import { DeleteClassCommand } from '@/modules/academic/application/commands/class/delete-class.command';
 import { ActiveUser, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { ClassAggregate } from '@/modules/academic/domain/aggregates/class.aggregate';
@@ -17,6 +26,7 @@ import { EnrollStudentDto } from '@/modules/academic/presentation/dtos/enrollmen
 import { EnrollStudentCommand } from '@/modules/academic/application/commands/enrollment/enroll-student.command';
 import { GetClassesDto } from '@/modules/academic/presentation/dtos/class/get-classes.dto';
 import { GetClassesQuery } from '@/modules/academic/application/queries/class/get-classes.query';
+import { GetStudentClassesQuery } from '@/modules/academic/application/queries/class/get-student-classes.query';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
 import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
 
@@ -92,7 +102,48 @@ export class ClassController {
     );
   }
 
-  @Post('enroll')
+  @Get('/me')
+  @Roles(UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get classes enrolled by the current student' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return enrolled classes',
+  })
+  async getMyEnrollments(
+    @Query() dto: GetClassesDto,
+    @ActiveUser() user: { id: string },
+  ): Promise<CursorPageDto<ClassResponseDto>> {
+    const result = await this.queryBus.execute<
+      GetStudentClassesQuery,
+      {
+        classes: ClassWithRelations[];
+        total: number;
+        nextCursor: string | null;
+      }
+    >(
+      new GetStudentClassesQuery(
+        user.id,
+        dto.cursor,
+        dto.take,
+        dto.order,
+        dto.search,
+      ),
+    );
+
+    const meta = new CursorPageMetaDto({
+      total: result.total,
+      nextCursor: result.nextCursor,
+      hasNextPage: !!result.nextCursor,
+    });
+
+    return new CursorPageDto(
+      result.classes.map((clazz) => new ClassResponseDto(clazz)),
+      meta,
+    );
+  }
+
+  @Post(':id/enroll')
   @Roles(UserRole.STUDENT)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Enroll in a class' })
@@ -101,11 +152,27 @@ export class ClassController {
     description: 'Enrolled successfully',
   })
   async enroll(
+    @Param('id') classId: string,
     @Body() dto: EnrollStudentDto,
     @ActiveUser() user: { id: string },
   ): Promise<void> {
     await this.commandBus.execute(
-      new EnrollStudentCommand(dto.classId, dto.enrollPassword, user.id),
+      new EnrollStudentCommand(classId, dto.enrollPassword, user.id),
     );
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a class (Soft delete)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Class deleted successfully',
+  })
+  async delete(
+    @Param('id') id: string,
+    @ActiveUser() user: { id: string },
+  ): Promise<void> {
+    await this.commandBus.execute(new DeleteClassCommand(id, user.id));
   }
 }

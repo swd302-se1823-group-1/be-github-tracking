@@ -6,6 +6,7 @@ import {
   Query,
   Patch,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
@@ -19,6 +20,7 @@ import { UpdateSemesterDto } from '@/modules/academic/presentation/dtos/semester
 import { SemesterResponseDto } from '@/modules/academic/presentation/dtos/semester/semester-response.dto';
 import { CreateSemesterCommand } from '@/modules/academic/application/commands/semester/create-semester.command';
 import { UpdateSemesterCommand } from '@/modules/academic/application/commands/semester/update-semester.command';
+import { DeleteSemesterCommand } from '@/modules/academic/application/commands/semester/delete-semester.command';
 import { GetSemestersQuery } from '@/modules/academic/application/queries/semester/get-semesters.query';
 import { GetSemestersDto } from '@/modules/academic/presentation/dtos/semester/get-semesters.dto';
 import { ActiveUser, Roles } from '@/shared/decorators';
@@ -158,5 +160,20 @@ export class SemesterController {
       SemesterAggregate
     >(new GetSemesterByCodeQuery(code));
     return new SemesterResponseDto(semester);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a semester (Soft delete)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Semester deleted successfully',
+  })
+  async delete(
+    @Param('id') id: number,
+    @ActiveUser() user: { id: string },
+  ): Promise<void> {
+    await this.commandBus.execute(new DeleteSemesterCommand(id, user.id));
   }
 }

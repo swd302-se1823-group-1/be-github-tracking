@@ -83,4 +83,15 @@ export class SemesterRepository implements ISemesterRepository {
     });
     return semester ? SemesterMapper.toDomain(semester) : null;
   }
+
+  async delete(id: bigint, deletedBy: string): Promise<void> {
+    await this.prisma.semester.update({
+      where: { id },
+      data: {
+        deleted_at: new Date(),
+        deleted_by_id: deletedBy,
+        is_active: false,
+      },
+    });
+  }
 }

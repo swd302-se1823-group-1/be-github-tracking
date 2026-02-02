@@ -7,4 +7,9 @@ export class GetClassesDto extends CursorPageOptionsDto {
   @IsString()
   @IsOptional()
   readonly search?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  readonly courseCode?: string;
 }
