@@ -146,7 +146,6 @@ export class ClassController {
   }
 
   @Get(':id/students')
-  @Roles(UserRole.ADMIN, UserRole.LECTURER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get students enrolled in a class' })
   @ApiResponse({
