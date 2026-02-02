@@ -72,4 +72,14 @@ export class CourseRepository implements ICourseRepository {
     });
     return course ? CourseMapper.toDomain(course) : null;
   }
+
+  async delete(id: string, deletedBy: string): Promise<void> {
+    await this.prisma.course.update({
+      where: { id },
+      data: {
+        deleted_at: new Date(),
+        deleted_by_id: deletedBy,
+      },
+    });
+  }
 }

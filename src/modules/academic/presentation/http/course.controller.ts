@@ -15,11 +15,12 @@ import { CourseAggregate } from '@/modules/academic/domain/aggregates/course.agg
 
 import { GetCoursesQuery } from '@/modules/academic/application/queries/course/get-courses.query';
 import { GetCourseByIdQuery } from '@/modules/academic/application/queries/course/get-course-by-id.query';
+import { DeleteCourseCommand } from '@/modules/academic/application/commands/course/delete-course.command';
 import { GetCourseByCodeQuery } from '@/modules/academic/application/queries/course/get-course-by-code.query';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
 import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
 import { GetCoursesDto } from '@/modules/academic/presentation/dtos/course/get-courses.dto';
-import { Param, Get, Query } from '@nestjs/common';
+import { Param, Get, Query, Delete } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 
 @ApiTags('Academic/courses')
@@ -112,5 +113,20 @@ export class CourseController {
       CourseAggregate
     >(new GetCourseByCodeQuery(code));
     return new CourseResponseDto(course);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a course (Soft delete)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Course deleted successfully',
+  })
+  async delete(
+    @Param('id') id: string,
+    @ActiveUser() user: { id: string },
+  ): Promise<void> {
+    await this.commandBus.execute(new DeleteCourseCommand(id, user.id));
   }
 }

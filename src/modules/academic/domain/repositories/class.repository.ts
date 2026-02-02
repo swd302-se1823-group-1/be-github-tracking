@@ -12,6 +12,15 @@ export interface IClassRepository {
     nextCursor: string | null;
   }>;
   findById(id: string): Promise<ClassAggregate | null>;
+  findEnrolledClasses(
+    studentId: string,
+    query: GetClassesQuery,
+  ): Promise<{
+    classes: ClassWithRelations[];
+    total: number;
+    nextCursor: string | null;
+  }>;
+  delete(id: string, deletedBy: string): Promise<void>;
 }
 
 export const IClassRepository = Symbol('IClassRepository');

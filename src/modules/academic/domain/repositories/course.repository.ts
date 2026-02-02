@@ -11,6 +11,7 @@ export interface ICourseRepository {
   }>;
   findById(id: string): Promise<CourseAggregate | null>;
   findByCode(code: string): Promise<CourseAggregate | null>;
+  delete(id: string, deletedBy: string): Promise<void>;
 }
 
 export const ICourseRepository = Symbol('ICourseRepository');

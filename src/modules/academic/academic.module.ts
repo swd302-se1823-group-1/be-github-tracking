@@ -7,6 +7,9 @@ import { GetSemestersHandler } from '@/modules/academic/application/handlers/sem
 import { CreateSemesterHandler } from '@/modules/academic/application/handlers/semester/create-semester.handler';
 import { CreateCourseHandler } from '@/modules/academic/application/handlers/course/create-course.handler';
 import { CreateClassHandler } from '@/modules/academic/application/handlers/class/create-class.handler';
+import { DeleteSemesterHandler } from '@/modules/academic/application/handlers/semester/delete-semester.handler';
+import { DeleteCourseHandler } from '@/modules/academic/application/handlers/course/delete-course.handler';
+import { DeleteClassHandler } from '@/modules/academic/application/handlers/class/delete-class.handler';
 import { SemesterRepository } from '@/modules/academic/infrastructure/repositories/semester.repository';
 import { CourseRepository } from '@/modules/academic/infrastructure/repositories/course.repository';
 import { ClassRepository } from '@/modules/academic/infrastructure/repositories/class.repository';
@@ -26,6 +29,7 @@ import { GetCourseByCodeHandler } from '@/modules/academic/application/handlers/
 import { GetSemesterByIdHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-id.handler';
 import { GetSemesterByCodeHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-code.handler';
 import { GetClassesHandler } from '@/modules/academic/application/handlers/class/get-classes.handler';
+import { GetStudentClassesHandler } from '@/modules/academic/application/handlers/class/get-student-classes.handler';
 
 @Module({
   imports: [CqrsModule, InfrastructureModule],
@@ -43,6 +47,10 @@ import { GetClassesHandler } from '@/modules/academic/application/handlers/class
     GetCourseByCodeHandler,
     CreateClassHandler,
     GetClassesHandler,
+    GetStudentClassesHandler,
+    DeleteSemesterHandler,
+    DeleteCourseHandler,
+    DeleteClassHandler,
     {
       provide: ISemesterRepository,
       useClass: SemesterRepository,

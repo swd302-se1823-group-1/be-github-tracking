@@ -1,6 +1,10 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 import { generateId } from '@/shared/utils/uuid';
 
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
 export class ClassAggregate extends AggregateRoot {
   private constructor(
     public readonly id: string,
@@ -11,12 +15,21 @@ export class ClassAggregate extends AggregateRoot {
     public readonly classCode: string,
     public readonly className: string,
     public readonly description: string | null,
+    public readonly deletedAt: Date | null,
+    public readonly deletedBy: string | null,
     public readonly createdBy: string | null,
     public readonly updatedBy: string | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
   ) {
     super();
+  }
+
+  delete(deletedBy: string): void {
+    (this as Mutable<ClassAggregate>).deletedAt = new Date();
+    (this as Mutable<ClassAggregate>).deletedBy = deletedBy;
+    (this as Mutable<ClassAggregate>).updatedAt = new Date();
+    (this as Mutable<ClassAggregate>).updatedBy = deletedBy;
   }
 
   static create(
@@ -38,6 +51,8 @@ export class ClassAggregate extends AggregateRoot {
       classCode,
       className,
       description || null,
+      null,
+      null,
       createdBy || null,
       createdBy || null,
       new Date(),
@@ -54,6 +69,8 @@ export class ClassAggregate extends AggregateRoot {
     classCode: string,
     className: string,
     description: string | null,
+    deletedAt: Date | null,
+    deletedBy: string | null,
     createdBy: string | null,
     updatedBy: string | null,
     createdAt: Date,
@@ -68,6 +85,8 @@ export class ClassAggregate extends AggregateRoot {
       classCode,
       className,
       description,
+      deletedAt,
+      deletedBy,
       createdBy,
       updatedBy,
       createdAt,
