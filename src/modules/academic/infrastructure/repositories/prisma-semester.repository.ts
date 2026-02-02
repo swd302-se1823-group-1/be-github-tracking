@@ -8,7 +8,7 @@ import { Prisma } from '@generated/prisma/client';
 import { GetSemestersQuery } from '../../application/queries/semester/get-semesters.query';
 
 @Injectable()
-export class SemesterRepository implements ISemesterRepository {
+export class PrismaSemesterRepository implements ISemesterRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(semester: SemesterAggregate): Promise<SemesterAggregate> {

@@ -10,7 +10,7 @@ import { CourseMapper } from '../mappers/course.mapper';
 import { SemesterMapper } from '../mappers/semester.mapper';
 
 @Injectable()
-export class ClassRepository implements IClassRepository {
+export class PrismaClassRepository implements IClassRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(clazz: ClassAggregate): Promise<ClassAggregate> {
@@ -177,6 +177,32 @@ export class ClassRepository implements IClassRepository {
       total,
       nextCursor,
     };
+  }
+
+  async findByIdWithRelations(id: string): Promise<ClassWithRelations | null> {
+    const found = await this.prisma.class.findUnique({
+      where: { id, deleted_at: null },
+      include: {
+        lecturer: {
+          include: { user: true },
+        },
+        course: true,
+        semester: true,
+      },
+    });
+
+    if (!found) return null;
+
+    const aggregate = ClassMapper.toDomain(found) as ClassWithRelations;
+    aggregate.lecturer = found.lecturer;
+    aggregate.course = found.course
+      ? CourseMapper.toDomain(found.course)
+      : undefined;
+    aggregate.semester = found.semester
+      ? SemesterMapper.toDomain(found.semester)
+      : undefined;
+
+    return aggregate;
   }
 
   async delete(id: string, deletedBy: string): Promise<void> {

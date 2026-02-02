@@ -20,6 +20,7 @@ export interface IClassRepository {
     total: number;
     nextCursor: string | null;
   }>;
+  findByIdWithRelations(id: string): Promise<ClassWithRelations | null>;
   delete(id: string, deletedBy: string): Promise<void>;
 }
 

@@ -26,6 +26,8 @@ import { EnrollStudentDto } from '@/modules/academic/presentation/dtos/enrollmen
 import { EnrollStudentCommand } from '@/modules/academic/application/commands/enrollment/enroll-student.command';
 import { GetClassesDto } from '@/modules/academic/presentation/dtos/class/get-classes.dto';
 import { GetClassesQuery } from '@/modules/academic/application/queries/class/get-classes.query';
+import { GetClassByIdQuery } from '@/modules/academic/application/queries/class/get-class-by-id.query';
+import { GetClassStudentsQuery } from '@/modules/academic/application/queries/class/get-class-students.query';
 import { GetStudentClassesQuery } from '@/modules/academic/application/queries/class/get-student-classes.query';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
 import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
@@ -143,6 +145,43 @@ export class ClassController {
     );
   }
 
+  @Get(':id/students')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get students enrolled in a class' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return enrolled students',
+  })
+  async getStudents(
+    @Param('id') classId: string,
+    @Query() dto: GetClassesDto,
+  ): Promise<CursorPageDto<any>> {
+    const result = await this.queryBus.execute<
+      GetClassStudentsQuery,
+      {
+        students: any[];
+        total: number;
+        nextCursor: string | null;
+      }
+    >(
+      new GetClassStudentsQuery(
+        classId,
+        GetClassesQuery.fromDto(dto), // Reuse GetClassesQuery logic or just pass DTO if query expects it, but here query expects GetClassesQuery object?
+        // Wait, GetClassStudentsQuery constructor defined as (classId, query: GetClassesQuery)
+      ),
+    );
+
+    const meta = new CursorPageMetaDto({
+      total: result.total,
+      nextCursor: result.nextCursor,
+      hasNextPage: !!result.nextCursor,
+    });
+
+    // Return students directly or map to DTO?
+    // Using any for now as requested/planned
+    return new CursorPageDto(result.students, meta);
+  }
+
   @Post(':id/enroll')
   @Roles(UserRole.STUDENT)
   @ApiBearerAuth()
@@ -159,6 +198,22 @@ export class ClassController {
     await this.commandBus.execute(
       new EnrollStudentCommand(classId, dto.enrollPassword, user.id),
     );
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a class by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return a class',
+    type: ClassResponseDto,
+  })
+  @ApiBearerAuth()
+  async findOne(@Param('id') id: string): Promise<ClassResponseDto> {
+    const clazz = await this.queryBus.execute<
+      GetClassByIdQuery,
+      ClassWithRelations
+    >(new GetClassByIdQuery(id));
+    return new ClassResponseDto(clazz);
   }
 
   @Delete(':id')
