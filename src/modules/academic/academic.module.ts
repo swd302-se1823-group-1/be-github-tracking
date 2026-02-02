@@ -10,15 +10,15 @@ import { CreateClassHandler } from '@/modules/academic/application/handlers/clas
 import { DeleteSemesterHandler } from '@/modules/academic/application/handlers/semester/delete-semester.handler';
 import { DeleteCourseHandler } from '@/modules/academic/application/handlers/course/delete-course.handler';
 import { DeleteClassHandler } from '@/modules/academic/application/handlers/class/delete-class.handler';
-import { SemesterRepository } from '@/modules/academic/infrastructure/repositories/semester.repository';
-import { CourseRepository } from '@/modules/academic/infrastructure/repositories/course.repository';
-import { ClassRepository } from '@/modules/academic/infrastructure/repositories/class.repository';
+import { PrismaSemesterRepository } from '@/modules/academic/infrastructure/repositories/prisma-semester.repository';
+import { PrismaCourseRepository } from '@/modules/academic/infrastructure/repositories/prisma-course.repository';
+import { PrismaClassRepository } from '@/modules/academic/infrastructure/repositories/prisma-class.repository';
 
 import { ISemesterRepository } from '@/modules/academic/domain/repositories/semester.repository';
 import { ICourseRepository } from '@/modules/academic/domain/repositories/course.repository';
 import { IClassRepository } from '@/modules/academic/domain/repositories/class.repository';
 import { IEnrollmentRepository } from '@/modules/academic/domain/repositories/enrollment.repository';
-import { EnrollmentRepository } from '@/modules/academic/infrastructure/repositories/enrollment.repository';
+import { PrismaEnrollmentRepository } from '@/modules/academic/infrastructure/repositories/prisma-enrollment.repository';
 import { EnrollStudentHandler } from '@/modules/academic/application/handlers/enrollment/enroll-student.handler';
 import { InfrastructureModule } from '@/infrastructure';
 
@@ -29,7 +29,10 @@ import { GetCourseByCodeHandler } from '@/modules/academic/application/handlers/
 import { GetSemesterByIdHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-id.handler';
 import { GetSemesterByCodeHandler } from '@/modules/academic/application/handlers/semester/get-semester-by-code.handler';
 import { GetClassesHandler } from '@/modules/academic/application/handlers/class/get-classes.handler';
+
 import { GetStudentClassesHandler } from '@/modules/academic/application/handlers/class/get-student-classes.handler';
+import { GetClassByIdHandler } from '@/modules/academic/application/handlers/class/get-class-by-id.handler';
+import { GetClassStudentsHandler } from '@/modules/academic/application/handlers/class/get-class-students.handler';
 
 @Module({
   imports: [CqrsModule, InfrastructureModule],
@@ -48,25 +51,27 @@ import { GetStudentClassesHandler } from '@/modules/academic/application/handler
     CreateClassHandler,
     GetClassesHandler,
     GetStudentClassesHandler,
+    GetClassByIdHandler,
+    GetClassStudentsHandler,
     DeleteSemesterHandler,
     DeleteCourseHandler,
     DeleteClassHandler,
     {
       provide: ISemesterRepository,
-      useClass: SemesterRepository,
+      useClass: PrismaSemesterRepository,
     },
     {
       provide: ICourseRepository,
-      useClass: CourseRepository,
+      useClass: PrismaCourseRepository,
     },
     {
       provide: IClassRepository,
-      useClass: ClassRepository,
+      useClass: PrismaClassRepository,
     },
     EnrollStudentHandler,
     {
       provide: IEnrollmentRepository,
-      useClass: EnrollmentRepository,
+      useClass: PrismaEnrollmentRepository,
     },
   ],
 })
