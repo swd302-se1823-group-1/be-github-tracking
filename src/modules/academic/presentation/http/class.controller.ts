@@ -31,6 +31,11 @@ import { GetClassStudentsQuery } from '@/modules/academic/application/queries/cl
 import { GetStudentClassesQuery } from '@/modules/academic/application/queries/class/get-student-classes.query';
 import { CursorPageDto } from '@/shared/dtos/cursor-page.dto';
 import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
+import { CreateProjectDto } from '@/modules/academic/presentation/dtos/project/create-project.dto';
+import { CreateProjectCommand } from '@/modules/academic/application/commands/project/create-project.command';
+import { ProjectResponseDto } from '@/modules/academic/presentation/dtos/project/project-response.dto';
+import { ProjectAggregate } from '@/modules/academic/domain/aggregates/project.aggregate';
+import { GetProjectsByClassQuery } from '@/modules/academic/application/queries/project/get-projects-by-class.query';
 
 @ApiTags('Academic/classes')
 @Controller('classes')
@@ -229,5 +234,75 @@ export class ClassController {
     @ActiveUser() user: { id: string },
   ): Promise<void> {
     await this.commandBus.execute(new DeleteClassCommand(id, user.id));
+  }
+  @Post(':id/projects')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a project in a class' })
+  @ApiResponse({
+    status: 201,
+    description: 'Project created successfully',
+    type: ProjectResponseDto,
+  })
+  async createProject(
+    @Param('id') classId: string,
+    @Body() dto: CreateProjectDto,
+    @ActiveUser() user: { id: string },
+  ): Promise<ProjectResponseDto> {
+    const project = await this.commandBus.execute<
+      CreateProjectCommand,
+      ProjectAggregate
+    >(
+      new CreateProjectCommand(
+        classId,
+        dto.name,
+        dto.topic,
+        dto.description,
+        dto.avatarUrl,
+        user.id,
+      ),
+    );
+    return new ProjectResponseDto(project);
+  }
+
+  @Get(':id/projects')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get projects in a class' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return projects',
+    type: CursorPageDto,
+  })
+  async getProjects(
+    @Param('id') classId: string,
+    @Query() dto: GetClassesDto, // The client might send normal pagination params. GetClassesDto handles that.
+  ): Promise<CursorPageDto<ProjectResponseDto>> {
+    const result = await this.queryBus.execute<
+      GetProjectsByClassQuery,
+      {
+        projects: ProjectAggregate[];
+        total: number;
+        nextCursor: string | null;
+      }
+    >(
+      new GetProjectsByClassQuery(classId, {
+        take: dto.take,
+        cursor: dto.cursor,
+        search: dto.search,
+        order: dto.order, // order fits because both extend CursorPageOptionsDto
+      }),
+    );
+
+    const meta = new CursorPageMetaDto({
+      total: result.total,
+      nextCursor: result.nextCursor,
+      hasNextPage: !!result.nextCursor,
+    });
+
+    return new CursorPageDto(
+      result.projects.map((p) => new ProjectResponseDto(p)),
+      meta,
+    );
   }
 }

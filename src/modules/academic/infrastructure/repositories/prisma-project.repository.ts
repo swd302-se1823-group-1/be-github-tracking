@@ -1,0 +1,163 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
+import { IProjectRepository } from '../../domain/repositories/project.repository';
+import { ProjectAggregate } from '../../domain/aggregates/project.aggregate';
+import { ProjectMapper } from '../mappers/project.mapper';
+import { GetProjectsDto } from '@/modules/academic/presentation/dtos/project/get-projects.dto';
+import { Prisma, ProjectMemberRole } from '@generated/prisma/client';
+
+@Injectable()
+export class PrismaProjectRepository implements IProjectRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(project: ProjectAggregate): Promise<ProjectAggregate> {
+    // data removed as it was unused and just for mapper check
+    const persistenceData: Prisma.ProjectUncheckedCreateInput = {
+      id: project.id,
+      class_id: project.classId,
+      name: project.name,
+      topic: project.topic,
+      description: project.description,
+      avatar_url: project.avatarUrl,
+      created_by_id: project.createdBy,
+      updated_by_id: project.updatedBy,
+      deleted_at: project.deletedAt,
+      deleted_by_id: project.deletedBy,
+      created_at: project.createdAt,
+      updated_at: project.updatedAt,
+    };
+
+    const newProject = await this.prisma.project.create({
+      data: persistenceData,
+    });
+    return ProjectMapper.toDomain(newProject);
+  }
+
+  async update(project: ProjectAggregate): Promise<ProjectAggregate> {
+    // implementation same as before
+    const persistenceData: Prisma.ProjectUncheckedUpdateInput = {
+      name: project.name,
+      topic: project.topic,
+      description: project.description,
+      avatar_url: project.avatarUrl,
+      updated_by_id: project.updatedBy,
+      updated_at: new Date(),
+    };
+
+    const updated = await this.prisma.project.update({
+      where: { id: project.id },
+      data: persistenceData,
+    });
+    return ProjectMapper.toDomain(updated);
+  }
+
+  async findById(id: string): Promise<ProjectAggregate | null> {
+    // implementation same as before
+    const found = await this.prisma.project.findUnique({
+      where: { id, deleted_at: null },
+      include: {
+        project_members: {
+          where: { deleted_at: null, is_active: true },
+        },
+      },
+    });
+    return found ? ProjectMapper.toDomain(found) : null;
+  }
+
+  async findByClassId(
+    classId: string,
+    query: GetProjectsDto,
+  ): Promise<{
+    projects: ProjectAggregate[];
+    total: number;
+    nextCursor: string | null;
+  }> {
+    const { cursor, take = 10, search } = query;
+    const where: Prisma.ProjectWhereInput = {
+      class_id: classId,
+      deleted_at: null,
+      ...(search && {
+        name: { contains: search, mode: 'insensitive' },
+      }),
+    };
+
+    const [total, projects] = await Promise.all([
+      this.prisma.project.count({ where }),
+      this.prisma.project.findMany({
+        where,
+        take: take ? take + 1 : undefined,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: { created_at: 'desc' }, // Ignoring query.order for now or implement mapping
+        skip: cursor ? 1 : 0,
+        include: {
+          project_members: {
+            where: { deleted_at: null, is_active: true },
+          },
+        },
+      }),
+    ]);
+
+    let nextCursor: string | null = null;
+    if (projects.length > take) {
+      const nextItem = projects.pop();
+      nextCursor = nextItem?.id ? nextItem.id : null;
+    }
+
+    return {
+      projects: projects.map((p) => ProjectMapper.toDomain(p)),
+      total,
+      nextCursor,
+    };
+  }
+
+  async delete(id: string, deletedBy: string): Promise<void> {
+    await this.prisma.project.update({
+      where: { id },
+      data: {
+        deleted_at: new Date(),
+        deleted_by_id: deletedBy,
+      },
+    });
+  }
+
+  async addMember(
+    projectId: string,
+    studentId: string,
+    role: string,
+  ): Promise<void> {
+    // Check if exists first? Or upsert?
+    // Assuming role is enum string compatible with Prisma
+    await this.prisma.projectMember.create({
+      data: {
+        project_id: projectId,
+        student_id: studentId,
+        role: role as ProjectMemberRole,
+      },
+    });
+  }
+
+  async driverRemoveMember(
+    projectId: string,
+    studentId: string,
+  ): Promise<void> {
+    // Hard delete or soft delete? Usually soft delete for members too
+    await this.removeMember(projectId, studentId);
+  }
+
+  async removeMember(projectId: string, studentId: string): Promise<void> {
+    // Soft delete member
+    // Need to find unique ID or use compound where if supported (it is: @@unique([project_id, student_id]))
+    await this.prisma.projectMember.update({
+      where: {
+        project_id_student_id: {
+          project_id: projectId,
+          student_id: studentId,
+        },
+      },
+      data: {
+        deleted_at: new Date(),
+        is_active: false,
+      },
+    });
+  }
+}

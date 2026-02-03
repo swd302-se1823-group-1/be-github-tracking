@@ -34,9 +34,21 @@ import { GetStudentClassesHandler } from '@/modules/academic/application/handler
 import { GetClassByIdHandler } from '@/modules/academic/application/handlers/class/get-class-by-id.handler';
 import { GetClassStudentsHandler } from '@/modules/academic/application/handlers/class/get-class-students.handler';
 
+import { ProjectController } from '@/modules/academic/presentation/http/project.controller';
+import { CreateProjectHandler } from '@/modules/academic/application/handlers/project/create-project.handler';
+import { AddProjectMemberHandler } from '@/modules/academic/application/handlers/project/add-project-member.handler';
+import { GetProjectsByClassHandler } from '@/modules/academic/application/handlers/project/get-projects-by-class.handler';
+import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
+import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repositories/prisma-project.repository';
+
 @Module({
   imports: [CqrsModule, InfrastructureModule],
-  controllers: [SemesterController, CourseController, ClassController],
+  controllers: [
+    SemesterController,
+    CourseController,
+    ClassController,
+    ProjectController,
+  ],
   providers: [
     GetSemestersHandler,
     CreateSemesterHandler,
@@ -72,6 +84,13 @@ import { GetClassStudentsHandler } from '@/modules/academic/application/handlers
     {
       provide: IEnrollmentRepository,
       useClass: PrismaEnrollmentRepository,
+    },
+    CreateProjectHandler,
+    AddProjectMemberHandler,
+    GetProjectsByClassHandler,
+    {
+      provide: IProjectRepository,
+      useClass: PrismaProjectRepository,
     },
   ],
 })
