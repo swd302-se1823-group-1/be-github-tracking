@@ -247,7 +247,7 @@ export class ClassController {
   async createProject(
     @Param('id') classId: string,
     @Body() dto: CreateProjectDto,
-    @ActiveUser() user: { id: string },
+    @ActiveUser('id') userId: string,
   ): Promise<ProjectResponseDto> {
     const project = await this.commandBus.execute<
       CreateProjectCommand,
@@ -258,8 +258,8 @@ export class ClassController {
         dto.name,
         dto.topic,
         dto.description,
-        dto.avatarUrl,
-        user.id,
+        null, // avatarUrl handled separately
+        userId,
       ),
     );
     return new ProjectResponseDto(project);

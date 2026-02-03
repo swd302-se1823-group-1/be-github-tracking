@@ -13,7 +13,7 @@ export class CreateProjectHandler implements ICommandHandler<CreateProjectComman
   ) {}
 
   async execute(command: CreateProjectCommand): Promise<ProjectAggregate> {
-    const { classId, name, topic, description, avatarUrl, userId } = command;
+    const { classId, name, topic, description, userId } = command;
 
     // Optional: Check if class exists here or rely on DB constraint.
     // Ideally, validation should happen before or in domain service.
@@ -24,7 +24,7 @@ export class CreateProjectHandler implements ICommandHandler<CreateProjectComman
       name,
       topic,
       description,
-      avatarUrl,
+      null, // avatarUrl will be uploaded separately via PUT /projects/:id/avatar
       userId,
     );
 

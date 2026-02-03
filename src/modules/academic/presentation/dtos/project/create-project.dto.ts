@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'Github Tracking System' })
@@ -16,9 +16,4 @@ export class CreateProjectDto {
   @IsString()
   @IsOptional()
   description: string;
-
-  @ApiPropertyOptional({ example: 'https://example.com/avatar.png' })
-  @IsUrl()
-  @IsOptional()
-  avatarUrl: string;
 }
