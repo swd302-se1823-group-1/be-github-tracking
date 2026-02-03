@@ -1,0 +1,36 @@
+import { ProjectAggregate } from '../aggregates/project.aggregate';
+import { GetProjectsDto } from '@/modules/academic/presentation/dtos/project/get-projects.dto';
+import { ProjectMemberRole } from '@generated/prisma/client';
+
+export interface IProjectRepository {
+  create(project: ProjectAggregate): Promise<ProjectAggregate>;
+  update(project: ProjectAggregate): Promise<ProjectAggregate>;
+  findById(id: string): Promise<ProjectAggregate | null>;
+  findByClassId(
+    classId: string,
+    query: GetProjectsDto,
+  ): Promise<{
+    projects: ProjectAggregate[];
+    total: number;
+    nextCursor: string | null;
+  }>;
+  delete(id: string, deletedBy: string): Promise<void>;
+
+  // Member management
+  addMember(
+    projectId: string,
+    studentId: string,
+    role: ProjectMemberRole,
+  ): Promise<void>;
+  removeMember(projectId: string, studentId: string): Promise<void>;
+
+  // Validation helpers
+  isStudentInProject(projectId: string, studentId: string): Promise<boolean>;
+  getStudentProjectInClass(
+    classId: string,
+    studentId: string,
+  ): Promise<ProjectAggregate | null>;
+  getProjectMemberCount(projectId: string): Promise<number>;
+}
+
+export const IProjectRepository = Symbol('IProjectRepository');
