@@ -1,5 +1,6 @@
 import { ProjectAggregate } from '../aggregates/project.aggregate';
 import { GetProjectsDto } from '@/modules/academic/presentation/dtos/project/get-projects.dto';
+import { ProjectMemberRole } from '@generated/prisma/client';
 
 export interface IProjectRepository {
   create(project: ProjectAggregate): Promise<ProjectAggregate>;
@@ -15,13 +16,21 @@ export interface IProjectRepository {
   }>;
   delete(id: string, deletedBy: string): Promise<void>;
 
-  // Member management might be handled via update(aggregate) or separate methods depending on granularity
-  // For now, assuming ProjectAggregate holds members and we save the aggregate.
-  // But strictly speaking, adding a member is a sub-entity operation.
-  // Let's keep it simple: generic update or specific member methods if needed.
-  addMember(projectId: string, studentId: string, role: string): Promise<void>;
-  driverRemoveMember(projectId: string, studentId: string): Promise<void>; // Naming to avoid conflict with standard delete
+  // Member management
+  addMember(
+    projectId: string,
+    studentId: string,
+    role: ProjectMemberRole,
+  ): Promise<void>;
   removeMember(projectId: string, studentId: string): Promise<void>;
+
+  // Validation helpers
+  isStudentInProject(projectId: string, studentId: string): Promise<boolean>;
+  getStudentProjectInClass(
+    classId: string,
+    studentId: string,
+  ): Promise<ProjectAggregate | null>;
+  getProjectMemberCount(projectId: string): Promise<number>;
 }
 
 export const IProjectRepository = Symbol('IProjectRepository');

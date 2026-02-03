@@ -123,30 +123,18 @@ export class PrismaProjectRepository implements IProjectRepository {
   async addMember(
     projectId: string,
     studentId: string,
-    role: string,
+    role: ProjectMemberRole,
   ): Promise<void> {
-    // Check if exists first? Or upsert?
-    // Assuming role is enum string compatible with Prisma
     await this.prisma.projectMember.create({
       data: {
         project_id: projectId,
         student_id: studentId,
-        role: role as ProjectMemberRole,
+        role: role,
       },
     });
   }
 
-  async driverRemoveMember(
-    projectId: string,
-    studentId: string,
-  ): Promise<void> {
-    // Hard delete or soft delete? Usually soft delete for members too
-    await this.removeMember(projectId, studentId);
-  }
-
   async removeMember(projectId: string, studentId: string): Promise<void> {
-    // Soft delete member
-    // Need to find unique ID or use compound where if supported (it is: @@unique([project_id, student_id]))
     await this.prisma.projectMember.update({
       where: {
         project_id_student_id: {
@@ -157,6 +145,58 @@ export class PrismaProjectRepository implements IProjectRepository {
       data: {
         deleted_at: new Date(),
         is_active: false,
+      },
+    });
+  }
+
+  // Validation helpers
+  async isStudentInProject(
+    projectId: string,
+    studentId: string,
+  ): Promise<boolean> {
+    const member = await this.prisma.projectMember.findUnique({
+      where: {
+        project_id_student_id: {
+          project_id: projectId,
+          student_id: studentId,
+        },
+      },
+    });
+    return member !== null && member.deleted_at === null;
+  }
+
+  async getStudentProjectInClass(
+    classId: string,
+    studentId: string,
+  ): Promise<ProjectAggregate | null> {
+    const project = await this.prisma.project.findFirst({
+      where: {
+        class_id: classId,
+        deleted_at: null,
+        project_members: {
+          some: {
+            student_id: studentId,
+            deleted_at: null,
+            is_active: true,
+          },
+        },
+      },
+      include: {
+        project_members: {
+          where: { deleted_at: null, is_active: true },
+        },
+      },
+    });
+
+    return project ? ProjectMapper.toDomain(project) : null;
+  }
+
+  async getProjectMemberCount(projectId: string): Promise<number> {
+    return this.prisma.projectMember.count({
+      where: {
+        project_id: projectId,
+        deleted_at: null,
+        is_active: true,
       },
     });
   }

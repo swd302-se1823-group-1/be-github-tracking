@@ -21,6 +21,7 @@ import { IEnrollmentRepository } from '@/modules/academic/domain/repositories/en
 import { PrismaEnrollmentRepository } from '@/modules/academic/infrastructure/repositories/prisma-enrollment.repository';
 import { EnrollStudentHandler } from '@/modules/academic/application/handlers/enrollment/enroll-student.handler';
 import { InfrastructureModule } from '@/infrastructure';
+import { CloudinaryModule } from '@/shared/cloudinary/cloudinary.module';
 
 import { UpdateSemesterHandler } from '@/modules/academic/application/handlers/semester/update-semester.handler';
 import { GetCoursesHandler } from '@/modules/academic/application/handlers/course/get-courses.handler';
@@ -38,11 +39,14 @@ import { ProjectController } from '@/modules/academic/presentation/http/project.
 import { CreateProjectHandler } from '@/modules/academic/application/handlers/project/create-project.handler';
 import { AddProjectMemberHandler } from '@/modules/academic/application/handlers/project/add-project-member.handler';
 import { GetProjectsByClassHandler } from '@/modules/academic/application/handlers/project/get-projects-by-class.handler';
+import { UpdateProjectHandler } from '@/modules/academic/application/handlers/project/update-project.handler';
+import { DeleteProjectHandler } from '@/modules/academic/application/handlers/project/delete-project.handler';
+import { UpdateProjectAvatarHandler } from '@/modules/academic/application/handlers/project/update-project-avatar.handler';
 import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
 import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repositories/prisma-project.repository';
 
 @Module({
-  imports: [CqrsModule, InfrastructureModule],
+  imports: [CqrsModule, InfrastructureModule, CloudinaryModule],
   controllers: [
     SemesterController,
     CourseController,
@@ -88,6 +92,9 @@ import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repos
     CreateProjectHandler,
     AddProjectMemberHandler,
     GetProjectsByClassHandler,
+    UpdateProjectHandler,
+    DeleteProjectHandler,
+    UpdateProjectAvatarHandler,
     {
       provide: IProjectRepository,
       useClass: PrismaProjectRepository,
