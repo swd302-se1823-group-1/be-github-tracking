@@ -5,3 +5,4 @@ export * from './throttler';
 export * from './jwt';
 export * from './google';
 export * from './cloudinary';
+export * from './github';
