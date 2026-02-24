@@ -14,6 +14,7 @@ import {
   JwtAccessStrategy,
   JwtRefreshStrategy,
   GoogleStrategy,
+  GitHubVerifyStrategy,
 } from './infrastructure/strategies';
 
 // Guards
@@ -21,6 +22,7 @@ import {
   JwtAccessGuard,
   JwtRefreshGuard,
   GoogleAuthGuard,
+  GitHubVerifyGuard,
 } from './infrastructure/guards';
 
 import { TokenService } from './application/services/token.service';
@@ -72,10 +74,12 @@ import { GitHubService } from '@/modules/auth/infrastructure/services/github.ser
     JwtAccessStrategy,
     JwtRefreshStrategy,
     GoogleStrategy,
+    GitHubVerifyStrategy,
     // Guards
     JwtAccessGuard,
     JwtRefreshGuard,
     GoogleAuthGuard,
+    GitHubVerifyGuard,
     // Handlers
     GoogleLoginHandler,
     RefreshTokenHandler,
@@ -91,7 +95,9 @@ import { GitHubService } from '@/modules/auth/infrastructure/services/github.ser
     JwtAccessGuard,
     JwtRefreshGuard,
     GoogleAuthGuard,
+    GitHubVerifyGuard,
     GoogleStrategy,
+    GitHubVerifyStrategy,
     RolesGuard,
     GitHubService,
   ],

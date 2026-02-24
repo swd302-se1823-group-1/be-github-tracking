@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GithubMappingAggregate } from '@/modules/academic/domain/aggregates/github-mapping.aggregate';
+import { GithubMappingAggregate } from '@/modules/tracking/domain/aggregates/github-mapping.aggregate';
 
 export class GithubMappingResponseDto {
   @ApiProperty({ example: '1' })
@@ -21,7 +21,7 @@ export class GithubMappingResponseDto {
   updatedAt: Date;
 
   constructor(mapping: GithubMappingAggregate) {
-    this.id = mapping.id.toString();
+    this.id = mapping.id;
     this.githubEmail = mapping.githubEmail;
     this.githubUsername = mapping.githubUsername;
     this.isVerified = mapping.isVerified;

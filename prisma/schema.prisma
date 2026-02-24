@@ -182,7 +182,7 @@ model Student {
   /// @hide
   user            User            @relation(fields: [id], references: [id], onDelete: NoAction)
   /// @hide
-  github_mappings GithubMapping[]
+  github_mapping   GithubMapping?
   /// @hide
   enrollments     Enrollment[]
   /// @hide
@@ -222,8 +222,10 @@ model Lecturer {
 }
 
 model GithubMapping {
-  id              BigInt    @id @default(autoincrement())
-  student_id      String    @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
+  student_id      String    @db.Uuid @unique
+  access_token    String    @db.Text
+  github_id       String    @unique
   github_email    String?   @db.VarChar(255)
   github_username String?   @db.VarChar(255)
   is_verified     Boolean   @default(false)

@@ -1,8 +1,11 @@
+import { generateId } from '@/shared/utils/uuid';
 import { AggregateRoot } from '@nestjs/cqrs';
 
 export type GithubMappingProps = {
-  id: bigint;
+  id: string;
   studentId: string;
+  githubId: string;
+  accessToken: string;
   githubEmail: string | null;
   githubUsername: string | null;
   isVerified: boolean;
@@ -17,12 +20,20 @@ export class GithubMappingAggregate extends AggregateRoot {
     super();
   }
 
-  get id(): bigint {
+  get id(): string {
     return this._props.id;
   }
 
   get studentId(): string {
     return this._props.studentId;
+  }
+
+  get githubId(): string {
+    return this._props.githubId;
+  }
+
+  get accessToken(): string {
+    return this._props.accessToken;
   }
 
   get githubEmail(): string | null {
@@ -63,13 +74,17 @@ export class GithubMappingAggregate extends AggregateRoot {
   // Factory: Create verified GitHub mapping
   public static createVerified(
     studentId: string,
-    githubEmail: string,
-    githubUsername: string,
+    githubId: string,
+    accessToken: string,
+    githubEmail: string | null,
+    githubUsername: string | null,
     createdBy: string,
   ): GithubMappingAggregate {
     const mapping = new GithubMappingAggregate({
-      id: BigInt(0), // Will be set by database
+      id: generateId(),
       studentId,
+      githubId,
+      accessToken,
       githubEmail,
       githubUsername,
       isVerified: true,
@@ -84,10 +99,14 @@ export class GithubMappingAggregate extends AggregateRoot {
 
   // Business logic: Update GitHub info
   public updateGithubInfo(
-    githubEmail: string,
-    githubUsername: string,
+    githubId: string,
+    accessToken: string,
+    githubEmail: string | null,
+    githubUsername: string | null,
     updatedBy: string,
   ): void {
+    this._props.githubId = githubId;
+    this._props.accessToken = accessToken;
     this._props.githubEmail = githubEmail;
     this._props.githubUsername = githubUsername;
     this._props.isVerified = true;

@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetGitHubMappingQuery } from '@/modules/academic/application/queries/github/get-github-mapping.query';
-import { IGithubMappingRepository } from '@/modules/academic/domain/repositories/github-mapping.repository';
-import { GithubMappingAggregate } from '@/modules/academic/domain/aggregates/github-mapping.aggregate';
+import { GetGitHubMappingQuery } from '@/modules/tracking/application/queries/github/get-github-mapping.query';
+import { IGithubMappingRepository } from '@/modules/tracking/domain/repositories/github-mapping.repository';
+import { GithubMappingAggregate } from '@/modules/tracking/domain/aggregates/github-mapping.aggregate';
 
 @QueryHandler(GetGitHubMappingQuery)
 export class GetGitHubMappingHandler implements IQueryHandler<

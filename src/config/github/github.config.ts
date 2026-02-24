@@ -3,6 +3,7 @@ import { registerAs } from '@nestjs/config';
 export interface GitHubConfig {
   clientId: string;
   clientSecret: string;
+  callbackUrl: string;
 }
 
 export const GITHUB_CONFIG_KEY = 'github';
@@ -12,5 +13,6 @@ export default registerAs(
   (): GitHubConfig => ({
     clientId: process.env.GITHUB_CLIENT_ID!,
     clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    callbackUrl: process.env.GITHUB_CALLBACK_URL!,
   }),
 );

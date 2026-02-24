@@ -13,9 +13,13 @@ export abstract class IGithubMappingRepository {
     username: string,
   ): Promise<GithubMappingAggregate | null>;
 
+  abstract findByGitHubId(
+    githubId: string,
+  ): Promise<GithubMappingAggregate | null>;
+
   abstract save(
     mapping: GithubMappingAggregate,
   ): Promise<GithubMappingAggregate>;
 
-  abstract delete(id: bigint): Promise<void>;
+  abstract delete(id: string): Promise<void>;
 }

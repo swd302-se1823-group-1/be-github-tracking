@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { IGithubMappingRepository } from '@/modules/academic/domain/repositories/github-mapping.repository';
-import { GithubMappingAggregate } from '@/modules/academic/domain/aggregates/github-mapping.aggregate';
+import { IGithubMappingRepository } from '@/modules/tracking/domain/repositories/github-mapping.repository';
+import { GithubMappingAggregate } from '@/modules/tracking/domain/aggregates/github-mapping.aggregate';
 import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
 import { GithubMapping } from '@generated/prisma/client';
 
@@ -48,9 +48,24 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
     return mapping ? this.toDomain(mapping) : null;
   }
 
+  async findByGitHubId(
+    githubId: string,
+  ): Promise<GithubMappingAggregate | null> {
+    const mapping = await this.prisma.githubMapping.findFirst({
+      where: {
+        github_id: githubId,
+        deleted_at: null,
+      },
+    });
+
+    return mapping ? this.toDomain(mapping) : null;
+  }
+
   async save(mapping: GithubMappingAggregate): Promise<GithubMappingAggregate> {
     const data = {
       student_id: mapping.studentId,
+      github_id: mapping.githubId,
+      access_token: mapping.accessToken,
       github_email: mapping.githubEmail,
       github_username: mapping.githubUsername,
       is_verified: mapping.isVerified,
@@ -60,11 +75,16 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
 
     let saved: GithubMapping;
 
-    if (mapping.id === BigInt(0)) {
+    const existing = await this.prisma.githubMapping.findUnique({
+      where: { id: mapping.id },
+    });
+
+    if (!existing) {
       // Create new
       saved = await this.prisma.githubMapping.create({
         data: {
           ...data,
+          id: mapping.id,
           created_at: mapping.createdAt,
           created_by_id: mapping.createdBy,
         },
@@ -80,7 +100,7 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
     return this.toDomain(saved);
   }
 
-  async delete(id: bigint): Promise<void> {
+  async delete(id: string): Promise<void> {
     await this.prisma.githubMapping.update({
       where: { id },
       data: {
@@ -93,6 +113,8 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
     return GithubMappingAggregate.reconstitute({
       id: prismaMapping.id,
       studentId: prismaMapping.student_id,
+      githubId: prismaMapping.github_id,
+      accessToken: prismaMapping.access_token,
       githubEmail: prismaMapping.github_email,
       githubUsername: prismaMapping.github_username,
       isVerified: prismaMapping.is_verified,

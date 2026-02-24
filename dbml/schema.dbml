@@ -96,7 +96,7 @@ Table students {
   updated_by_id String
   updated_by users [note: '@hide']
   user users [not null, note: '@hide']
-  github_mappings github_mappings [not null, note: '@hide']
+  github_mapping github_mappings [note: '@hide']
   enrollments enrollments [not null, note: '@hide']
   project_members project_members [not null, note: '@hide']
 }
@@ -121,8 +121,10 @@ Table lecturers {
 }
 
 Table github_mappings {
-  id BigInt [pk, increment]
-  student_id String [not null]
+  id String [pk]
+  student_id String [unique, not null]
+  access_token String [not null]
+  github_id String [unique, not null]
   github_email String [unique]
   github_username String [unique]
   is_verified Boolean [not null, default: false]
@@ -374,7 +376,7 @@ Ref: github_mappings.created_by_id > users.id [delete: No Action]
 
 Ref: github_mappings.updated_by_id > users.id [delete: No Action]
 
-Ref: github_mappings.student_id > students.id [delete: No Action]
+Ref: github_mappings.student_id - students.id [delete: No Action]
 
 Ref: semesters.deleted_by_id > users.id [delete: No Action]
 

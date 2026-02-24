@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictException } from '@nestjs/common';
-import { VerifyGitHubAccountCommand } from '@/modules/academic/application/commands/github/verify-github-account.command';
-import { IGithubMappingRepository } from '@/modules/academic/domain/repositories/github-mapping.repository';
-import { GithubMappingAggregate } from '@/modules/academic/domain/aggregates/github-mapping.aggregate';
-import { GitHubService } from '@/modules/auth/infrastructure/services/github.service';
+import { Transactional } from '@nestjs-cls/transactional';
+import { VerifyGitHubAccountCommand } from '@/modules/tracking/application/commands/github/verify-github-account.command';
+import { IGithubMappingRepository } from '@/modules/tracking/domain/repositories/github-mapping.repository';
+import { GithubMappingAggregate } from '@/modules/tracking/domain/aggregates/github-mapping.aggregate';
 
 @CommandHandler(VerifyGitHubAccountCommand)
 export class VerifyGitHubAccountHandler implements ICommandHandler<
@@ -12,19 +12,23 @@ export class VerifyGitHubAccountHandler implements ICommandHandler<
 > {
   constructor(
     private readonly githubMappingRepository: IGithubMappingRepository,
-    private readonly githubService: GitHubService,
   ) {}
 
+  @Transactional()
   async execute(
     command: VerifyGitHubAccountCommand,
   ): Promise<GithubMappingAggregate> {
-    const { studentId, code, redirectUri } = command;
+    const { studentId, githubProfile } = command;
 
-    // Step 1: Exchange code for GitHub profile
-    const githubProfile = await this.githubService.exchangeCodeForProfile(
-      code,
-      redirectUri,
+    // Step 1: Check if GitHub ID is already mapped to another student
+    const existingById = await this.githubMappingRepository.findByGitHubId(
+      githubProfile.providerId,
     );
+    if (existingById && existingById.studentId !== studentId) {
+      throw new ConflictException(
+        'This GitHub account is already linked to another student',
+      );
+    }
 
     // Step 2: Check if GitHub email is already mapped to another student
     if (githubProfile.email) {
@@ -56,6 +60,8 @@ export class VerifyGitHubAccountHandler implements ICommandHandler<
     if (mapping) {
       // Update existing mapping
       mapping.updateGithubInfo(
+        githubProfile.providerId,
+        githubProfile.accessToken,
         githubProfile.email,
         githubProfile.username,
         studentId,
@@ -64,6 +70,8 @@ export class VerifyGitHubAccountHandler implements ICommandHandler<
       // Create new verified mapping
       mapping = GithubMappingAggregate.createVerified(
         studentId,
+        githubProfile.providerId,
+        githubProfile.accessToken,
         githubProfile.email,
         githubProfile.username,
         studentId,

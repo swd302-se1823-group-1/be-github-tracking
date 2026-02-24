@@ -25,6 +25,11 @@ export const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string(),
   CLOUDINARY_API_SECRET: z.string(),
   CLOUDINARY_FOLDER: z.string().default('github-tracking/avatars'),
+
+  // GitHub Configuration
+  GITHUB_CLIENT_ID: z.string(),
+  GITHUB_CLIENT_SECRET: z.string(),
+  GITHUB_CALLBACK_URL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

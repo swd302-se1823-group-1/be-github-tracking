@@ -45,11 +45,6 @@ import { UpdateProjectAvatarHandler } from '@/modules/academic/application/handl
 import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
 import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repositories/prisma-project.repository';
 import { AuthModule } from '@/modules/auth/auth.module';
-import { GitHubController } from '@/modules/academic/presentation/http/github.controller';
-import { VerifyGitHubAccountHandler } from '@/modules/academic/application/handlers/github/verify-github-account.handler';
-import { GetGitHubMappingHandler } from '@/modules/academic/application/handlers/github/get-github-mapping.handler';
-import { IGithubMappingRepository } from '@/modules/academic/domain/repositories/github-mapping.repository';
-import { PrismaGithubMappingRepository } from '@/modules/academic/infrastructure/repositories/prisma-github-mapping.repository';
 
 @Module({
   imports: [
@@ -63,7 +58,6 @@ import { PrismaGithubMappingRepository } from '@/modules/academic/infrastructure
     CourseController,
     ClassController,
     ProjectController,
-    GitHubController,
   ],
   providers: [
     GetSemestersHandler,
@@ -110,13 +104,6 @@ import { PrismaGithubMappingRepository } from '@/modules/academic/infrastructure
     {
       provide: IProjectRepository,
       useClass: PrismaProjectRepository,
-    },
-    // GitHub verification
-    VerifyGitHubAccountHandler,
-    GetGitHubMappingHandler,
-    {
-      provide: IGithubMappingRepository,
-      useClass: PrismaGithubMappingRepository,
     },
   ],
 })
