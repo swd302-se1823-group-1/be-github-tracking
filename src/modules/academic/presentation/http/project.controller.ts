@@ -3,6 +3,7 @@ import {
   Controller,
   Param,
   Post,
+  Get,
   Patch,
   Delete,
   Put,
@@ -31,8 +32,14 @@ import { UpdateProjectDto } from '@/modules/academic/presentation/dtos/project/u
 import { UpdateProjectCommand } from '@/modules/academic/application/commands/project/update-project.command';
 import { DeleteProjectCommand } from '@/modules/academic/application/commands/project/delete-project.command';
 import { UpdateProjectAvatarCommand } from '@/modules/academic/application/commands/project/update-project-avatar.command';
-import { ProjectResponseDto } from '@/modules/academic/presentation/dtos/project/project-response.dto';
+import {
+  ProjectResponseDto,
+  ProjectMemberResponseDto,
+} from '@/modules/academic/presentation/dtos/project/project-response.dto';
+import { GetProjectMembersQuery } from '@/modules/academic/application/queries/project/get-project-members.query';
+import { ProjectDtoMapper } from '@/modules/academic/presentation/mappers/project-dto.mapper';
 import { ProjectAggregate } from '@/modules/academic/domain/aggregates/project.aggregate';
+import { ProjectMemberWithStudent } from '@/modules/academic/domain/repositories/project.repository';
 import { CloudinaryService } from '@/shared/cloudinary/cloudinary.service';
 import type { UploadedFile as UploadedFileType } from '@/shared/types/uploaded-file.interface';
 import { UploadAvatarResponseDto } from '@/shared/cloudinary/dtos/upload-avatar-response.dto';
@@ -60,6 +67,25 @@ export class ProjectController {
     await this.commandBus.execute(
       new AddProjectMemberCommand(projectId, dto.studentId, dto.role, user.id),
     );
+  }
+
+  @Get(':id/members')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all members of a project' })
+  @ApiResponse({
+    status: 200,
+    description: 'Members retrieved successfully',
+    type: [ProjectMemberResponseDto],
+  })
+  async getMembers(
+    @Param('id') projectId: string,
+  ): Promise<ProjectMemberResponseDto[]> {
+    const members = await this.queryBus.execute<
+      GetProjectMembersQuery,
+      ProjectMemberWithStudent[]
+    >(new GetProjectMembersQuery(projectId));
+    return members.map((m) => ProjectDtoMapper.toMemberResponseFromPrisma(m));
   }
 
   @Patch(':id')

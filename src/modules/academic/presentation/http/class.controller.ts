@@ -34,6 +34,7 @@ import { CursorPageMetaDto } from '@/shared/dtos/cursor-page-meta.dto';
 import { CreateProjectDto } from '@/modules/academic/presentation/dtos/project/create-project.dto';
 import { CreateProjectCommand } from '@/modules/academic/application/commands/project/create-project.command';
 import { ProjectResponseDto } from '@/modules/academic/presentation/dtos/project/project-response.dto';
+import { ProjectDtoMapper } from '@/modules/academic/presentation/mappers/project-dto.mapper';
 import { ProjectAggregate } from '@/modules/academic/domain/aggregates/project.aggregate';
 import { GetProjectsByClassQuery } from '@/modules/academic/application/queries/project/get-projects-by-class.query';
 
@@ -262,7 +263,7 @@ export class ClassController {
         userId,
       ),
     );
-    return new ProjectResponseDto(project);
+    return ProjectDtoMapper.toResponse(project);
   }
 
   @Get(':id/projects')
@@ -301,7 +302,7 @@ export class ClassController {
     });
 
     return new CursorPageDto(
-      result.projects.map((p) => new ProjectResponseDto(p)),
+      result.projects.map((p) => ProjectDtoMapper.toResponse(p)),
       meta,
     );
   }

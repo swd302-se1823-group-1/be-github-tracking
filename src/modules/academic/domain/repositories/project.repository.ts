@@ -1,6 +1,16 @@
 import { ProjectAggregate } from '../aggregates/project.aggregate';
 import { GetProjectsDto } from '@/modules/academic/presentation/dtos/project/get-projects.dto';
-import { ProjectMemberRole } from '@generated/prisma/client';
+import { Prisma, ProjectMemberRole } from '@generated/prisma/client';
+
+export type ProjectMemberWithStudent = Prisma.ProjectMemberGetPayload<{
+  include: {
+    student: {
+      include: {
+        user: true;
+      };
+    };
+  };
+}>;
 
 export interface IProjectRepository {
   create(project: ProjectAggregate): Promise<ProjectAggregate>;
@@ -31,6 +41,7 @@ export interface IProjectRepository {
     studentId: string,
   ): Promise<ProjectAggregate | null>;
   getProjectMemberCount(projectId: string): Promise<number>;
+  getMembers(projectId: string): Promise<ProjectMemberWithStudent[]>;
 }
 
 export const IProjectRepository = Symbol('IProjectRepository');

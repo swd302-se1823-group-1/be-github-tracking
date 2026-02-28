@@ -42,6 +42,7 @@ import { GetProjectsByClassHandler } from '@/modules/academic/application/handle
 import { UpdateProjectHandler } from '@/modules/academic/application/handlers/project/update-project.handler';
 import { DeleteProjectHandler } from '@/modules/academic/application/handlers/project/delete-project.handler';
 import { UpdateProjectAvatarHandler } from '@/modules/academic/application/handlers/project/update-project-avatar.handler';
+import { GetProjectMembersHandler } from '@/modules/academic/application/handlers/project/get-project-members.handler';
 import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
 import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repositories/prisma-project.repository';
 import { AuthModule } from '@/modules/auth/auth.module';
@@ -101,6 +102,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
     UpdateProjectHandler,
     DeleteProjectHandler,
     UpdateProjectAvatarHandler,
+    GetProjectMembersHandler,
     {
       provide: IProjectRepository,
       useClass: PrismaProjectRepository,
