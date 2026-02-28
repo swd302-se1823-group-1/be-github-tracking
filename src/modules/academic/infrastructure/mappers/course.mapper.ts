@@ -29,4 +29,14 @@ export class CourseMapper {
       updated_at: aggregate.updatedAt,
     };
   }
+
+  static toUpdateData(aggregate: CourseAggregate) {
+    return {
+      name: aggregate.name,
+      deleted_at: aggregate.deletedAt,
+      deleted_by_id: aggregate.deletedBy,
+      updated_by_id: aggregate.updatedBy,
+      updated_at: aggregate.updatedAt,
+    };
+  }
 }

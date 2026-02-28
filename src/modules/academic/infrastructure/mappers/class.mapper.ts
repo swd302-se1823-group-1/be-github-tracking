@@ -39,4 +39,18 @@ export class ClassMapper {
       updated_at: aggregate.updatedAt,
     };
   }
+
+  static toUpdateData(aggregate: ClassAggregate) {
+    return {
+      semester_id: aggregate.semesterId,
+      enroll_password: aggregate.enrollPassword,
+      lecturer_id: aggregate.lecturerId,
+      class_name: aggregate.className,
+      description: aggregate.description,
+      deleted_at: aggregate.deletedAt,
+      deleted_by_id: aggregate.deletedBy,
+      updated_by_id: aggregate.updatedBy,
+      updated_at: aggregate.updatedAt,
+    };
+  }
 }

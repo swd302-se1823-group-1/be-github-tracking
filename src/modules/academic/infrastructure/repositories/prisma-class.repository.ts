@@ -14,11 +14,18 @@ export class PrismaClassRepository implements IClassRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(clazz: ClassAggregate): Promise<ClassAggregate> {
-    const persistence = ClassMapper.toPersistence(clazz);
     const newClass = await this.prisma.class.create({
-      data: persistence,
+      data: ClassMapper.toPersistence(clazz),
     });
     return ClassMapper.toDomain(newClass);
+  }
+
+  async update(clazz: ClassAggregate): Promise<ClassAggregate> {
+    const updated = await this.prisma.class.update({
+      where: { id: clazz.id },
+      data: ClassMapper.toUpdateData(clazz),
+    });
+    return ClassMapper.toDomain(updated);
   }
 
   async findAll(query: GetClassesQuery): Promise<{

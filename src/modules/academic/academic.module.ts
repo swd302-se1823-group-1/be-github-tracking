@@ -6,7 +6,9 @@ import { ClassController } from '@/modules/academic/presentation/http/class.cont
 import { GetSemestersHandler } from '@/modules/academic/application/handlers/semester/get-semesters.handler';
 import { CreateSemesterHandler } from '@/modules/academic/application/handlers/semester/create-semester.handler';
 import { CreateCourseHandler } from '@/modules/academic/application/handlers/course/create-course.handler';
+import { UpdateCourseHandler } from '@/modules/academic/application/handlers/course/update-course.handler';
 import { CreateClassHandler } from '@/modules/academic/application/handlers/class/create-class.handler';
+import { UpdateClassHandler } from '@/modules/academic/application/handlers/class/update-class.handler';
 import { DeleteSemesterHandler } from '@/modules/academic/application/handlers/semester/delete-semester.handler';
 import { DeleteCourseHandler } from '@/modules/academic/application/handlers/course/delete-course.handler';
 import { DeleteClassHandler } from '@/modules/academic/application/handlers/class/delete-class.handler';
@@ -69,10 +71,12 @@ import { AuthModule } from '@/modules/auth/auth.module';
     GetSemesterByIdHandler,
     GetSemesterByCodeHandler,
     CreateCourseHandler,
+    UpdateCourseHandler,
     GetCoursesHandler,
     GetCourseByIdHandler,
     GetCourseByCodeHandler,
     CreateClassHandler,
+    UpdateClassHandler,
     GetClassesHandler,
     GetStudentClassesHandler,
     GetClassByIdHandler,

@@ -6,6 +6,7 @@ import {
   Query,
   Param,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
@@ -15,8 +16,10 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { CreateClassDto } from '@/modules/academic/presentation/dtos/class/create-class.dto';
+import { UpdateClassDto } from '@/modules/academic/presentation/dtos/class/update-class.dto';
 import { ClassResponseDto } from '@/modules/academic/presentation/dtos/class/class-response.dto';
 import { CreateClassCommand } from '@/modules/academic/application/commands/class/create-class.command';
+import { UpdateClassCommand } from '@/modules/academic/application/commands/class/update-class.command';
 import { DeleteClassCommand } from '@/modules/academic/application/commands/class/delete-class.command';
 import { ActiveUser, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
@@ -236,6 +239,40 @@ export class ClassController {
   ): Promise<void> {
     await this.commandBus.execute(new DeleteClassCommand(id, user.id));
   }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.LECTURER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a class' })
+  @ApiResponse({
+    status: 200,
+    description: 'Class updated successfully',
+    type: ClassResponseDto,
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateClassDto,
+    @ActiveUser() user: { id: string; role: UserRole },
+  ): Promise<ClassResponseDto> {
+    // Only ADMIN can reassign lecturerId
+    const lecturerId =
+      user.role === UserRole.ADMIN ? dto.lecturerId : undefined;
+    const clazz = await this.commandBus.execute<
+      UpdateClassCommand,
+      ClassAggregate
+    >(
+      new UpdateClassCommand(
+        id,
+        dto.className,
+        dto.description,
+        dto.enrollPassword,
+        lecturerId,
+        user.id,
+      ),
+    );
+    return new ClassResponseDto(clazz);
+  }
+
   @Post(':id/projects')
   @Roles(UserRole.LECTURER, UserRole.ADMIN)
   @ApiBearerAuth()

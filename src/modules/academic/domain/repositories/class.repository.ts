@@ -6,6 +6,7 @@ import { ClassWithRelations } from '../types/class-with-relations.type';
 
 export interface IClassRepository {
   create(clazz: ClassAggregate): Promise<ClassAggregate>;
+  update(clazz: ClassAggregate): Promise<ClassAggregate>;
   findAll(query: GetClassesQuery): Promise<{
     classes: ClassWithRelations[];
     total: number;
