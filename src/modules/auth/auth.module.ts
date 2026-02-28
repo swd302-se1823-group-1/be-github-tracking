@@ -14,6 +14,7 @@ import {
   JwtAccessStrategy,
   JwtRefreshStrategy,
   GoogleStrategy,
+  GitHubVerifyStrategy,
 } from './infrastructure/strategies';
 
 // Guards
@@ -21,17 +22,19 @@ import {
   JwtAccessGuard,
   JwtRefreshGuard,
   GoogleAuthGuard,
+  GitHubVerifyGuard,
 } from './infrastructure/guards';
 
 import { TokenService } from './application/services/token.service';
 
 import { InfrastructureModule } from '@/infrastructure';
-import { googleConfig } from '@/config';
+import { googleConfig, githubConfig } from '@/config';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
 import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
 import { IdentityModule } from '@/modules/identity/identity.module';
 import { GoogleService } from '@/modules/auth/infrastructure/services/google.service';
+import { GitHubService } from '@/modules/auth/infrastructure/services/github.service';
 
 @Module({
   controllers: [AuthController],
@@ -41,6 +44,7 @@ import { GoogleService } from '@/modules/auth/infrastructure/services/google.ser
     PassportModule.register({ defaultStrategy: 'jwt-access' }),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(googleConfig),
+    ConfigModule.forFeature(githubConfig),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -59,6 +63,8 @@ import { GoogleService } from '@/modules/auth/infrastructure/services/google.ser
   providers: [
     // Services
     TokenService,
+    GoogleService,
+    GitHubService,
     // Repositories
     {
       provide: IRefreshTokenRepository,
@@ -68,15 +74,16 @@ import { GoogleService } from '@/modules/auth/infrastructure/services/google.ser
     JwtAccessStrategy,
     JwtRefreshStrategy,
     GoogleStrategy,
+    GitHubVerifyStrategy,
     // Guards
     JwtAccessGuard,
     JwtRefreshGuard,
     GoogleAuthGuard,
+    GitHubVerifyGuard,
     // Handlers
     GoogleLoginHandler,
     RefreshTokenHandler,
     LogoutHandler,
-    GoogleService,
     RolesGuard,
   ],
   exports: [
@@ -88,8 +95,11 @@ import { GoogleService } from '@/modules/auth/infrastructure/services/google.ser
     JwtAccessGuard,
     JwtRefreshGuard,
     GoogleAuthGuard,
+    GitHubVerifyGuard,
     GoogleStrategy,
+    GitHubVerifyStrategy,
     RolesGuard,
+    GitHubService,
   ],
 })
 export class AuthModule {}

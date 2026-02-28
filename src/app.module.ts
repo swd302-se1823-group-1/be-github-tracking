@@ -13,6 +13,7 @@ import { IdentityModule } from '@/modules/identity/identity.module';
 import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
 import { JwtAccessGuard } from '@/modules/auth/infrastructure';
 import { AcademicModule } from './modules/academic/academic.module';
+import { TrackingModule } from './modules/tracking/tracking.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AcademicModule } from './modules/academic/academic.module';
     AuthModule,
     IdentityModule,
     AcademicModule,
+    TrackingModule,
     ClsModule.forRoot({
       global: true,
       middleware: { mount: true },

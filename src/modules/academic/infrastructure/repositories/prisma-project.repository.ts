@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
-import { IProjectRepository } from '../../domain/repositories/project.repository';
+import {
+  IProjectRepository,
+  ProjectMemberWithStudent,
+} from '../../domain/repositories/project.repository';
 import { ProjectAggregate } from '../../domain/aggregates/project.aggregate';
 import { ProjectMapper } from '../mappers/project.mapper';
 import { GetProjectsDto } from '@/modules/academic/presentation/dtos/project/get-projects.dto';
@@ -197,6 +200,26 @@ export class PrismaProjectRepository implements IProjectRepository {
         project_id: projectId,
         deleted_at: null,
         is_active: true,
+      },
+    });
+  }
+
+  async getMembers(projectId: string): Promise<ProjectMemberWithStudent[]> {
+    return this.prisma.projectMember.findMany({
+      where: {
+        project_id: projectId,
+        deleted_at: null,
+        is_active: true,
+      },
+      include: {
+        student: {
+          include: {
+            user: true,
+          },
+        },
+      },
+      orderBy: {
+        joined_at: 'asc',
       },
     });
   }

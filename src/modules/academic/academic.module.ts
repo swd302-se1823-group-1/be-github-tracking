@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { SemesterController } from '@/modules/academic/presentation/http/semester.controller';
 import { CourseController } from '@/modules/academic/presentation/http/course.controller';
@@ -42,11 +42,19 @@ import { GetProjectsByClassHandler } from '@/modules/academic/application/handle
 import { UpdateProjectHandler } from '@/modules/academic/application/handlers/project/update-project.handler';
 import { DeleteProjectHandler } from '@/modules/academic/application/handlers/project/delete-project.handler';
 import { UpdateProjectAvatarHandler } from '@/modules/academic/application/handlers/project/update-project-avatar.handler';
+import { GetProjectMembersHandler } from '@/modules/academic/application/handlers/project/get-project-members.handler';
+import { GetProjectByIdHandler } from '@/modules/academic/application/handlers/project/get-project-by-id.handler';
 import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
 import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repositories/prisma-project.repository';
+import { AuthModule } from '@/modules/auth/auth.module';
 
 @Module({
-  imports: [CqrsModule, InfrastructureModule, CloudinaryModule],
+  imports: [
+    CqrsModule,
+    InfrastructureModule,
+    CloudinaryModule,
+    forwardRef(() => AuthModule),
+  ],
   controllers: [
     SemesterController,
     CourseController,
@@ -95,6 +103,8 @@ import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repos
     UpdateProjectHandler,
     DeleteProjectHandler,
     UpdateProjectAvatarHandler,
+    GetProjectMembersHandler,
+    GetProjectByIdHandler,
     {
       provide: IProjectRepository,
       useClass: PrismaProjectRepository,
