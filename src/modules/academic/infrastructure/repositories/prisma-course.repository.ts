@@ -11,11 +11,18 @@ export class PrismaCourseRepository implements ICourseRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(course: CourseAggregate): Promise<CourseAggregate> {
-    const persistence = CourseMapper.toPersistence(course);
     const newCourse = await this.prisma.course.create({
-      data: persistence,
+      data: CourseMapper.toPersistence(course),
     });
     return CourseMapper.toDomain(newCourse);
+  }
+
+  async update(course: CourseAggregate): Promise<CourseAggregate> {
+    const updated = await this.prisma.course.update({
+      where: { id: course.id },
+      data: CourseMapper.toUpdateData(course),
+    });
+    return CourseMapper.toDomain(updated);
   }
 
   async findAll(query: GetCoursesQuery): Promise<{

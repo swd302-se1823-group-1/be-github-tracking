@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Patch } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
   ApiBearerAuth,
@@ -7,8 +7,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateCourseDto } from '@/modules/academic/presentation/dtos/course/create-course.dto';
+import { UpdateCourseDto } from '@/modules/academic/presentation/dtos/course/update-course.dto';
 import { CourseResponseDto } from '@/modules/academic/presentation/dtos/course/course-response.dto';
 import { CreateCourseCommand } from '@/modules/academic/application/commands/course/create-course.command';
+import { UpdateCourseCommand } from '@/modules/academic/application/commands/course/update-course.command';
 import { ActiveUser, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { CourseAggregate } from '@/modules/academic/domain/aggregates/course.aggregate';
@@ -128,5 +130,26 @@ export class CourseController {
     @ActiveUser() user: { id: string },
   ): Promise<void> {
     await this.commandBus.execute(new DeleteCourseCommand(id, user.id));
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a course' })
+  @ApiResponse({
+    status: 200,
+    description: 'Course updated successfully',
+    type: CourseResponseDto,
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateCourseDto,
+    @ActiveUser('id') userId: string,
+  ): Promise<CourseResponseDto> {
+    const course = await this.commandBus.execute<
+      UpdateCourseCommand,
+      CourseAggregate
+    >(new UpdateCourseCommand(id, dto.name, userId));
+    return new CourseResponseDto(course);
   }
 }

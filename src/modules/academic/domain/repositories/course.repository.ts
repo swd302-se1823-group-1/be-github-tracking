@@ -4,6 +4,7 @@ import { GetCoursesQuery } from '../../application/queries/course/get-courses.qu
 
 export interface ICourseRepository {
   create(course: CourseAggregate): Promise<CourseAggregate>;
+  update(course: CourseAggregate): Promise<CourseAggregate>;
   findAll(query: GetCoursesQuery): Promise<{
     courses: CourseAggregate[];
     total: number;

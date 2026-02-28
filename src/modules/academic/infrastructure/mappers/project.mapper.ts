@@ -61,10 +61,22 @@ export class ProjectMapper {
       description: aggregate.description,
       avatar_url: aggregate.avatarUrl,
       deleted_at: aggregate.deletedAt,
-      // deleted_by: aggregate.deletedBy ? { connect: { id: aggregate.deletedBy } } : undefined,
-      // created_by: aggregate.createdBy ? { connect: { id: aggregate.createdBy } } : undefined,
-      // updated_by: aggregate.updatedBy ? { connect: { id: aggregate.updatedBy } } : undefined,
       created_at: aggregate.createdAt,
+      updated_at: aggregate.updatedAt,
+    };
+  }
+
+  static toUpdateData(
+    aggregate: ProjectAggregate,
+  ): Prisma.ProjectUncheckedUpdateInput {
+    return {
+      name: aggregate.name,
+      topic: aggregate.topic,
+      description: aggregate.description,
+      avatar_url: aggregate.avatarUrl,
+      deleted_at: aggregate.deletedAt,
+      deleted_by_id: aggregate.deletedBy,
+      updated_by_id: aggregate.updatedBy,
       updated_at: aggregate.updatedAt,
     };
   }

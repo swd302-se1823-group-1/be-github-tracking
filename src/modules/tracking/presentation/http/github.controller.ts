@@ -6,13 +6,12 @@ import {
   ApiBearerAuth,
   ApiOperation,
 } from '@nestjs/swagger';
-import { ActiveUser, Roles } from '@/shared/decorators';
+import { ActiveUser, Public, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
 import { UseGuards, Req, Res, BadRequestException } from '@nestjs/common';
 import { type Request, type Response } from 'express';
 import {
   GitHubVerifyGuard,
-  JwtAccessGuard,
   RolesGuard,
 } from '@/modules/auth/infrastructure/guards';
 import { GitHubProfile } from '@/modules/auth/infrastructure/services/github.service';
@@ -34,11 +33,12 @@ export class GitHubController {
   @Get('verify')
   @Roles(UserRole.STUDENT)
   @ApiBearerAuth()
-  @UseGuards(JwtAccessGuard, RolesGuard, GitHubVerifyGuard)
+  @UseGuards(RolesGuard, GitHubVerifyGuard)
   @ApiOperation({ summary: 'Initiate GitHub verification flow' })
   async initiateGitHubVerify() {}
 
   @Get('callback')
+  @Public()
   @UseGuards(GitHubVerifyGuard)
   @ApiOperation({ summary: 'GitHub OAuth callback for verification' })
   async githubVerifyCallback(@Req() req: Request, @Res() res: Response) {

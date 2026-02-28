@@ -37,19 +37,9 @@ export class PrismaProjectRepository implements IProjectRepository {
   }
 
   async update(project: ProjectAggregate): Promise<ProjectAggregate> {
-    // implementation same as before
-    const persistenceData: Prisma.ProjectUncheckedUpdateInput = {
-      name: project.name,
-      topic: project.topic,
-      description: project.description,
-      avatar_url: project.avatarUrl,
-      updated_by_id: project.updatedBy,
-      updated_at: new Date(),
-    };
-
     const updated = await this.prisma.project.update({
       where: { id: project.id },
-      data: persistenceData,
+      data: ProjectMapper.toUpdateData(project),
     });
     return ProjectMapper.toDomain(updated);
   }
