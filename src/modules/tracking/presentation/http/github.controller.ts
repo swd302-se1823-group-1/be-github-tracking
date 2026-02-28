@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ApiResponse,
@@ -58,31 +58,6 @@ export class GitHubController {
     );
     // Redirect back to frontend or return success
     return res.redirect(`${frontendUrl}/profile?github=success`);
-  }
-
-  @Post('verify')
-  @Roles(UserRole.STUDENT)
-  @ApiBearerAuth()
-  @UseGuards(JwtAccessGuard, RolesGuard)
-  @ApiOperation({
-    summary:
-      'Verify GitHub account using pre-fetched profile (e.g. from mobile)',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'GitHub account verified successfully',
-    type: GithubMappingResponseDto,
-  })
-  async verifyGitHubAccount(
-    @Body() dto: { githubProfile: GitHubProfile },
-    @ActiveUser('id') studentId: string,
-  ): Promise<GithubMappingResponseDto> {
-    const mapping = await this.commandBus.execute<
-      VerifyGitHubAccountCommand,
-      GithubMappingAggregate
-    >(new VerifyGitHubAccountCommand(studentId, dto.githubProfile));
-
-    return new GithubMappingResponseDto(mapping);
   }
 
   @Get('mapping')
