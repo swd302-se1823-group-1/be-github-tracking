@@ -45,6 +45,8 @@ import type { UploadedFile as UploadedFileType } from '@/shared/types/uploaded-f
 import { UploadAvatarResponseDto } from '@/shared/cloudinary/dtos/upload-avatar-response.dto';
 import { CustomImageValidator } from '@/modules/identity/presentation/http/validators/custom-image.validator';
 
+import { GetProjectByIdQuery } from '@/modules/academic/application/queries/project/get-project-by-id.query';
+
 @ApiTags('Academic/projects')
 @Controller('projects')
 export class ProjectController {
@@ -86,6 +88,23 @@ export class ProjectController {
       ProjectMemberWithStudent[]
     >(new GetProjectMembersQuery(projectId));
     return members.map((m) => ProjectDtoMapper.toMemberResponseFromPrisma(m));
+  }
+
+  @Get(':id')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get project details by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Project retrieved successfully',
+    type: ProjectResponseDto,
+  })
+  async getById(@Param('id') projectId: string): Promise<ProjectResponseDto> {
+    const project = await this.queryBus.execute<
+      GetProjectByIdQuery,
+      ProjectAggregate
+    >(new GetProjectByIdQuery(projectId));
+    return ProjectDtoMapper.toResponse(project);
   }
 
   @Patch(':id')
