@@ -1,4 +1,4 @@
-import { GitHubProfile } from '@/modules/auth/infrastructure/services/github.service';
+import { GitHubProfile } from '@/modules/tracking/domain/types/github-profile.type';
 
 export class VerifyGitHubAccountCommand {
   constructor(

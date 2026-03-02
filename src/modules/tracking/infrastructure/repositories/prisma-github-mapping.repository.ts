@@ -62,6 +62,12 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
   }
 
   async save(mapping: GithubMappingAggregate): Promise<GithubMappingAggregate> {
+    if (!mapping.accessToken) {
+      throw new Error(
+        'GitHub access token is required to save a GithubMapping',
+      );
+    }
+
     const data = {
       student_id: mapping.studentId,
       github_id: mapping.githubId,
@@ -114,7 +120,7 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
       id: prismaMapping.id,
       studentId: prismaMapping.student_id,
       githubId: prismaMapping.github_id,
-      accessToken: prismaMapping.access_token,
+      accessToken: prismaMapping.access_token || null,
       githubEmail: prismaMapping.github_email,
       githubUsername: prismaMapping.github_username,
       isVerified: prismaMapping.is_verified,

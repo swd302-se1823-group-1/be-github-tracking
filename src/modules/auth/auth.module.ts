@@ -14,7 +14,6 @@ import {
   JwtAccessStrategy,
   JwtRefreshStrategy,
   GoogleStrategy,
-  GitHubVerifyStrategy,
 } from './infrastructure/strategies';
 
 // Guards
@@ -22,19 +21,19 @@ import {
   JwtAccessGuard,
   JwtRefreshGuard,
   GoogleAuthGuard,
-  GitHubVerifyGuard,
 } from './infrastructure/guards';
 
 import { TokenService } from './application/services/token.service';
 
 import { InfrastructureModule } from '@/infrastructure';
-import { googleConfig, githubConfig } from '@/config';
+import { googleConfig } from '@/config';
+import { firebaseConfig } from '@/config/firebase';
 import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
 import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
 import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
 import { IdentityModule } from '@/modules/identity/identity.module';
 import { GoogleService } from '@/modules/auth/infrastructure/services/google.service';
-import { GitHubService } from '@/modules/auth/infrastructure/services/github.service';
+import { FirebaseService } from '@/modules/auth/infrastructure/services/firebase.service';
 
 @Module({
   controllers: [AuthController],
@@ -44,7 +43,7 @@ import { GitHubService } from '@/modules/auth/infrastructure/services/github.ser
     PassportModule.register({ defaultStrategy: 'jwt-access' }),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(googleConfig),
-    ConfigModule.forFeature(githubConfig),
+    ConfigModule.forFeature(firebaseConfig),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -58,13 +57,13 @@ import { GitHubService } from '@/modules/auth/infrastructure/services/github.ser
         } as JwtModuleOptions;
       },
     }),
-    forwardRef(() => IdentityModule), // IdentityModule exports IUserRepository
+    forwardRef(() => IdentityModule),
   ],
   providers: [
     // Services
     TokenService,
     GoogleService,
-    GitHubService,
+    FirebaseService,
     // Repositories
     {
       provide: IRefreshTokenRepository,
@@ -74,12 +73,10 @@ import { GitHubService } from '@/modules/auth/infrastructure/services/github.ser
     JwtAccessStrategy,
     JwtRefreshStrategy,
     GoogleStrategy,
-    GitHubVerifyStrategy,
     // Guards
     JwtAccessGuard,
     JwtRefreshGuard,
     GoogleAuthGuard,
-    GitHubVerifyGuard,
     // Handlers
     GoogleLoginHandler,
     RefreshTokenHandler,
@@ -95,11 +92,9 @@ import { GitHubService } from '@/modules/auth/infrastructure/services/github.ser
     JwtAccessGuard,
     JwtRefreshGuard,
     GoogleAuthGuard,
-    GitHubVerifyGuard,
     GoogleStrategy,
-    GitHubVerifyStrategy,
     RolesGuard,
-    GitHubService,
+    FirebaseService,
   ],
 })
 export class AuthModule {}

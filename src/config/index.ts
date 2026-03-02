@@ -6,3 +6,4 @@ export * from './jwt';
 export * from './google';
 export * from './cloudinary';
 export * from './github';
+export * from './firebase';

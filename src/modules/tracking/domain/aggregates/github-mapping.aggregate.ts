@@ -5,7 +5,7 @@ export type GithubMappingProps = {
   id: string;
   studentId: string;
   githubId: string;
-  accessToken: string;
+  accessToken: string | null;
   githubEmail: string | null;
   githubUsername: string | null;
   isVerified: boolean;
@@ -32,7 +32,7 @@ export class GithubMappingAggregate extends AggregateRoot {
     return this._props.githubId;
   }
 
-  get accessToken(): string {
+  get accessToken(): string | null {
     return this._props.accessToken;
   }
 
@@ -75,7 +75,7 @@ export class GithubMappingAggregate extends AggregateRoot {
   public static createVerified(
     studentId: string,
     githubId: string,
-    accessToken: string,
+    accessToken: string | null,
     githubEmail: string | null,
     githubUsername: string | null,
     createdBy: string,
@@ -100,7 +100,7 @@ export class GithubMappingAggregate extends AggregateRoot {
   // Business logic: Update GitHub info
   public updateGithubInfo(
     githubId: string,
-    accessToken: string,
+    accessToken: string | null,
     githubEmail: string | null,
     githubUsername: string | null,
     updatedBy: string,
