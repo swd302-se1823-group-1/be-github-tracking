@@ -1,13 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 
 import { IGithubMappingRepository } from '@/modules/tracking/domain/repositories/github-mapping.repository';
 import { GithubMappingAggregate } from '@/modules/tracking/domain/aggregates/github-mapping.aggregate';
 import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
 import { GithubMapping } from '@generated/prisma/client';
+import { IEncryptionService, ENCRYPTION_SERVICE } from '@/shared';
 
 @Injectable()
 export class PrismaGithubMappingRepository implements IGithubMappingRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(ENCRYPTION_SERVICE)
+    private readonly encryptionService: IEncryptionService,
+  ) {}
 
   async findByStudentId(
     studentId: string,
@@ -68,10 +73,15 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
       );
     }
 
+    const { encrypted, iv } = this.encryptionService.encrypt(
+      mapping.accessToken,
+    );
+
     const data = {
       student_id: mapping.studentId,
       github_id: mapping.githubId,
-      access_token: mapping.accessToken,
+      encrypted_access_token: encrypted,
+      token_iv: iv,
       github_email: mapping.githubEmail,
       github_username: mapping.githubUsername,
       is_verified: mapping.isVerified,
@@ -116,11 +126,19 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
   }
 
   private toDomain(prismaMapping: GithubMapping): GithubMappingAggregate {
+    const accessToken =
+      prismaMapping.encrypted_access_token && prismaMapping.token_iv
+        ? this.encryptionService.decrypt(
+            prismaMapping.encrypted_access_token as string,
+            prismaMapping.token_iv as string,
+          )
+        : null;
+
     return GithubMappingAggregate.reconstitute({
       id: prismaMapping.id,
       studentId: prismaMapping.student_id,
       githubId: prismaMapping.github_id,
-      accessToken: prismaMapping.access_token || null,
+      accessToken: accessToken,
       githubEmail: prismaMapping.github_email,
       githubUsername: prismaMapping.github_username,
       isVerified: prismaMapping.is_verified,

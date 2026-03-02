@@ -35,6 +35,11 @@ export const envSchema = z.object({
   FIREBASE_PROJECT_ID: z.string(),
   FIREBASE_CLIENT_EMAIL: z.string(),
   FIREBASE_PRIVATE_KEY: z.string(),
+
+  // Security Configuration
+  ENCRYPTION_KEY: z
+    .string()
+    .length(64, 'Encryption key must be a 64-character hex string (32 bytes)'),
 });
 
 export type Env = z.infer<typeof envSchema>;

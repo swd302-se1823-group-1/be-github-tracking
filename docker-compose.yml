@@ -38,6 +38,7 @@ services:
       FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
 
       # Các biến khác
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       NODE_ENV: production
       PORT: 3000
       FRONTEND_URL: ${FRONTEND_URL}

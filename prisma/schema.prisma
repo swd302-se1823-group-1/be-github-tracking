@@ -222,25 +222,26 @@ model Lecturer {
 }
 
 model GithubMapping {
-  id              String    @id @default(uuid()) @db.Uuid
-  student_id      String    @db.Uuid @unique
-  access_token    String    @db.Text
-  github_id       String    @unique
-  github_email    String?   @db.VarChar(255)
-  github_username String?   @db.VarChar(255)
-  is_verified     Boolean   @default(false)
-  deleted_at      DateTime?
-  deleted_by_id   String?   @db.Uuid
+  id                     String    @id @default(uuid()) @db.Uuid
+  student_id             String    @db.Uuid @unique
+  encrypted_access_token String    @db.Text
+  token_iv               String    @db.VarChar(255)
+  github_id              String    @unique
+  github_email           String?   @db.VarChar(255)
+  github_username        String?   @db.VarChar(255)
+  is_verified            Boolean   @default(false)
+  deleted_at             DateTime?
+  deleted_by_id          String?   @db.Uuid
   /// @hide
-  deleted_by      User?     @relation("GithubMappingDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
-  created_at      DateTime  @default(now())
-  created_by_id   String?   @db.Uuid
+  deleted_by             User?     @relation("GithubMappingDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
+  created_at             DateTime  @default(now())
+  created_by_id          String?   @db.Uuid
   /// @hide
-  created_by      User?     @relation("GithubMappingCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
-  updated_at      DateTime  @default(now()) @updatedAt
-  updated_by_id   String?   @db.Uuid
+  created_by             User?     @relation("GithubMappingCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
+  updated_at             DateTime  @default(now()) @updatedAt
+  updated_by_id          String?   @db.Uuid
   /// @hide
-  updated_by      User?     @relation("GithubMappingUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
+  updated_by             User?     @relation("GithubMappingUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
   student Student @relation(fields: [student_id], references: [id], onDelete: NoAction)
@@ -446,29 +447,27 @@ model ProjectMember {
 }
 
 model Repository {
-  id                     String    @id @default(uuid()) @db.Uuid
-  project_id             String    @db.Uuid
-  url                    String    @db.VarChar(500)
-  name                   String    @db.VarChar(255)
-  organization           String    @db.VarChar(255)
-  owner                  String    @db.VarChar(255)
-  encrypted_access_token String    @db.Text
-  token_iv               String    @db.VarChar(255)
-  last_scanned_at        DateTime?
-  scan_status            String    @db.VarChar(50)
-  error_message          String    @db.Text
-  deleted_at             DateTime?
-  deleted_by_id          String?   @db.Uuid
+  id            String    @id @default(uuid()) @db.Uuid
+  project_id    String    @db.Uuid
+  url           String    @db.VarChar(500)
+  name          String    @db.VarChar(255)
+  organization  String    @db.VarChar(255)
+  owner         String    @db.VarChar(255)
+  last_scanned_at DateTime?
+  scan_status   String    @default("pending") @db.VarChar(50)
+  error_message String?   @db.Text
+  deleted_at    DateTime?
+  deleted_by_id String?   @db.Uuid
   /// @hide
-  deleted_by             User?     @relation("RepositoryDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
-  created_at             DateTime  @default(now())
-  created_by_id          String?   @db.Uuid
+  deleted_by    User?     @relation("RepositoryDeletedBy", fields: [deleted_by_id], references: [id], onDelete: NoAction)
+  created_at    DateTime  @default(now())
+  created_by_id String?   @db.Uuid
   /// @hide
-  created_by             User?     @relation("RepositoryCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
-  updated_at             DateTime  @default(now()) @updatedAt
-  updated_by_id          String?   @db.Uuid
+  created_by    User?     @relation("RepositoryCreatedBy", fields: [created_by_id], references: [id], onDelete: NoAction)
+  updated_at    DateTime  @default(now()) @updatedAt
+  updated_by_id String?   @db.Uuid
   /// @hide
-  updated_by             User?     @relation("RepositoryUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
+  updated_by    User?     @relation("RepositoryUpdatedBy", fields: [updated_by_id], references: [id], onDelete: NoAction)
 
   // Relations
   /// @hide

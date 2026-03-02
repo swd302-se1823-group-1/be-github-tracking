@@ -123,7 +123,8 @@ Table lecturers {
 Table github_mappings {
   id String [pk]
   student_id String [unique, not null]
-  access_token String [not null]
+  encrypted_access_token String [not null]
+  token_iv String [not null]
   github_id String [unique, not null]
   github_email String [unique]
   github_username String [unique]
@@ -279,11 +280,9 @@ Table repositories {
   name String [not null]
   organization String [not null]
   owner String [not null]
-  encrypted_access_token String [not null]
-  token_iv String [not null]
   last_scanned_at DateTime
-  scan_status String [not null]
-  error_message String [not null]
+  scan_status String [not null, default: 'pending']
+  error_message String
   deleted_at DateTime
   deleted_by_id String
   deleted_by users [note: '@hide']
