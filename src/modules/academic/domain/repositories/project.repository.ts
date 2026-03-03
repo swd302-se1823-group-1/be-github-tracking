@@ -24,6 +24,7 @@ export interface IProjectRepository {
     total: number;
     nextCursor: string | null;
   }>;
+  findByMemberId(memberId: string): Promise<ProjectAggregate[]>;
   delete(id: string, deletedBy: string): Promise<void>;
 
   // Member management

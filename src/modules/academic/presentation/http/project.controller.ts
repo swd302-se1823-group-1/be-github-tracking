@@ -49,6 +49,7 @@ import { UploadAvatarResponseDto } from '@/shared/cloudinary/dtos/upload-avatar-
 import { CustomImageValidator } from '@/modules/identity/presentation/http/validators/custom-image.validator';
 
 import { GetProjectByIdQuery } from '@/modules/academic/application/queries/project/get-project-by-id.query';
+import { GetMyProjectsQuery } from '@/modules/academic/application/queries/project/get-my-projects.query';
 import { RepositoryAggregate } from '@/modules/academic/domain/aggregates/repository.aggregate';
 
 @ApiTags('Academic/projects')
@@ -92,6 +93,25 @@ export class ProjectController {
       ProjectMemberWithStudent[]
     >(new GetProjectMembersQuery(projectId));
     return members.map((m) => ProjectDtoMapper.toMemberResponseFromPrisma(m));
+  }
+
+  @Get('/me')
+  @Roles(UserRole.STUDENT, UserRole.LECTURER, UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get my projects' })
+  @ApiResponse({
+    status: 200,
+    description: 'Projects retrieved successfully',
+    type: [ProjectResponseDto],
+  })
+  async getMyProjects(
+    @ActiveUser('id') userId: string,
+  ): Promise<ProjectResponseDto[]> {
+    const projects = await this.queryBus.execute<
+      GetMyProjectsQuery,
+      ProjectAggregate[]
+    >(new GetMyProjectsQuery(userId));
+    return projects.map((p) => ProjectDtoMapper.toResponse(p));
   }
 
   @Get(':id')
