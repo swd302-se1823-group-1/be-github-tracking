@@ -32,12 +32,15 @@ import { UpdateProjectDto } from '@/modules/academic/presentation/dtos/project/u
 import { UpdateProjectCommand } from '@/modules/academic/application/commands/project/update-project.command';
 import { DeleteProjectCommand } from '@/modules/academic/application/commands/project/delete-project.command';
 import { UpdateProjectAvatarCommand } from '@/modules/academic/application/commands/project/update-project-avatar.command';
+import { LinkRepositoryCommand } from '@/modules/academic/application/commands/repository/link-repository.command';
 import {
   ProjectResponseDto,
   ProjectMemberResponseDto,
 } from '@/modules/academic/presentation/dtos/project/project-response.dto';
 import { GetProjectMembersQuery } from '@/modules/academic/application/queries/project/get-project-members.query';
 import { ProjectDtoMapper } from '@/modules/academic/presentation/mappers/project-dto.mapper';
+import { LinkRepositoryRequestDto } from '@/modules/academic/presentation/dtos/project/request/link-repository.request.dto';
+import { RepositoryResponseDto } from '@/modules/academic/presentation/dtos/project/response/repository-response.dto';
 import { ProjectAggregate } from '@/modules/academic/domain/aggregates/project.aggregate';
 import { ProjectMemberWithStudent } from '@/modules/academic/domain/repositories/project.repository';
 import { CloudinaryService } from '@/shared/cloudinary/cloudinary.service';
@@ -46,6 +49,8 @@ import { UploadAvatarResponseDto } from '@/shared/cloudinary/dtos/upload-avatar-
 import { CustomImageValidator } from '@/modules/identity/presentation/http/validators/custom-image.validator';
 
 import { GetProjectByIdQuery } from '@/modules/academic/application/queries/project/get-project-by-id.query';
+import { GetMyProjectsQuery } from '@/modules/academic/application/queries/project/get-my-projects.query';
+import { RepositoryAggregate } from '@/modules/academic/domain/aggregates/repository.aggregate';
 
 @ApiTags('Academic/projects')
 @Controller('projects')
@@ -88,6 +93,25 @@ export class ProjectController {
       ProjectMemberWithStudent[]
     >(new GetProjectMembersQuery(projectId));
     return members.map((m) => ProjectDtoMapper.toMemberResponseFromPrisma(m));
+  }
+
+  @Get('/me')
+  @Roles(UserRole.STUDENT, UserRole.LECTURER, UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get my projects' })
+  @ApiResponse({
+    status: 200,
+    description: 'Projects retrieved successfully',
+    type: [ProjectResponseDto],
+  })
+  async getMyProjects(
+    @ActiveUser('id') userId: string,
+  ): Promise<ProjectResponseDto[]> {
+    const projects = await this.queryBus.execute<
+      GetMyProjectsQuery,
+      ProjectAggregate[]
+    >(new GetMyProjectsQuery(userId));
+    return projects.map((p) => ProjectDtoMapper.toResponse(p));
   }
 
   @Get(':id')
@@ -203,5 +227,32 @@ export class ProjectController {
     @ActiveUser() user: { id: string },
   ): Promise<void> {
     await this.commandBus.execute(new DeleteProjectCommand(id, user.id));
+  }
+
+  @Post(':id/repositories')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Link a GitHub repository to a project' })
+  @ApiResponse({
+    status: 201,
+    description: 'Repository linked successfully',
+    type: RepositoryResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid GitHub URL' })
+  @ApiResponse({
+    status: 404,
+    description: 'Project or GitHub repository not found/private',
+  })
+  @ApiResponse({ status: 409, description: 'Repository already linked' })
+  async linkRepository(
+    @Param('id') projectId: string,
+    @Body() dto: LinkRepositoryRequestDto,
+    @ActiveUser('id') userId: string,
+  ): Promise<RepositoryResponseDto> {
+    const aggregate = await this.commandBus.execute<
+      LinkRepositoryCommand,
+      RepositoryAggregate
+    >(new LinkRepositoryCommand(projectId, dto.url, userId));
+    return new RepositoryResponseDto(aggregate);
   }
 }

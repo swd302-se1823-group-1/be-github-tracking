@@ -103,6 +103,29 @@ export class PrismaProjectRepository implements IProjectRepository {
     };
   }
 
+  async findByMemberId(memberId: string): Promise<ProjectAggregate[]> {
+    const projects = await this.prisma.project.findMany({
+      where: {
+        deleted_at: null,
+        project_members: {
+          some: {
+            student_id: memberId,
+            deleted_at: null,
+            is_active: true,
+          },
+        },
+      },
+      include: {
+        project_members: {
+          where: { deleted_at: null, is_active: true },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    return projects.map((p) => ProjectMapper.toDomain(p));
+  }
+
   async delete(id: string, deletedBy: string): Promise<void> {
     await this.prisma.project.update({
       where: { id },
