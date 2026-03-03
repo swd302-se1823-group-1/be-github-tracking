@@ -1,6 +1,5 @@
 export * from './shared.module';
 export * from './decorators';
-export * from './domain/interfaces/password-hasher.interface';
 export * from './domain/interfaces/encryption-service.interface';
 export * from './security';
 export * from './events';

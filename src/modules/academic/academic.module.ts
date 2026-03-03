@@ -48,7 +48,11 @@ import { GetProjectMembersHandler } from '@/modules/academic/application/handler
 import { GetProjectByIdHandler } from '@/modules/academic/application/handlers/project/get-project-by-id.handler';
 import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
 import { PrismaProjectRepository } from '@/modules/academic/infrastructure/repositories/prisma-project.repository';
+import { IRepositoryRepository } from '@/modules/academic/domain/repositories/repository.repository';
+import { PrismaRepositoryRepository } from '@/modules/academic/infrastructure/repositories/prisma-repository.repository';
+import { LinkRepositoryHandler } from '@/modules/academic/application/handlers/repository/link-repository.handler';
 import { AuthModule } from '@/modules/auth/auth.module';
+import { TrackingModule } from '@/modules/tracking/tracking.module';
 
 @Module({
   imports: [
@@ -56,6 +60,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
     InfrastructureModule,
     CloudinaryModule,
     forwardRef(() => AuthModule),
+    forwardRef(() => TrackingModule),
   ],
   controllers: [
     SemesterController,
@@ -113,6 +118,11 @@ import { AuthModule } from '@/modules/auth/auth.module';
       provide: IProjectRepository,
       useClass: PrismaProjectRepository,
     },
+    {
+      provide: IRepositoryRepository,
+      useClass: PrismaRepositoryRepository,
+    },
+    LinkRepositoryHandler,
   ],
 })
 export class AcademicModule {}

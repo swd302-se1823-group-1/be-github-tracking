@@ -129,8 +129,8 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
     const accessToken =
       prismaMapping.encrypted_access_token && prismaMapping.token_iv
         ? this.encryptionService.decrypt(
-            prismaMapping.encrypted_access_token as string,
-            prismaMapping.token_iv as string,
+            prismaMapping.encrypted_access_token,
+            prismaMapping.token_iv,
           )
         : null;
 

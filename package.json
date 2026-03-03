@@ -45,6 +45,7 @@
     "firebase-admin": "^13.7.0",
     "google-auth-library": "^10.5.0",
     "nestjs-cls": "^6.2.0",
+    "octokit": "^2.1.0",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
