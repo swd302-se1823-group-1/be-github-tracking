@@ -15,6 +15,7 @@ import { JwtAccessGuard } from '@/modules/auth/infrastructure';
 import { AcademicModule } from './modules/academic/academic.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -43,6 +44,10 @@ import { ScheduleModule } from '@nestjs/schedule';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: 'APP_GUARD',
+      useClass: ThrottlerGuard,
+    },
     {
       provide: 'APP_GUARD',
       useClass: JwtAccessGuard,
