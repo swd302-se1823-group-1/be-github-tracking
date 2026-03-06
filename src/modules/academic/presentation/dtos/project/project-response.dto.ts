@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { RepositoryResponseDto } from './response/repository-response.dto';
 
 export class ProjectResponseDto {
   @ApiProperty()
@@ -20,7 +21,20 @@ export class ProjectResponseDto {
   avatarUrl: string | null;
 
   @ApiProperty()
+  memberCount: number;
+
+  @ApiPropertyOptional()
+  class?: {
+    id?: string;
+    code?: string;
+    name?: string;
+  };
+
+  @ApiProperty()
   members: ProjectMemberResponseDto[];
+
+  @ApiProperty({ type: [RepositoryResponseDto] })
+  repositories: RepositoryResponseDto[];
 
   @ApiProperty()
   createdAt?: Date;

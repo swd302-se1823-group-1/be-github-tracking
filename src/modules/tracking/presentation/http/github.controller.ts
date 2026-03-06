@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Param } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ApiResponse,
@@ -15,6 +15,10 @@ import { VerifyGitHubFirebaseDto } from '@/modules/tracking/presentation/dtos/gi
 import { VerifyGitHubAccountCommand } from '@/modules/tracking/application/commands/github/verify-github-account.command';
 import { GetGitHubMappingQuery } from '@/modules/tracking/application/queries/github/get-github-mapping.query';
 import { GithubMappingAggregate } from '@/modules/tracking/domain/aggregates/github-mapping.aggregate';
+import { SyncRepositoryCommand } from '@/modules/tracking/application/commands/github/sync-repository.command';
+import { GetStudentStatsQuery } from '@/modules/tracking/application/queries/github/get-student-stats.query';
+import { StudentStatsResponseDto } from '@/modules/tracking/presentation/dtos/github/student-stats-response.dto';
+import { StudentStatsResult } from '@/modules/tracking/application/handlers/github/get-student-stats.handler';
 
 @ApiTags('GitHub')
 @ApiBearerAuth()
@@ -73,5 +77,36 @@ export class GitHubController {
     >(new GetGitHubMappingQuery(studentId));
 
     return mapping ? new GithubMappingResponseDto(mapping) : null;
+  }
+
+  @Post('repositories/:id/sync')
+  @Roles(UserRole.ADMIN, UserRole.LECTURER)
+  @UseGuards(RolesGuard)
+  @ResponseMessage('Repository synchronization triggered')
+  @ApiOperation({ summary: 'Manually trigger repository synchronization' })
+  @ApiResponse({ status: 201, description: 'Sync triggered' })
+  async syncRepository(@Param('id') repositoryId: string): Promise<void> {
+    await this.commandBus.execute(new SyncRepositoryCommand(repositoryId));
+  }
+
+  @Get('stats/project/:projectId/student/:studentId')
+  @Roles(UserRole.ADMIN, UserRole.LECTURER, UserRole.STUDENT)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Get commit statistics for a student in a project' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stats retrieved',
+    type: StudentStatsResponseDto,
+  })
+  async getStudentStats(
+    @Param('projectId') projectId: string,
+    @Param('studentId') studentId: string,
+  ): Promise<StudentStatsResponseDto> {
+    const stats = await this.queryBus.execute<
+      GetStudentStatsQuery,
+      StudentStatsResult
+    >(new GetStudentStatsQuery(projectId, studentId));
+
+    return new StudentStatsResponseDto(stats);
   }
 }

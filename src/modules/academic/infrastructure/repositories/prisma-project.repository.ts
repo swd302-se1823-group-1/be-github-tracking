@@ -52,6 +52,11 @@ export class PrismaProjectRepository implements IProjectRepository {
         project_members: {
           where: { deleted_at: null, is_active: true },
         },
+        class: true,
+        repositories: {
+          where: { deleted_at: null },
+          orderBy: { created_at: 'desc' },
+        },
       },
     });
     return found ? ProjectMapper.toDomain(found) : null;
@@ -86,6 +91,11 @@ export class PrismaProjectRepository implements IProjectRepository {
           project_members: {
             where: { deleted_at: null, is_active: true },
           },
+          class: true,
+          repositories: {
+            where: { deleted_at: null },
+            orderBy: { created_at: 'desc' },
+          },
         },
       }),
     ]);
@@ -118,6 +128,11 @@ export class PrismaProjectRepository implements IProjectRepository {
       include: {
         project_members: {
           where: { deleted_at: null, is_active: true },
+        },
+        class: true,
+        repositories: {
+          where: { deleted_at: null },
+          orderBy: { created_at: 'desc' },
         },
       },
       orderBy: { created_at: 'desc' },
@@ -200,6 +215,11 @@ export class PrismaProjectRepository implements IProjectRepository {
       include: {
         project_members: {
           where: { deleted_at: null, is_active: true },
+        },
+        class: true,
+        repositories: {
+          where: { deleted_at: null },
+          orderBy: { created_at: 'desc' },
         },
       },
     });

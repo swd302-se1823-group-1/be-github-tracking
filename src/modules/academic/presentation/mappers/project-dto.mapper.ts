@@ -5,6 +5,7 @@ import {
   ProjectMemberResponseDto,
   ProjectResponseDto,
 } from '../dtos/project/project-response.dto';
+import { RepositoryResponseDto } from '../dtos/project/response/repository-response.dto';
 
 export class ProjectDtoMapper {
   static toResponse(aggregate: ProjectAggregate): ProjectResponseDto {
@@ -15,9 +16,19 @@ export class ProjectDtoMapper {
       topic: aggregate.topic,
       description: aggregate.description,
       avatarUrl: aggregate.avatarUrl,
+      memberCount: aggregate.getActiveMemberCount(),
+      class: aggregate.classInfo
+        ? {
+            id: aggregate.classId,
+            code: aggregate.classInfo.code,
+            name: aggregate.classInfo.name,
+          }
+        : undefined,
       members: aggregate.members.map((m) =>
         ProjectDtoMapper.toMemberResponse(m),
       ),
+      repositories:
+        aggregate.repositories?.map((r) => new RepositoryResponseDto(r)) || [],
       createdAt: aggregate.createdAt,
     });
   }

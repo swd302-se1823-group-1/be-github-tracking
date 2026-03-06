@@ -25,6 +25,7 @@ export class CreateClassHandler implements ICommandHandler<
       command.classCode,
       command.className,
       command.description,
+      command.maxStudents,
       command.createdBy,
     );
     return this.classRepository.create(clazz);

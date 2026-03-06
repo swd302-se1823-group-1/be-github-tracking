@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'Github Tracking System' })
@@ -16,4 +16,9 @@ export class CreateProjectDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @ApiPropertyOptional({ example: 5, default: 5 })
+  @IsNumber()
+  @IsOptional()
+  maxMembers?: number;
 }

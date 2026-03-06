@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
+import { Transactional } from '@nestjs-cls/transactional';
 import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
 import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
 import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
@@ -12,6 +13,7 @@ export class UpdateUserGoogleInfoHandler implements ICommandHandler<UpdateUserGo
     private readonly userRepository: IUserRepository,
   ) {}
 
+  @Transactional()
   async execute(command: UpdateUserGoogleInfoCommand): Promise<UserAggregate> {
     const { userId, providerId, avatarUrl } = command;
 

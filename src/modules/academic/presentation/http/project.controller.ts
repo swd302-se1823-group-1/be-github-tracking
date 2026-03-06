@@ -52,6 +52,11 @@ import { GetProjectByIdQuery } from '@/modules/academic/application/queries/proj
 import { GetMyProjectsQuery } from '@/modules/academic/application/queries/project/get-my-projects.query';
 import { RepositoryAggregate } from '@/modules/academic/domain/aggregates/repository.aggregate';
 
+// New Commands & Queries for Repository
+import { DeleteRepositoryCommand } from '@/modules/academic/application/commands/repository/delete-repository.command';
+import { GetRepositoriesByProjectQuery } from '@/modules/academic/application/queries/repository/get-repositories-by-project.query';
+import { GetRepositoryByIdQuery } from '@/modules/academic/application/queries/repository/get-repository-by-id.query';
+
 @ApiTags('Academic/projects')
 @Controller('projects')
 export class ProjectController {
@@ -254,5 +259,64 @@ export class ProjectController {
       RepositoryAggregate
     >(new LinkRepositoryCommand(projectId, dto.url, userId));
     return new RepositoryResponseDto(aggregate);
+  }
+
+  @Get(':id/repositories')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all repositories of a project' })
+  @ApiResponse({
+    status: 200,
+    description: 'Repositories retrieved successfully',
+    type: [RepositoryResponseDto],
+  })
+  async getRepositories(
+    @Param('id') projectId: string,
+    @ActiveUser('id') userId: string,
+  ): Promise<RepositoryResponseDto[]> {
+    const repositories = await this.queryBus.execute<
+      GetRepositoriesByProjectQuery,
+      RepositoryAggregate[]
+    >(new GetRepositoriesByProjectQuery(projectId, userId));
+    return repositories.map((repo) => new RepositoryResponseDto(repo));
+  }
+
+  @Get(':id/repositories/:repoId')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get repository details by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Repository retrieved successfully',
+    type: RepositoryResponseDto,
+  })
+  async getRepositoryById(
+    @Param('id') projectId: string,
+    @Param('repoId') repoId: string,
+    @ActiveUser('id') userId: string,
+  ): Promise<RepositoryResponseDto> {
+    const repository = await this.queryBus.execute<
+      GetRepositoryByIdQuery,
+      RepositoryAggregate
+    >(new GetRepositoryByIdQuery(repoId, projectId, userId));
+    return new RepositoryResponseDto(repository);
+  }
+
+  @Delete(':id/repositories/:repoId')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Unlink/Delete a project repository' })
+  @ApiResponse({
+    status: 200,
+    description: 'Repository deleted successfully',
+  })
+  async deleteRepository(
+    @Param('id') projectId: string,
+    @Param('repoId') repoId: string,
+    @ActiveUser('id') userId: string,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new DeleteRepositoryCommand(repoId, projectId, userId),
+    );
   }
 }

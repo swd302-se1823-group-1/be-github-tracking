@@ -1,11 +1,14 @@
 import { ProjectAggregate } from '../../domain/aggregates/project.aggregate';
 import { ProjectMemberEntity } from '../../domain/entities/project-member.entity';
 import { Prisma, Project, ProjectMember } from '@generated/prisma/client';
+import { RepositoryMapper } from '../../presentation/mappers/repository.mapper';
 
 // Define exact type expected from Prisma with includes
 type ProjectWithRelations = Prisma.ProjectGetPayload<{
   include: {
     project_members: true;
+    class: true;
+    repositories: true;
   };
 }>;
 
@@ -13,12 +16,13 @@ export class ProjectMapper {
   static toDomain(
     prismaProject: ProjectWithRelations | Project,
   ): ProjectAggregate {
+    const projectWithRelations = prismaProject as ProjectWithRelations;
     const members =
-      (prismaProject as ProjectWithRelations).project_members?.map((pm) =>
+      projectWithRelations.project_members?.map((pm) =>
         ProjectMapper.toDomainMember(pm),
       ) || [];
 
-    return new ProjectAggregate(
+    const project = new ProjectAggregate(
       prismaProject.id,
       prismaProject.class_id,
       prismaProject.name,
@@ -33,7 +37,21 @@ export class ProjectMapper {
       prismaProject.created_by_id,
       prismaProject.updated_at,
       prismaProject.updated_by_id,
+      undefined, // classInfo will be set below
+      prismaProject.max_members,
+      projectWithRelations.repositories?.map((r) =>
+        RepositoryMapper.toDomain(r),
+      ) || [],
     );
+
+    if (projectWithRelations.class) {
+      project.classInfo = {
+        code: projectWithRelations.class.class_code,
+        name: projectWithRelations.class.class_name,
+      };
+    }
+
+    return project;
   }
 
   static toDomainMember(prismaMember: ProjectMember): ProjectMemberEntity {
@@ -60,6 +78,7 @@ export class ProjectMapper {
       topic: aggregate.topic,
       description: aggregate.description,
       avatar_url: aggregate.avatarUrl,
+      max_members: aggregate.maxMembers,
       deleted_at: aggregate.deletedAt,
       created_at: aggregate.createdAt,
       updated_at: aggregate.updatedAt,
@@ -74,6 +93,7 @@ export class ProjectMapper {
       topic: aggregate.topic,
       description: aggregate.description,
       avatar_url: aggregate.avatarUrl,
+      max_members: aggregate.maxMembers,
       deleted_at: aggregate.deletedAt,
       deleted_by_id: aggregate.deletedBy,
       updated_by_id: aggregate.updatedBy,

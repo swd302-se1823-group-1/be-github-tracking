@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
+import { Transactional } from '@nestjs-cls/transactional';
 import { LogoutCommand } from '../commands/logout.command';
 import { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository';
 
@@ -10,6 +11,7 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand, void> {
     private readonly refreshTokenRepo: IRefreshTokenRepository,
   ) {}
 
+  @Transactional()
   async execute(command: LogoutCommand): Promise<void> {
     const { userId, jti } = command;
 

@@ -3,6 +3,7 @@ import { Inject, NotFoundException } from '@nestjs/common';
 import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
 import { UpdateProjectAvatarCommand } from '../../commands/project/update-project-avatar.command';
 import { ProjectAggregate } from '@/modules/academic/domain/aggregates/project.aggregate';
+import { Transactional } from '@nestjs-cls/transactional';
 
 @CommandHandler(UpdateProjectAvatarCommand)
 export class UpdateProjectAvatarHandler implements ICommandHandler<UpdateProjectAvatarCommand> {
@@ -11,6 +12,7 @@ export class UpdateProjectAvatarHandler implements ICommandHandler<UpdateProject
     private readonly projectRepository: IProjectRepository,
   ) {}
 
+  @Transactional()
   async execute(
     command: UpdateProjectAvatarCommand,
   ): Promise<ProjectAggregate> {

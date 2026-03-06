@@ -4,6 +4,7 @@ import { IProjectRepository } from '@/modules/academic/domain/repositories/proje
 import { IEnrollmentRepository } from '@/modules/academic/domain/repositories/enrollment.repository';
 import { AddProjectMemberCommand } from '@/modules/academic/application/commands/project/add-project-member.command';
 import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
+import { Transactional } from '@nestjs-cls/transactional';
 import {
   NotFoundException,
   BusinessRuleViolationException,
@@ -20,6 +21,7 @@ export class AddProjectMemberHandler implements ICommandHandler<AddProjectMember
     private readonly prisma: PrismaService,
   ) {}
 
+  @Transactional()
   async execute(command: AddProjectMemberCommand): Promise<void> {
     const { projectId, studentId, role } = command;
 

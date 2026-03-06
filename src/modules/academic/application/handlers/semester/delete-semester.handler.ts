@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DeleteSemesterCommand } from '../../commands/semester/delete-semester.command';
 import { Inject } from '@nestjs/common';
 import { ISemesterRepository } from '@/modules/academic/domain/repositories/semester.repository';
+import { Transactional } from '@nestjs-cls/transactional';
 
 @CommandHandler(DeleteSemesterCommand)
 export class DeleteSemesterHandler implements ICommandHandler<DeleteSemesterCommand> {
@@ -10,6 +11,7 @@ export class DeleteSemesterHandler implements ICommandHandler<DeleteSemesterComm
     private readonly semesterRepository: ISemesterRepository,
   ) {}
 
+  @Transactional()
   async execute(command: DeleteSemesterCommand): Promise<void> {
     const { id, deletedBy } = command;
     // We could check if it exists here, but delete usually is idempotent or repo throws if not found?

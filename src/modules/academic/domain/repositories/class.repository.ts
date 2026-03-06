@@ -23,6 +23,7 @@ export interface IClassRepository {
   }>;
   findByIdWithRelations(id: string): Promise<ClassWithRelations | null>;
   delete(id: string, deletedBy: string): Promise<void>;
+  countActiveEnrollments(id: string): Promise<number>;
 }
 
 export const IClassRepository = Symbol('IClassRepository');
