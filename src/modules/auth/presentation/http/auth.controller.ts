@@ -10,6 +10,7 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import type { Request, Response, CookieOptions } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import {
   GoogleAuthGuard,
@@ -51,6 +52,7 @@ export class AuthController {
 
   @Get('google/callback')
   @Public()
+  @Throttle({ auth: {} })
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({ status: 302, description: 'Redirect to Dashboard' })
@@ -109,6 +111,7 @@ export class AuthController {
 
   @Post('refresh')
   @Public()
+  @Throttle({ medium: {} })
   @UseGuards(JwtRefreshGuard)
   @ResponseMessage('Refresh token successfully')
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
@@ -155,6 +158,7 @@ export class AuthController {
 
   @Post('google/exchange')
   @Public()
+  @Throttle({ auth: {} })
   @ApiOperation({ summary: 'Exchange Google authorization code for tokens' })
   @ApiResponse({
     status: 200,
@@ -218,6 +222,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @Throttle({ medium: {} })
   @UseGuards(JwtRefreshGuard)
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Logout successful' })

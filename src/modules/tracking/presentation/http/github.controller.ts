@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, UseGuards, Param } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ApiResponse,
@@ -31,6 +32,7 @@ export class GitHubController {
   ) {}
 
   @Post('verify')
+  @Throttle({ auth: {} })
   @Roles(UserRole.STUDENT)
   @UseGuards(RolesGuard)
   @ResponseMessage('GitHub account verified successfully')
@@ -80,6 +82,7 @@ export class GitHubController {
   }
 
   @Post('repositories/:id/sync')
+  @Throttle({ sync: {} })
   @Roles(UserRole.ADMIN, UserRole.LECTURER)
   @UseGuards(RolesGuard)
   @ResponseMessage('Repository synchronization triggered')

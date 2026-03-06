@@ -47,6 +47,7 @@ import { CloudinaryService } from '@/shared/cloudinary/cloudinary.service';
 import type { UploadedFile as UploadedFileType } from '@/shared/types/uploaded-file.interface';
 import { UploadAvatarResponseDto } from '@/shared/cloudinary/dtos/upload-avatar-response.dto';
 import { CustomImageValidator } from '@/modules/identity/presentation/http/validators/custom-image.validator';
+import { Throttle } from '@nestjs/throttler';
 
 import { GetProjectByIdQuery } from '@/modules/academic/application/queries/project/get-project-by-id.query';
 import { GetMyProjectsQuery } from '@/modules/academic/application/queries/project/get-my-projects.query';
@@ -235,6 +236,7 @@ export class ProjectController {
   }
 
   @Post(':id/repositories')
+  @Throttle({ medium: {} })
   @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Link a GitHub repository to a project' })
