@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
+import { Transactional } from '@nestjs-cls/transactional';
 import { UpdateStudentCommand } from '@/modules/identity/application/commands/student/update-student.command';
 import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
 import { UserId } from '@/modules/identity/domain/value-objects/user-id.vo';
@@ -13,6 +14,7 @@ export class UpdateStudentHandler implements ICommandHandler<UpdateStudentComman
     private readonly userRepository: IUserRepository,
   ) {}
 
+  @Transactional()
   async execute(command: UpdateStudentCommand): Promise<StudentResponseDto> {
     const { id, fullName, studentCode, universityEmail } = command;
 

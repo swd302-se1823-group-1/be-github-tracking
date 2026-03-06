@@ -10,5 +10,6 @@ export class CreateClassCommand implements ICommand {
     public readonly className: string,
     public readonly description: string | undefined,
     public readonly createdBy: string,
+    public readonly maxStudents?: number,
   ) {}
 }

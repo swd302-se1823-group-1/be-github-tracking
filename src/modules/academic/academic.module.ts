@@ -55,6 +55,11 @@ import { LinkRepositoryHandler } from '@/modules/academic/application/handlers/r
 import { AuthModule } from '@/modules/auth/auth.module';
 import { TrackingModule } from '@/modules/tracking/tracking.module';
 
+// Repository Handlers
+import { DeleteRepositoryHandler } from '@/modules/academic/application/handlers/repository/delete-repository.handler';
+import { GetRepositoriesByProjectHandler } from '@/modules/academic/application/handlers/repository/get-repositories-by-project.handler';
+import { GetRepositoryByIdHandler } from '@/modules/academic/application/handlers/repository/get-repository-by-id.handler';
+
 @Module({
   imports: [
     CqrsModule,
@@ -125,6 +130,9 @@ import { TrackingModule } from '@/modules/tracking/tracking.module';
       useClass: PrismaRepositoryRepository,
     },
     LinkRepositoryHandler,
+    DeleteRepositoryHandler,
+    GetRepositoriesByProjectHandler,
+    GetRepositoryByIdHandler,
   ],
 })
 export class AcademicModule {}

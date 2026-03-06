@@ -221,4 +221,13 @@ export class PrismaClassRepository implements IClassRepository {
       },
     });
   }
+
+  async countActiveEnrollments(id: string): Promise<number> {
+    return this.prisma.enrollment.count({
+      where: {
+        class_id: id,
+        deleted_at: null,
+      },
+    });
+  }
 }

@@ -6,5 +6,6 @@ export class CreateProjectCommand {
     public readonly description: string | null,
     public readonly avatarUrl: string | null,
     public readonly userId: string,
+    public readonly maxMembers?: number,
   ) {}
 }

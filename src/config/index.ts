@@ -7,3 +7,4 @@ export * from './google';
 export * from './cloudinary';
 export * from './github';
 export * from './firebase';
+export * from './redis';

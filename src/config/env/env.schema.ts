@@ -40,6 +40,17 @@ export const envSchema = z.object({
   ENCRYPTION_KEY: z
     .string()
     .length(64, 'Encryption key must be a 64-character hex string (32 bytes)'),
+
+  // Redis Configuration
+  REDIS_HOST: z.string().default('localhost'),
+  REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().optional(),
+  REDIS_USERNAME: z.string().optional(),
+  REDIS_TLS: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true')
+    .default(false),
 });
 
 export type Env = z.infer<typeof envSchema>;

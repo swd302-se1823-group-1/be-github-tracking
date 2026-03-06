@@ -3,6 +3,7 @@ import { Inject, NotFoundException } from '@nestjs/common';
 import { UpdateCourseCommand } from '../../commands/course/update-course.command';
 import { ICourseRepository } from '../../../domain/repositories/course.repository';
 import { CourseAggregate } from '../../../domain/aggregates/course.aggregate';
+import { Transactional } from '@nestjs-cls/transactional';
 
 @CommandHandler(UpdateCourseCommand)
 export class UpdateCourseHandler implements ICommandHandler<
@@ -14,6 +15,7 @@ export class UpdateCourseHandler implements ICommandHandler<
     private readonly courseRepository: ICourseRepository,
   ) {}
 
+  @Transactional()
   async execute(command: UpdateCourseCommand): Promise<CourseAggregate> {
     const course = await this.courseRepository.findById(command.id);
 

@@ -4,6 +4,7 @@ import { Inject } from '@nestjs/common';
 import { IProjectRepository } from '@/modules/academic/domain/repositories/project.repository';
 import { ProjectAggregate } from '@/modules/academic/domain/aggregates/project.aggregate';
 import { CreateProjectCommand } from '@/modules/academic/application/commands/project/create-project.command';
+import { Transactional } from '@nestjs-cls/transactional';
 
 @CommandHandler(CreateProjectCommand)
 export class CreateProjectHandler implements ICommandHandler<CreateProjectCommand> {
@@ -12,6 +13,7 @@ export class CreateProjectHandler implements ICommandHandler<CreateProjectComman
     private readonly projectRepository: IProjectRepository,
   ) {}
 
+  @Transactional()
   async execute(command: CreateProjectCommand): Promise<ProjectAggregate> {
     const { classId, name, topic, description, userId } = command;
 
@@ -24,8 +26,9 @@ export class CreateProjectHandler implements ICommandHandler<CreateProjectComman
       name,
       topic,
       description,
-      null, // avatarUrl will be uploaded separately via PUT /projects/:id/avatar
+      null, // avatarUrl
       userId,
+      command.maxMembers,
     );
 
     return this.projectRepository.create(project);

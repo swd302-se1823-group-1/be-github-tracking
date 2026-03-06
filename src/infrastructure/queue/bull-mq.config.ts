@@ -1,18 +1,24 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
+import { RedisConfig } from '@/config/redis';
 
 export const BullMQConfig = BullModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => {
-    const host = configService.get<string>('REDIS_HOST') ?? 'localhost';
-    const port = configService.get<number>('REDIS_PORT') ?? 6379;
-    const password = configService.get<string>('REDIS_PASSWORD');
+    const redis = configService.get<RedisConfig>('redis');
+
+    if (!redis) {
+      throw new Error('Redis configuration not found');
+    }
 
     return {
       connection: {
-        host,
-        port,
-        password,
+        host: redis.host,
+        port: redis.port,
+        password: redis.password,
+        username: redis.username,
+        tls: redis.tls ? {} : undefined,
+        skipVersionCheck: true,
       },
       defaultJobOptions: {
         attempts: 3,

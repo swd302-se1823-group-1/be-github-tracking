@@ -9,6 +9,7 @@ import {
 import { IEnrollmentRepository } from '@/modules/academic/domain/repositories/enrollment.repository';
 import { IClassRepository } from '@/modules/academic/domain/repositories/class.repository';
 import { EnrollmentAggregate } from '@/modules/academic/domain/aggregates/enrollment.aggregate';
+import { Transactional } from '@nestjs-cls/transactional';
 
 @CommandHandler(EnrollStudentCommand)
 export class EnrollStudentHandler implements ICommandHandler<EnrollStudentCommand> {
@@ -19,6 +20,7 @@ export class EnrollStudentHandler implements ICommandHandler<EnrollStudentComman
     private readonly classRepository: IClassRepository,
   ) {}
 
+  @Transactional()
   async execute(command: EnrollStudentCommand): Promise<void> {
     const { classId, enrollPassword, studentId } = command;
 
@@ -33,13 +35,14 @@ export class EnrollStudentHandler implements ICommandHandler<EnrollStudentComman
       throw new ForbiddenException('Invalid enrollment password');
     }
 
-    // 3. Check if already enrolled
-    const exists = await this.enrollmentRepository.exists(classId, studentId);
-    if (exists) {
-      throw new BadRequestException('Student already enrolled in this class');
+    // 4. Check if class is full
+    const currentEnrollments =
+      await this.classRepository.countActiveEnrollments(classId);
+    if (currentEnrollments >= clazz.maxStudents) {
+      throw new BadRequestException('Class is full');
     }
 
-    // 4. Create enrollment
+    // 5. Create enrollment
     const enrollment = EnrollmentAggregate.create(
       classId,
       studentId,

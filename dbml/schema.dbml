@@ -169,6 +169,7 @@ Table classes {
   class_code String [not null]
   class_name String [not null]
   description String
+  max_students Int [not null, default: 40]
   deleted_at DateTime
   deleted_by_id String
   deleted_by users [note: '@hide']
@@ -234,6 +235,7 @@ Table projects {
   topic String
   description String
   avatar_url String
+  max_members Int [not null, default: 5]
   deleted_at DateTime
   deleted_by_id String
   deleted_by users [note: '@hide']

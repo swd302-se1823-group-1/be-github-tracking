@@ -1,10 +1,8 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 import { ProjectMemberEntity } from '../entities/project-member.entity';
+import { RepositoryAggregate } from './repository.aggregate';
 import { generateId } from '@/shared/utils/uuid';
 import { BusinessRuleViolationException } from '@/shared/exceptions';
-
-// Business rule constants
-const MAX_PROJECT_MEMBERS = 5;
 
 export class ProjectAggregate extends AggregateRoot {
   constructor(
@@ -22,6 +20,9 @@ export class ProjectAggregate extends AggregateRoot {
     public createdBy: string | null,
     public updatedAt: Date,
     public updatedBy: string | null,
+    public classInfo?: { code: string; name: string },
+    public maxMembers: number = 5,
+    public repositories: RepositoryAggregate[] = [],
   ) {
     super();
   }
@@ -65,14 +66,14 @@ export class ProjectAggregate extends AggregateRoot {
 
     // Check member limit
     const currentCount = this.getActiveMemberCount();
-    if (currentCount >= MAX_PROJECT_MEMBERS) {
+    if (currentCount >= this.maxMembers) {
       throw new BusinessRuleViolationException(
         'Project member limit exceeded',
-        `Project has reached the maximum member limit of ${MAX_PROJECT_MEMBERS}.`,
+        `Project has reached the maximum member limit of ${this.maxMembers}.`,
         {
           projectId: this.id,
           currentMemberCount: currentCount,
-          maxMembers: MAX_PROJECT_MEMBERS,
+          maxMembers: this.maxMembers,
         },
       );
     }
@@ -116,6 +117,7 @@ export class ProjectAggregate extends AggregateRoot {
     description: string | null,
     avatarUrl: string | null,
     createdBy: string,
+    maxMembers: number = 5,
   ): ProjectAggregate {
     const id = generateId();
     return new ProjectAggregate(
@@ -133,6 +135,8 @@ export class ProjectAggregate extends AggregateRoot {
       createdBy,
       new Date(),
       createdBy,
+      undefined,
+      maxMembers,
     );
   }
 

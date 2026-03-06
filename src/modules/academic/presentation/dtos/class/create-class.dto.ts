@@ -36,4 +36,8 @@ export class CreateClassDto {
   @IsString()
   @IsNotEmpty()
   description?: string;
+
+  @ApiProperty({ default: 40 })
+  @IsNumber()
+  maxStudents?: number;
 }

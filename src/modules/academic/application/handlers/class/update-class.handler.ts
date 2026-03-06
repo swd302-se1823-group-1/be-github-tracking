@@ -3,6 +3,7 @@ import { Inject, NotFoundException } from '@nestjs/common';
 import { UpdateClassCommand } from '../../commands/class/update-class.command';
 import { IClassRepository } from '../../../domain/repositories/class.repository';
 import { ClassAggregate } from '../../../domain/aggregates/class.aggregate';
+import { Transactional } from '@nestjs-cls/transactional';
 
 @CommandHandler(UpdateClassCommand)
 export class UpdateClassHandler implements ICommandHandler<
@@ -14,6 +15,7 @@ export class UpdateClassHandler implements ICommandHandler<
     private readonly classRepository: IClassRepository,
   ) {}
 
+  @Transactional()
   async execute(command: UpdateClassCommand): Promise<ClassAggregate> {
     const clazz = await this.classRepository.findById(command.id);
 
