@@ -20,6 +20,7 @@ export interface GitHubCommitInfo {
   authorName: string;
   authorEmail: string;
   authorUsername: string | null;
+  authorGithubId: string | null;
   date: Date;
   additions: number;
   deletions: number;
@@ -48,6 +49,7 @@ interface GitHubGraphQLResponse {
                 email: string;
                 user: {
                   login: string;
+                  databaseId: number;
                 } | null;
               };
             };
@@ -137,6 +139,7 @@ export class GitHubService {
                           email
                           user {
                             login
+                            databaseId
                           }
                         }
                       }
@@ -197,6 +200,9 @@ export class GitHubService {
             authorName: node.author.name || 'Unknown',
             authorEmail: node.author.email || 'Unknown',
             authorUsername: node.author.user?.login || null,
+            authorGithubId: node.author.user?.databaseId
+              ? String(node.author.user.databaseId)
+              : null,
             date: new Date(node.authoredDate),
             additions: node.additions || 0,
             deletions: node.deletions || 0,
