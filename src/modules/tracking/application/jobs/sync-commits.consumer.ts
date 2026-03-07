@@ -48,6 +48,7 @@ export class SyncCommitsConsumer extends WorkerHost {
 
         // Create a list of all unique verified tokens and mapping info
         const verifiedTokens: string[] = [];
+        const githubIdToMemberIdMap = new Map<string, string>();
         const usernameToMemberIdMap = new Map<string, string>();
         const emailToMemberIdMap = new Map<string, string>();
 
@@ -61,6 +62,9 @@ export class SyncCommitsConsumer extends WorkerHost {
               !verifiedTokens.includes(mapping.accessToken)
             ) {
               verifiedTokens.push(mapping.accessToken);
+            }
+            if (mapping.githubId) {
+              githubIdToMemberIdMap.set(mapping.githubId, member.id);
             }
             if (mapping.githubUsername) {
               usernameToMemberIdMap.set(
@@ -141,12 +145,19 @@ export class SyncCommitsConsumer extends WorkerHost {
         }
 
         this.logger.log(
-          `Fetched ${commits.length} commits for ${owner}/${name}. UsernameMap: ${usernameToMemberIdMap.size}, EmailMap: ${emailToMemberIdMap.size}`,
+          `Fetched ${commits.length} commits for ${owner}/${name}. GithubIdMap: ${githubIdToMemberIdMap.size}, UsernameMap: ${usernameToMemberIdMap.size}, EmailMap: ${emailToMemberIdMap.size}`,
         );
 
         // Log the mapping state for debugging
-        if (usernameToMemberIdMap.size > 0 || emailToMemberIdMap.size > 0) {
+        if (
+          githubIdToMemberIdMap.size > 0 ||
+          usernameToMemberIdMap.size > 0 ||
+          emailToMemberIdMap.size > 0
+        ) {
           this.logger.log('--- CURRENT PROJECT MAPPINGS ---');
+          githubIdToMemberIdMap.forEach((id, gid) =>
+            this.logger.log(`Mapped GithubID: ${gid} -> Member: ${id}`),
+          );
           usernameToMemberIdMap.forEach((id, user) =>
             this.logger.log(`Mapped User: ${user} -> Member: ${id}`),
           );
@@ -172,8 +183,13 @@ export class SyncCommitsConsumer extends WorkerHost {
         for (const commit of commits) {
           let memberId: string | null = null;
 
-          // Try username mapping first
-          if (commit.authorUsername) {
+          // Try GitHub ID mapping first
+          if (commit.authorGithubId) {
+            memberId = githubIdToMemberIdMap.get(commit.authorGithubId) || null;
+          }
+
+          // Fallback to username mapping
+          if (!memberId && commit.authorUsername) {
             memberId =
               usernameToMemberIdMap.get(commit.authorUsername.toLowerCase()) ||
               null;
