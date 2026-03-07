@@ -78,7 +78,7 @@ export class ProjectController {
     @ActiveUser() user: { id: string },
   ): Promise<void> {
     await this.commandBus.execute(
-      new AddProjectMemberCommand(projectId, dto.studentId, dto.role, user.id),
+      new AddProjectMemberCommand(projectId, dto.members, user.id),
     );
   }
 

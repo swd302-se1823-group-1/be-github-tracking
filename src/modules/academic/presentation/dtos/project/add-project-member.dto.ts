@@ -1,8 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsUUID } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { ProjectMemberRole } from '@generated/prisma/client';
 
-export class AddProjectMemberDto {
+export class ProjectMemberItemDto {
   @ApiProperty({ example: 'uuid-of-student' })
   @IsUUID()
   @IsNotEmpty()
@@ -12,4 +20,16 @@ export class AddProjectMemberDto {
   @IsEnum(ProjectMemberRole)
   @IsNotEmpty()
   role: ProjectMemberRole;
+}
+
+export class AddProjectMemberDto {
+  @ApiProperty({
+    type: [ProjectMemberItemDto],
+    description: 'Array of members to add to the project',
+  })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => ProjectMemberItemDto)
+  members: ProjectMemberItemDto[];
 }

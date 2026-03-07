@@ -48,17 +48,26 @@ export class ProjectAggregate extends AggregateRoot {
   }
 
   /**
+   * Check if project already has a leader
+   */
+  hasLeader(): boolean {
+    return this._members.some(
+      (m) => m.role === 'LEADER' && m.isActive && !m.deletedAt,
+    );
+  }
+
+  /**
    * Validate if a student can be added to this project
    * Throws domain exceptions if business rules are violated
    */
-  validateCanAddMember(studentId: string): void {
+  validateCanAddMember(member: ProjectMemberEntity): void {
     // Check if student is already a member
-    if (this.hasMember(studentId)) {
+    if (this.hasMember(member.studentId)) {
       throw new BusinessRuleViolationException(
         'Duplicate project membership',
         'Student is already a member of this project.',
         {
-          studentId,
+          studentId: member.studentId,
           projectId: this.id,
         },
       );
@@ -77,6 +86,18 @@ export class ProjectAggregate extends AggregateRoot {
         },
       );
     }
+
+    // Check leader limit: Max 1 leader per project
+    if (member.role === 'LEADER' && this.hasLeader()) {
+      throw new BusinessRuleViolationException(
+        'Maximum 1 Leader allowed',
+        'This project already has a leader. A project can only have one leader.',
+        {
+          projectId: this.id,
+          attemptedRole: member.role,
+        },
+      );
+    }
   }
 
   /**
@@ -84,7 +105,7 @@ export class ProjectAggregate extends AggregateRoot {
    * This is a domain operation that enforces business rules
    */
   addMember(member: ProjectMemberEntity): void {
-    this.validateCanAddMember(member.studentId);
+    this.validateCanAddMember(member);
     this._members.push(member);
   }
 
