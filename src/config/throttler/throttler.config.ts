@@ -6,7 +6,7 @@ export const ThrottlerConfig = ThrottlerModule.forRoot({
     {
       name: 'default',
       ttl: 10_000,
-      limit: 20,
+      limit: 50,
     },
     {
       // Strict: login/OAuth endpoints (5 req / 60s)
