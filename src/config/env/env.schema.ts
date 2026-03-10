@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 export const envSchema = z.object({
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:3000,http://localhost:5173'),
   DATABASE_URL: z.url(),
   DIRECT_URL: z.url(),
   COOKIE_DOMAIN: z.string(),

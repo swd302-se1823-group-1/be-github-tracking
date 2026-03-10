@@ -7,6 +7,9 @@ import { VerifyGitHubAccountHandler } from './application/handlers/github/verify
 import { GetGitHubMappingHandler } from './application/handlers/github/get-github-mapping.handler';
 import { SyncRepositoryHandler } from './application/handlers/github/sync-repository.handler';
 import { GetStudentStatsHandler } from './application/handlers/github/get-student-stats.handler';
+import { GetProjectStudentsStatsHandler } from './application/handlers/github/get-project-students-stats.handler';
+import { GetLecturerClassesStatsHandler } from './application/handlers/github/get-lecturer-classes-stats.handler';
+import { GetLecturerDashboardStatsHandler } from './application/handlers/github/get-lecturer-dashboard-stats.handler';
 import { IGithubMappingRepository } from './domain/repositories/github-mapping.repository';
 import { PrismaGithubMappingRepository } from './infrastructure/repositories/prisma-github-mapping.repository';
 import { GitHubService } from './application/services/github.service';
@@ -20,6 +23,9 @@ const Handlers = [
   GetGitHubMappingHandler,
   SyncRepositoryHandler,
   GetStudentStatsHandler,
+  GetProjectStudentsStatsHandler,
+  GetLecturerClassesStatsHandler,
+  GetLecturerDashboardStatsHandler,
 ];
 
 @Module({
