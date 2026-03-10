@@ -82,7 +82,11 @@ export class ClassController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all classes' })
+  @Roles(UserRole.ADMIN, UserRole.LECTURER, UserRole.STUDENT)
+  @ApiOperation({
+    summary:
+      'Get all classes (ADMIN: all, LECTURER: own classes only, STUDENT: all)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Return all classes',
@@ -91,7 +95,11 @@ export class ClassController {
   @ApiBearerAuth()
   async findAll(
     @Query() dto: GetClassesDto,
+    @ActiveUser() user: { id: string; role: UserRole },
   ): Promise<CursorPageDto<ClassResponseDto>> {
+    // LECTURER only sees their own classes; ADMIN sees everything
+    const lecturerId = user.role === UserRole.LECTURER ? user.id : undefined;
+
     const result = await this.queryBus.execute<
       GetClassesQuery,
       {
@@ -99,7 +107,7 @@ export class ClassController {
         total: number;
         nextCursor: string | null;
       }
-    >(GetClassesQuery.fromDto(dto));
+    >(GetClassesQuery.fromDto(dto, lecturerId));
 
     const meta = new CursorPageMetaDto({
       total: result.total,

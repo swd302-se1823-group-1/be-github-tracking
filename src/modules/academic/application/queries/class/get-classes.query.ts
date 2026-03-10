@@ -7,15 +7,17 @@ export class GetClassesQuery {
     public readonly order?: 'ASC' | 'DESC',
     public readonly search?: string,
     public readonly courseCode?: string,
+    public readonly lecturerId?: string,
   ) {}
 
-  static fromDto(dto: GetClassesDto): GetClassesQuery {
+  static fromDto(dto: GetClassesDto, lecturerId?: string): GetClassesQuery {
     return new GetClassesQuery(
       dto.cursor,
       dto.take,
       dto.order,
       dto.search,
       dto.courseCode,
+      lecturerId,
     );
   }
 }

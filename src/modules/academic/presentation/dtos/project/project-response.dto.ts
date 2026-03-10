@@ -39,6 +39,18 @@ export class ProjectResponseDto {
   @ApiProperty()
   createdAt?: Date;
 
+  @ApiPropertyOptional({
+    description: 'Whether the current caller is a member of this project',
+  })
+  isMember?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'Role of the current caller in this project (null if not a member)',
+    enum: ['LEADER', 'MEMBER'],
+  })
+  myRole?: string | null;
+
   constructor(partial: Partial<ProjectResponseDto>) {
     Object.assign(this, partial);
   }
