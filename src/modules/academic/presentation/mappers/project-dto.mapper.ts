@@ -8,7 +8,16 @@ import {
 import { RepositoryResponseDto } from '../dtos/project/response/repository-response.dto';
 
 export class ProjectDtoMapper {
-  static toResponse(aggregate: ProjectAggregate): ProjectResponseDto {
+  static toResponse(
+    aggregate: ProjectAggregate,
+    requesterId?: string,
+  ): ProjectResponseDto {
+    const myMember = requesterId
+      ? aggregate.members.find(
+          (m) => m.studentId === requesterId && m.isActive && !m.deletedAt,
+        )
+      : undefined;
+
     return new ProjectResponseDto({
       id: aggregate.id,
       classId: aggregate.classId,
@@ -30,6 +39,8 @@ export class ProjectDtoMapper {
       repositories:
         aggregate.repositories?.map((r) => new RepositoryResponseDto(r)) || [],
       createdAt: aggregate.createdAt,
+      isMember: requesterId !== undefined ? !!myMember : undefined,
+      myRole: requesterId !== undefined ? (myMember?.role ?? null) : undefined,
     });
   }
 

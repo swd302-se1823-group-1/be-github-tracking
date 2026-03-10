@@ -33,10 +33,18 @@ export class PrismaClassRepository implements IClassRepository {
     total: number;
     nextCursor: string | null;
   }> {
-    const { cursor, take = 10, search, order = 'DESC', courseCode } = query;
+    const {
+      cursor,
+      take = 10,
+      search,
+      order = 'DESC',
+      courseCode,
+      lecturerId,
+    } = query;
 
     const where: Prisma.ClassWhereInput = {
       deleted_at: null,
+      ...(lecturerId && { lecturer_id: lecturerId }),
       ...(courseCode && {
         course: {
           code: courseCode,

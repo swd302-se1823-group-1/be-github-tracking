@@ -153,12 +153,13 @@ export class ProjectController {
     description: 'Project retrieved successfully',
     type: ProjectResponseDto,
   })
-  async getById(@Param('id') projectId: string): Promise<ProjectResponseDto> {
-    const project = await this.queryBus.execute<
-      GetProjectByIdQuery,
-      ProjectAggregate
-    >(new GetProjectByIdQuery(projectId));
-    return ProjectDtoMapper.toResponse(project);
+  async getById(
+    @Param('id') projectId: string,
+    @ActiveUser('id') userId: string,
+  ): Promise<ProjectResponseDto> {
+    return this.queryBus.execute<GetProjectByIdQuery, ProjectResponseDto>(
+      new GetProjectByIdQuery(projectId, userId),
+    );
   }
 
   @Patch(':id')
