@@ -20,13 +20,13 @@ export async function bootstrapHttp() {
   // Config Lib
   // -------------------------------------------------------------------------------------------
   app.setGlobalPrefix('api/v1');
+  const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ];
+
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL,
-      'https://api.hoaiphuong.io.vn',
-      'http://localhost:3000',
-      'http://localhost:5173',
-    ],
+    origin: allowedOrigins,
     credentials: true,
   });
   app.use(cookieParser());

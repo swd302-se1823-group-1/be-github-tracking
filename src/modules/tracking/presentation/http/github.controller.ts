@@ -20,6 +20,14 @@ import { SyncRepositoryCommand } from '@/modules/tracking/application/commands/g
 import { GetStudentStatsQuery } from '@/modules/tracking/application/queries/github/get-student-stats.query';
 import { StudentStatsResponseDto } from '@/modules/tracking/presentation/dtos/github/student-stats-response.dto';
 import { StudentStatsResult } from '@/modules/tracking/application/handlers/github/get-student-stats.handler';
+import { GetProjectStudentsStatsQuery } from '@/modules/tracking/application/queries/github/get-project-students-stats.query';
+import { ProjectStudentStatsItemDto } from '@/modules/tracking/presentation/dtos/github/project-students-stats-response.dto';
+import { ProjectStudentStatsResult } from '@/modules/tracking/application/handlers/github/get-project-students-stats.handler';
+import { GetLecturerClassesStatsQuery } from '@/modules/tracking/application/queries/github/get-lecturer-classes-stats.query';
+import { LecturerClassesStatsItemDto } from '@/modules/tracking/presentation/dtos/github/lecturer-classes-stats-response.dto';
+import { LecturerClassesStatsResult } from '@/modules/tracking/application/handlers/github/get-lecturer-classes-stats.handler';
+import { GetLecturerDashboardStatsQuery } from '@/modules/tracking/application/queries/github/get-lecturer-dashboard-stats.query';
+import { LecturerDashboardStatsResponseDto } from '@/modules/tracking/presentation/dtos/github/lecturer-dashboard-stats-response.dto';
 
 @ApiTags('GitHub')
 @ApiBearerAuth()
@@ -111,5 +119,92 @@ export class GitHubController {
     >(new GetStudentStatsQuery(projectId, studentId));
 
     return new StudentStatsResponseDto(stats);
+  }
+
+  @Get('stats/project/:projectId')
+  @Roles(UserRole.ADMIN, UserRole.LECTURER, UserRole.STUDENT)
+  @UseGuards(RolesGuard)
+  @ApiOperation({
+    summary: 'Get commit statistics for all students in a project',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project students stats retrieved',
+    type: [ProjectStudentStatsItemDto],
+  })
+  async getProjectStudentsStats(
+    @Param('projectId') projectId: string,
+  ): Promise<ProjectStudentStatsItemDto[]> {
+    const statsList = await this.queryBus.execute<
+      GetProjectStudentsStatsQuery,
+      ProjectStudentStatsResult[]
+    >(new GetProjectStudentsStatsQuery(projectId));
+
+    // Map each result to DTO
+    return statsList.map((stat) => {
+      const dto = new ProjectStudentStatsItemDto();
+      dto.studentId = stat.studentId;
+      dto.role = stat.role;
+      dto.totalCommits = stat.totalCommits;
+      dto.totalAdditions = stat.totalAdditions;
+      dto.totalDeletions = stat.totalDeletions;
+      dto.totalFilesChanged = stat.totalFilesChanged;
+      return dto;
+    });
+  }
+
+  @Get('stats/classes')
+  @Roles(UserRole.ADMIN, UserRole.LECTURER)
+  @UseGuards(RolesGuard)
+  @ApiOperation({
+    summary: 'Get commit statistics for all classes taught by the lecturer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lecturer classes stats retrieved',
+    type: [LecturerClassesStatsItemDto],
+  })
+  async getLecturerClassesStats(
+    @ActiveUser('id') lecturerId: string,
+  ): Promise<LecturerClassesStatsItemDto[]> {
+    const statsList = await this.queryBus.execute<
+      GetLecturerClassesStatsQuery,
+      LecturerClassesStatsResult[]
+    >(new GetLecturerClassesStatsQuery(lecturerId));
+
+    // Map each result to DTO
+    return statsList.map((stat) => {
+      const dto = new LecturerClassesStatsItemDto();
+      dto.classId = stat.classId;
+      dto.classCode = stat.classCode;
+      dto.className = stat.className;
+      dto.totalStudents = stat.totalStudents;
+      dto.totalProjects = stat.totalProjects;
+      dto.totalCommits = stat.totalCommits;
+      dto.totalAdditions = stat.totalAdditions;
+      dto.totalDeletions = stat.totalDeletions;
+      dto.totalFilesChanged = stat.totalFilesChanged;
+      return dto;
+    });
+  }
+
+  @Get('stats/dashboard/lecturer')
+  @Roles(UserRole.ADMIN, UserRole.LECTURER)
+  @UseGuards(RolesGuard)
+  @ApiOperation({
+    summary: 'Get comprehensive dashboard statistics for the lecturer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Dashboard statistics retrieved successfully',
+    type: LecturerDashboardStatsResponseDto,
+  })
+  async getLecturerDashboardStats(
+    @ActiveUser('id') lecturerId: string,
+  ): Promise<LecturerDashboardStatsResponseDto> {
+    return this.queryBus.execute<
+      GetLecturerDashboardStatsQuery,
+      LecturerDashboardStatsResponseDto
+    >(new GetLecturerDashboardStatsQuery(lecturerId));
   }
 }
