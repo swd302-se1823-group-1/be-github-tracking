@@ -1,4 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Transactional } from '@nestjs-cls/transactional';
 import { NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -16,6 +17,7 @@ export class SyncRepositoryHandler implements ICommandHandler<
     private readonly syncQueue: Queue,
   ) {}
 
+  @Transactional()
   async execute(command: SyncRepositoryCommand): Promise<void> {
     const { repositoryId } = command;
 

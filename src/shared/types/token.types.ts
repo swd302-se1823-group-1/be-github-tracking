@@ -1,3 +1,5 @@
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+
 export interface JwtTokenPayload {
   sub: string;
   deviceId: string;
@@ -12,4 +14,5 @@ export interface TokenUserPayload {
   id: string;
   deviceId: string;
   jti: string;
+  role: UserRole;
 }

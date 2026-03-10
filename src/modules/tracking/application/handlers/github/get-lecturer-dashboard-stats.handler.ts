@@ -14,7 +14,7 @@ export class GetLecturerDashboardStatsHandler implements IQueryHandler<
     query: GetLecturerDashboardStatsQuery,
   ): Promise<LecturerDashboardStatsResponseDto> {
     const { lecturerId } = query;
-    const REQUIRED_COMMITS = 100; // Default
+    const REQUIRED_COMMITS = 20; // Default threshold
 
     // 1. Fetch classes, projects, members, and student details
     const classes = await this.prisma.class.findMany({
@@ -42,7 +42,7 @@ export class GetLecturerDashboardStatsHandler implements IQueryHandler<
     });
 
     if (!classes.length) {
-      return this.emptyResponse();
+      return this.emptyResponse(0);
     }
 
     let totalProjects = 0;

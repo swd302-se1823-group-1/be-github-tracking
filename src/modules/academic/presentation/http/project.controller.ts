@@ -32,6 +32,9 @@ import { UpdateProjectDto } from '@/modules/academic/presentation/dtos/project/u
 import { UpdateProjectCommand } from '@/modules/academic/application/commands/project/update-project.command';
 import { DeleteProjectCommand } from '@/modules/academic/application/commands/project/delete-project.command';
 import { UpdateProjectAvatarCommand } from '@/modules/academic/application/commands/project/update-project-avatar.command';
+import { TransferLeaderDto } from '@/modules/academic/presentation/dtos/project/transfer-leader.dto';
+import { TransferLeaderCommand } from '@/modules/academic/application/commands/project/transfer-leader.command';
+import { RemoveProjectMemberCommand } from '@/modules/academic/application/commands/project/remove-project-member.command';
 import { LinkRepositoryCommand } from '@/modules/academic/application/commands/repository/link-repository.command';
 import {
   ProjectResponseDto,
@@ -68,7 +71,7 @@ export class ProjectController {
   ) {}
 
   @Post(':id/members')
-  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT) // Student can add member if Leader? Logic inside handler? Handler didn't check role. Assuming LECTURER/ADMIN for now safely.
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Add a member to a project' })
   @ApiResponse({ status: 201, description: 'Member added successfully' })
@@ -79,6 +82,27 @@ export class ProjectController {
   ): Promise<void> {
     await this.commandBus.execute(
       new AddProjectMemberCommand(projectId, dto.members, user.id),
+    );
+  }
+
+  @Delete(':id/members/:studentId')
+  @Roles(UserRole.LECTURER, UserRole.ADMIN, UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remove a member from a project' })
+  @ApiResponse({ status: 200, description: 'Member removed successfully' })
+  @ApiResponse({ status: 400, description: 'Cannot remove the project LEADER' })
+  @ApiResponse({
+    status: 403,
+    description: 'Only the project LEADER can remove members',
+  })
+  @ApiResponse({ status: 404, description: 'Project or member not found' })
+  async removeMember(
+    @Param('id') projectId: string,
+    @Param('studentId') studentId: string,
+    @ActiveUser('id') requesterId: string,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new RemoveProjectMemberCommand(projectId, studentId, requesterId),
     );
   }
 
@@ -233,6 +257,40 @@ export class ProjectController {
     @ActiveUser() user: { id: string },
   ): Promise<void> {
     await this.commandBus.execute(new DeleteProjectCommand(id, user.id));
+  }
+
+  @Put(':id/transfer-leader')
+  @Roles(UserRole.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Transfer project leadership to another member' })
+  @ApiResponse({
+    status: 200,
+    description: 'Project leadership transferred successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'The specified member is already the leader',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Only the current project LEADER can transfer leadership',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project or new leader member not found',
+  })
+  async transferLeader(
+    @Param('id') projectId: string,
+    @Body() dto: TransferLeaderDto,
+    @ActiveUser('id') currentLeaderId: string,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new TransferLeaderCommand(
+        projectId,
+        dto.newLeaderStudentId,
+        currentLeaderId,
+      ),
+    );
   }
 
   @Post(':id/repositories')

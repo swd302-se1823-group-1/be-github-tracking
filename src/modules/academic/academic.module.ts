@@ -43,6 +43,8 @@ import { AddProjectMemberHandler } from '@/modules/academic/application/handlers
 import { GetProjectsByClassHandler } from '@/modules/academic/application/handlers/project/get-projects-by-class.handler';
 import { UpdateProjectHandler } from '@/modules/academic/application/handlers/project/update-project.handler';
 import { DeleteProjectHandler } from '@/modules/academic/application/handlers/project/delete-project.handler';
+import { TransferLeaderHandler } from './application/handlers/project/transfer-leader.handler';
+import { RemoveProjectMemberHandler } from './application/handlers/project/remove-project-member.handler';
 import { UpdateProjectAvatarHandler } from '@/modules/academic/application/handlers/project/update-project-avatar.handler';
 import { GetProjectMembersHandler } from '@/modules/academic/application/handlers/project/get-project-members.handler';
 import { GetProjectByIdHandler } from '@/modules/academic/application/handlers/project/get-project-by-id.handler';
@@ -133,6 +135,8 @@ import { GetRepositoryByIdHandler } from '@/modules/academic/application/handler
     DeleteRepositoryHandler,
     GetRepositoriesByProjectHandler,
     GetRepositoryByIdHandler,
+    TransferLeaderHandler,
+    RemoveProjectMemberHandler,
   ],
 })
 export class AcademicModule {}

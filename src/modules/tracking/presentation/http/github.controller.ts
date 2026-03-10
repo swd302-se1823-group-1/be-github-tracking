@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, UseGuards, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
@@ -28,6 +36,12 @@ import { LecturerClassesStatsItemDto } from '@/modules/tracking/presentation/dto
 import { LecturerClassesStatsResult } from '@/modules/tracking/application/handlers/github/get-lecturer-classes-stats.handler';
 import { GetLecturerDashboardStatsQuery } from '@/modules/tracking/application/queries/github/get-lecturer-dashboard-stats.query';
 import { LecturerDashboardStatsResponseDto } from '@/modules/tracking/presentation/dtos/github/lecturer-dashboard-stats-response.dto';
+import { AdminDashboardStatsResponseDto } from '@/modules/tracking/presentation/dtos/github/admin-dashboard-stats-response.dto';
+import { GetAdminDashboardStatsQuery } from '@/modules/tracking/application/queries/github/get-admin-dashboard-stats.query';
+import { LecturerStatisticsResponseDto } from '@/modules/tracking/presentation/dtos/github/lecturer-statistics-response.dto';
+import { GetLecturerStatisticsQuery } from '@/modules/tracking/application/queries/github/get-lecturer-statistics.query';
+import { ProjectCommitTimelineResponseDto } from '@/modules/tracking/presentation/dtos/github/project-commit-timeline-response.dto';
+import { GetProjectCommitTimelineQuery } from '@/modules/tracking/application/queries/github/get-project-commit-timeline.query';
 
 @ApiTags('GitHub')
 @ApiBearerAuth()
@@ -154,7 +168,7 @@ export class GitHubController {
   }
 
   @Get('stats/classes')
-  @Roles(UserRole.ADMIN, UserRole.LECTURER)
+  @Roles(UserRole.LECTURER)
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Get commit statistics for all classes taught by the lecturer',
@@ -189,7 +203,7 @@ export class GitHubController {
   }
 
   @Get('stats/dashboard/lecturer')
-  @Roles(UserRole.ADMIN, UserRole.LECTURER)
+  @Roles(UserRole.LECTURER)
   @UseGuards(RolesGuard)
   @ApiOperation({
     summary: 'Get comprehensive dashboard statistics for the lecturer',
@@ -206,5 +220,74 @@ export class GitHubController {
       GetLecturerDashboardStatsQuery,
       LecturerDashboardStatsResponseDto
     >(new GetLecturerDashboardStatsQuery(lecturerId));
+  }
+
+  @Get('stats/dashboard/admin')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @UseGuards(RolesGuard)
+  @ApiOperation({
+    summary: 'Get comprehensive macro statistics for the Admin Dashboard',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Admin dashboard statistics retrieved successfully',
+    type: AdminDashboardStatsResponseDto,
+  })
+  async getAdminDashboardStats(
+    @ActiveUser('role') role: UserRole,
+  ): Promise<AdminDashboardStatsResponseDto> {
+    return this.queryBus.execute<
+      GetAdminDashboardStatsQuery,
+      AdminDashboardStatsResponseDto
+    >(new GetAdminDashboardStatsQuery(role));
+  }
+
+  @Get('stats/statistics')
+  @Roles(UserRole.LECTURER)
+  @UseGuards(RolesGuard)
+  @ApiOperation({
+    summary: 'Get detailed statistics for the lecturer statistics page',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Detailed statistics retrieved successfully',
+    type: LecturerStatisticsResponseDto,
+  })
+  async getLecturerStatistics(
+    @ActiveUser('id') lecturerId: string,
+    @Query('semesterCode') semesterCode?: string,
+    @Query('classId') classId?: string,
+  ): Promise<LecturerStatisticsResponseDto> {
+    return this.queryBus.execute<
+      GetLecturerStatisticsQuery,
+      LecturerStatisticsResponseDto
+    >(new GetLecturerStatisticsQuery(lecturerId, semesterCode, classId));
+  }
+
+  @Get('stats/project/:projectId/timeline')
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.SUPERADMIN,
+    UserRole.LECTURER,
+    UserRole.STUDENT,
+  )
+  @UseGuards(RolesGuard)
+  @ApiOperation({
+    summary: 'Get project commit timeline over the last N days',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project timeline retrieved successfully',
+    type: ProjectCommitTimelineResponseDto,
+  })
+  async getProjectCommitTimeline(
+    @Param('projectId') projectId: string,
+    @Query('days') days?: string,
+  ): Promise<ProjectCommitTimelineResponseDto> {
+    const daysNumber = days ? parseInt(days, 10) : 30;
+    return this.queryBus.execute<
+      GetProjectCommitTimelineQuery,
+      ProjectCommitTimelineResponseDto
+    >(new GetProjectCommitTimelineQuery(projectId, daysNumber));
   }
 }
