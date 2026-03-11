@@ -163,7 +163,6 @@ export class ProjectController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.LECTURER, UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a project' })
   @ApiResponse({
