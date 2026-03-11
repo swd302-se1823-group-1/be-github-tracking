@@ -12,19 +12,19 @@ export const ThrottlerConfig = ThrottlerModule.forRoot({
       // Strict: login/OAuth endpoints (5 req / 60s)
       name: 'auth',
       ttl: 60_000,
-      limit: 5,
+      limit: 10,
     },
     {
       // Medium: token operations and link repo (10 req / 60s)
       name: 'medium',
       ttl: 60_000,
-      limit: 10,
+      limit: 20,
     },
     {
       // Sync: manual GitHub sync (5 req / 60s)
       name: 'sync',
       ttl: 60_000,
-      limit: 5,
+      limit: 10,
     },
   ],
 });
