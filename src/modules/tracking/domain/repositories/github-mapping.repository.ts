@@ -5,6 +5,10 @@ export abstract class IGithubMappingRepository {
     studentId: string,
   ): Promise<GithubMappingAggregate | null>;
 
+  abstract findByStudentIds(
+    studentIds: string[],
+  ): Promise<GithubMappingAggregate[]>;
+
   abstract findByGitHubEmail(
     email: string,
   ): Promise<GithubMappingAggregate | null>;

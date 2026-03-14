@@ -1,11 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '@/infrastructure/database/prisma/prisma.service';
 
 @Injectable()
-export class SyncCommitsProducer {
+export class SyncCommitsProducer implements OnModuleInit {
   private readonly logger = new Logger(SyncCommitsProducer.name);
 
   constructor(
@@ -13,33 +12,41 @@ export class SyncCommitsProducer {
     private readonly prisma: PrismaService,
   ) {}
 
-  @Cron('0 * * * *') // Run every hour
-  async handleCron() {
-    this.logger.log('Started cron job to sync GitHub commits...');
+  async onModuleInit() {
+    this.logger.log('Initializing repeatable sync jobs...');
     try {
+      // Remove any existing repeatable jobs to avoid duplicates on restart
+      const repeatableJobs = await this.syncQueue.getRepeatableJobs();
+      for (const job of repeatableJobs) {
+        await this.syncQueue.removeRepeatableByKey(job.key);
+      }
+
       const repositories = await this.prisma.repository.findMany({
         where: { deleted_at: null },
       });
 
-      if (repositories.length === 0) {
-        this.logger.log('No repositories found to sync.');
-        return;
-      }
-
-      let enqueued = 0;
       for (const repo of repositories) {
-        await this.syncQueue.add('sync-commits-job', {
-          repositoryId: repo.id,
-          projectId: repo.project_id,
-          owner: repo.owner,
-          name: repo.name,
-        });
-        enqueued++;
+        await this.syncQueue.add(
+          'sync-commits-job',
+          {
+            repositoryId: repo.id,
+            projectId: repo.project_id,
+            owner: repo.owner,
+            name: repo.name,
+          },
+          {
+            repeat: {
+              pattern: '0 0 */2 * *', // Every 2 days
+            },
+            jobId: `sync-${repo.id}`, // Constant ID to prevent duplication
+            removeOnComplete: true, // Auto-clean Redis
+            removeOnFail: 100, // Keep last 100 failures
+          },
+        );
       }
-
-      this.logger.log(`Enqueued ${enqueued} repositories for commit sync.`);
+      this.logger.log(`Initialized ${repositories.length} repeatable jobs.`);
     } catch (error) {
-      this.logger.error('Failed to run sync commits cron job', error);
+      this.logger.error('Failed to initialize repeatable jobs', error);
     }
   }
 }
