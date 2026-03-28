@@ -21,6 +21,10 @@ import { BullModule } from '@nestjs/bullmq';
 import { SyncCommitsProducer } from './application/jobs/sync-commits.producer';
 import { SyncCommitsConsumer } from './application/jobs/sync-commits.consumer';
 
+import { GetProjectSummaryStatsHandler } from './application/handlers/github/get-project-summary-stats.handler';
+import { GetProjectStudentAlertsHandler } from './application/handlers/github/get-project-student-alerts.handler';
+import { GetProjectRankingHandler } from './application/handlers/github/get-project-ranking.handler';
+
 const QueryHandlers = [
   GetProjectStudentsStatsHandler,
   GetLecturerClassesStatsHandler,
@@ -28,6 +32,9 @@ const QueryHandlers = [
   GetAdminDashboardStatsHandler,
   GetLecturerStatisticsHandler,
   GetProjectCommitTimelineHandler,
+  GetProjectSummaryStatsHandler,
+  GetProjectStudentAlertsHandler,
+  GetProjectRankingHandler,
 ];
 
 const Handlers = [

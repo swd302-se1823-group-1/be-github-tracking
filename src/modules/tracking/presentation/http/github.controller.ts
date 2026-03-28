@@ -14,6 +14,7 @@ import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { ActiveUser, ResponseMessage, Roles } from '@/shared/decorators';
 import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
@@ -42,6 +43,15 @@ import { LecturerStatisticsResponseDto } from '@/modules/tracking/presentation/d
 import { GetLecturerStatisticsQuery } from '@/modules/tracking/application/queries/github/get-lecturer-statistics.query';
 import { ProjectCommitTimelineResponseDto } from '@/modules/tracking/presentation/dtos/github/project-commit-timeline-response.dto';
 import { GetProjectCommitTimelineQuery } from '@/modules/tracking/application/queries/github/get-project-commit-timeline.query';
+import { GetProjectSummaryStatsQuery } from '@/modules/tracking/application/queries/github/get-project-summary-stats.query';
+import { ProjectSummaryStatsResponseDto } from '@/modules/tracking/presentation/dtos/github/project-summary-stats-response.dto';
+import { ProjectSummaryStatsResult } from '@/modules/tracking/application/handlers/github/get-project-summary-stats.handler';
+import { GetProjectStudentAlertsQuery } from '@/modules/tracking/application/queries/github/get-project-student-alerts.query';
+import { StudentAlertItemDto } from '@/modules/tracking/presentation/dtos/github/student-alert-response.dto';
+import { StudentAlertResult } from '@/modules/tracking/application/handlers/github/get-project-student-alerts.handler';
+import { GetProjectRankingQuery } from '@/modules/tracking/application/queries/github/get-project-ranking.query';
+import { ProjectRankingResponseDto } from '@/modules/tracking/presentation/dtos/github/project-ranking-response.dto';
+import { ProjectRankingResult } from '@/modules/tracking/application/handlers/github/get-project-ranking.handler';
 
 @ApiTags('GitHub')
 @ApiBearerAuth()
@@ -289,5 +299,74 @@ export class GitHubController {
       GetProjectCommitTimelineQuery,
       ProjectCommitTimelineResponseDto
     >(new GetProjectCommitTimelineQuery(projectId, daysNumber));
+  }
+
+  // -----------------------------------------------------------------------
+  // Feature 1: Project Summary Statistics
+  // -----------------------------------------------------------------------
+  @Get('stats/project/:projectId/summary')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.LECTURER)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Get aggregated statistics for a project' })
+  @ApiResponse({
+    status: 200,
+    description: 'Project summary stats retrieved',
+    type: ProjectSummaryStatsResponseDto,
+  })
+  async getProjectSummaryStats(
+    @Param('projectId') projectId: string,
+  ): Promise<ProjectSummaryStatsResponseDto> {
+    const result = await this.queryBus.execute<
+      GetProjectSummaryStatsQuery,
+      ProjectSummaryStatsResult
+    >(new GetProjectSummaryStatsQuery(projectId));
+    return result as ProjectSummaryStatsResponseDto;
+  }
+
+  // -----------------------------------------------------------------------
+  // Feature 2: Smart Alerts & Inactivity
+  // -----------------------------------------------------------------------
+  @Get('stats/project/:projectId/students/alerts')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.LECTURER)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Get inactivity alerts and contribution ratios per student' })
+  @ApiQuery({ name: 'inactiveDays', required: false, description: 'Days without commit to consider inactive (default: 5)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Student alerts retrieved',
+    type: [StudentAlertItemDto],
+  })
+  async getProjectStudentAlerts(
+    @Param('projectId') projectId: string,
+    @Query('inactiveDays') inactiveDays?: string,
+  ): Promise<StudentAlertItemDto[]> {
+    const days = inactiveDays ? parseInt(inactiveDays, 10) : 5;
+    const results = await this.queryBus.execute<
+      GetProjectStudentAlertsQuery,
+      StudentAlertResult[]
+    >(new GetProjectStudentAlertsQuery(projectId, days));
+    return results as StudentAlertItemDto[];
+  }
+
+  // -----------------------------------------------------------------------
+  // Feature 3: Project Class Ranking
+  // -----------------------------------------------------------------------
+  @Get('stats/project/:projectId/ranking')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.LECTURER)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Get project ranking within its class (by commits)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Project ranking retrieved',
+    type: ProjectRankingResponseDto,
+  })
+  async getProjectRanking(
+    @Param('projectId') projectId: string,
+  ): Promise<ProjectRankingResponseDto> {
+    const result = await this.queryBus.execute<
+      GetProjectRankingQuery,
+      ProjectRankingResult
+    >(new GetProjectRankingQuery(projectId));
+    return result as ProjectRankingResponseDto;
   }
 }
