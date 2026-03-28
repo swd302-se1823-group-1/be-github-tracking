@@ -14,6 +14,7 @@ import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
 import { JwtAccessGuard } from '@/modules/auth/infrastructure';
 import { AcademicModule } from './modules/academic/academic.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
@@ -28,6 +29,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     IdentityModule,
     AcademicModule,
     TrackingModule,
+    NotificationModule,
     ClsModule.forRoot({
       global: true,
       middleware: { mount: true },

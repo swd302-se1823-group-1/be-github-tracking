@@ -27,6 +27,19 @@ export class PrismaGithubMappingRepository implements IGithubMappingRepository {
     return mapping ? this.toDomain(mapping) : null;
   }
 
+  async findByStudentIds(
+    studentIds: string[],
+  ): Promise<GithubMappingAggregate[]> {
+    const mappings = await this.prisma.githubMapping.findMany({
+      where: {
+        student_id: { in: studentIds },
+        deleted_at: null,
+      },
+    });
+
+    return mappings.map((m) => this.toDomain(m));
+  }
+
   async findByGitHubEmail(
     email: string,
   ): Promise<GithubMappingAggregate | null> {

@@ -53,6 +53,12 @@ model User {
   lecturer       Lecturer?
   refresh_tokens RefreshToken[]
 
+  // Notification relations
+  /// @hide
+  received_notifications Notification[] @relation("NotificationRecipient")
+  /// @hide
+  sent_notifications     Notification[] @relation("NotificationSender")
+
   // Opposite relations for student audit fields
   /// @hide
   deleted_students        Student[]       @relation("StudentDeletedBy")
@@ -412,6 +418,8 @@ model Project {
   project_members ProjectMember[]
   /// @hide
   repositories    Repository[]
+  /// @hide
+  notifications   Notification[]
 
   @@map("projects")
 }
@@ -548,3 +556,37 @@ enum ProjectMemberRole {
   LEADER
   MEMBER
 }
+
+enum NotificationType {
+  INACTIVITY
+  LOW_COMMITS
+  GENERAL
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+
+model Notification {
+  id          String             @id @default(uuid()) @db.Uuid
+  recipient_id String            @db.Uuid
+  sender_id   String?            @db.Uuid
+  project_id  String?            @db.Uuid
+  title       String             @db.VarChar(255)
+  message     String             @db.Text
+  type        NotificationType   @default(GENERAL)
+  status      NotificationStatus @default(UNREAD)
+  created_at  DateTime           @default(now())
+  read_at     DateTime?
+
+  // Relations
+  recipient User     @relation("NotificationRecipient", fields: [recipient_id], references: [id], onDelete: Cascade)
+  sender    User?    @relation("NotificationSender", fields: [sender_id], references: [id], onDelete: SetNull)
+  project   Project? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+
+  @@index([recipient_id, status])
+  @@index([recipient_id, created_at])
+  @@map("notifications")
+}
+

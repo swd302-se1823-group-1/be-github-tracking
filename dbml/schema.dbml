@@ -31,6 +31,8 @@ Table users {
   student students
   lecturer lecturers
   refresh_tokens refresh_tokens [not null]
+  received_notifications notifications [not null, note: '@hide']
+  sent_notifications notifications [not null, note: '@hide']
   deleted_students students [not null, note: '@hide']
   created_students students [not null, note: '@hide']
   updated_students students [not null, note: '@hide']
@@ -248,6 +250,7 @@ Table projects {
   class classes [not null, note: '@hide']
   project_members project_members [not null, note: '@hide']
   repositories repositories [not null, note: '@hide']
+  notifications notifications [not null, note: '@hide']
 }
 
 Table project_members {
@@ -335,6 +338,22 @@ Table sync_logs {
   repository repositories [not null, note: '@hide']
 }
 
+Table notifications {
+  id String [pk]
+  recipient_id String [not null]
+  sender_id String
+  project_id String
+  title String [not null]
+  message String [not null]
+  type NotificationType [not null, default: 'GENERAL']
+  status NotificationStatus [not null, default: 'UNREAD']
+  created_at DateTime [default: `now()`, not null]
+  read_at DateTime
+  recipient users [not null]
+  sender users
+  project projects
+}
+
 Enum UserRole {
   SUPERADMIN
   ADMIN
@@ -345,6 +364,17 @@ Enum UserRole {
 Enum ProjectMemberRole {
   LEADER
   MEMBER
+}
+
+Enum NotificationType {
+  INACTIVITY
+  LOW_COMMITS
+  GENERAL
+}
+
+Enum NotificationStatus {
+  UNREAD
+  READ
 }
 
 Ref: users.deleted_by_id - users.id [delete: No Action]
@@ -444,3 +474,9 @@ Ref: commits.repository_id > repositories.id [delete: Cascade]
 Ref: commits.project_member_id > project_members.id [delete: Cascade]
 
 Ref: sync_logs.repository_id > repositories.id [delete: Cascade]
+
+Ref: notifications.recipient_id > users.id [delete: Cascade]
+
+Ref: notifications.sender_id > users.id [delete: Cascade]
+
+Ref: notifications.project_id > projects.id [delete: Set Null]
