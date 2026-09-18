@@ -1,0 +1,77 @@
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
+import { Transactional } from '@nestjs-cls/transactional';
+import { IUserRepository } from '@/modules/identity/domain/repositories/user.repository';
+import { UserAggregate } from '@/modules/identity/domain/aggregates/user.aggregate';
+import { CreateUserCommand } from '@/modules/identity/application/commands/user/create-user.command';
+import { UserRole } from '@/modules/identity/domain/enums/user-role.enum';
+import { InvalidRoleOperationException } from '@/modules/identity/domain/exceptions/user.exceptions';
+
+@CommandHandler(CreateUserCommand)
+export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
+  constructor(
+    @Inject(IUserRepository)
+    private readonly userRepository: IUserRepository,
+  ) {}
+
+  @Transactional()
+  async execute(command: CreateUserCommand): Promise<UserAggregate> {
+    const {
+      email,
+      fullName,
+      provider,
+      providerId,
+      avatarUrl,
+      role,
+      createdBy,
+    } = command;
+
+    // Default to STUDENT if role not specified
+    const userRole = role ?? UserRole.STUDENT;
+
+    let user: UserAggregate;
+
+    // Create user based on role
+    switch (userRole) {
+      case UserRole.STUDENT:
+        user = UserAggregate.createStudent(
+          email,
+          fullName,
+          undefined, // studentCode - empty initially
+          provider,
+          providerId,
+          avatarUrl,
+          undefined, // universityEmail
+          createdBy,
+        );
+        break;
+
+      case UserRole.LECTURER:
+        user = UserAggregate.createLecturer(
+          email,
+          fullName,
+          provider,
+          providerId,
+          avatarUrl,
+          createdBy,
+        );
+        break;
+
+      case UserRole.ADMIN:
+        user = UserAggregate.createAdmin(
+          email,
+          fullName,
+          provider,
+          providerId,
+          avatarUrl,
+          createdBy,
+        );
+        break;
+
+      default:
+        throw new InvalidRoleOperationException(userRole, 'create user');
+    }
+
+    return this.userRepository.create(user);
+  }
+}

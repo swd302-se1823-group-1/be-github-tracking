@@ -1,0 +1,100 @@
+import { Module, forwardRef } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JWT_CONFIG_KEY, jwtConfig, JwtConfig } from '@/config/jwt';
+
+import { CqrsModule } from '@nestjs/cqrs';
+import { AuthController } from './presentation/http/auth.controller';
+import { GoogleLoginHandler } from './application/handlers/google-login.handler';
+import { RefreshTokenHandler } from './application/handlers/refresh-token.handler';
+import { LogoutHandler } from './application/handlers/logout.handler';
+// Strategies
+import {
+  JwtAccessStrategy,
+  JwtRefreshStrategy,
+  GoogleStrategy,
+} from './infrastructure/strategies';
+
+// Guards
+import {
+  JwtAccessGuard,
+  JwtRefreshGuard,
+  GoogleAuthGuard,
+} from './infrastructure/guards';
+
+import { TokenService } from './application/services/token.service';
+
+import { InfrastructureModule } from '@/infrastructure';
+import { googleConfig } from '@/config';
+import { firebaseConfig } from '@/config/firebase';
+import { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository';
+import { PrismaRefreshTokenRepository } from '@/modules/auth/infrastructure/repositories/refresh-token.repository';
+import { RolesGuard } from '@/modules/auth/infrastructure/guards/roles.guard';
+import { IdentityModule } from '@/modules/identity/identity.module';
+import { GoogleService } from '@/modules/auth/infrastructure/services/google.service';
+import { FirebaseService } from '@/modules/auth/infrastructure/services/firebase.service';
+
+@Module({
+  controllers: [AuthController],
+  imports: [
+    InfrastructureModule,
+    CqrsModule,
+    PassportModule.register({ defaultStrategy: 'jwt-access' }),
+    ConfigModule.forFeature(jwtConfig),
+    ConfigModule.forFeature(googleConfig),
+    ConfigModule.forFeature(firebaseConfig),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService): JwtModuleOptions => {
+        const jwtConfig = configService.get<JwtConfig>(JWT_CONFIG_KEY)!;
+        return {
+          secret: jwtConfig.accessSecret,
+          signOptions: {
+            expiresIn: jwtConfig.accessExpiresIn,
+          },
+        } as JwtModuleOptions;
+      },
+    }),
+    forwardRef(() => IdentityModule),
+  ],
+  providers: [
+    // Services
+    TokenService,
+    GoogleService,
+    FirebaseService,
+    // Repositories
+    {
+      provide: IRefreshTokenRepository,
+      useClass: PrismaRefreshTokenRepository,
+    },
+    // Strategies
+    JwtAccessStrategy,
+    JwtRefreshStrategy,
+    GoogleStrategy,
+    // Guards
+    JwtAccessGuard,
+    JwtRefreshGuard,
+    GoogleAuthGuard,
+    // Handlers
+    GoogleLoginHandler,
+    RefreshTokenHandler,
+    LogoutHandler,
+    RolesGuard,
+  ],
+  exports: [
+    JwtModule,
+    PassportModule,
+    TokenService,
+    JwtAccessStrategy,
+    JwtRefreshStrategy,
+    JwtAccessGuard,
+    JwtRefreshGuard,
+    GoogleAuthGuard,
+    GoogleStrategy,
+    RolesGuard,
+    FirebaseService,
+  ],
+})
+export class AuthModule {}

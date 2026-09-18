@@ -1,0 +1,482 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Project "GitHub Tracking System" {
+  database_type: ''
+  Note: ''
+}
+
+Table users {
+  id String [pk]
+  email String [unique, not null]
+  full_name String
+  role UserRole [not null, default: 'STUDENT']
+  avatar_url String
+  provider String
+  provider_id String
+  is_active Boolean [not null, default: true]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users
+  deleted_user users [not null]
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users
+  created_user users [not null]
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users
+  updated_user users [not null]
+  student students
+  lecturer lecturers
+  refresh_tokens refresh_tokens [not null]
+  received_notifications notifications [not null, note: '@hide']
+  sent_notifications notifications [not null, note: '@hide']
+  deleted_students students [not null, note: '@hide']
+  created_students students [not null, note: '@hide']
+  updated_students students [not null, note: '@hide']
+  deleted_lecturers lecturers [not null, note: '@hide']
+  created_lecturers lecturers [not null, note: '@hide']
+  updated_lecturers lecturers [not null, note: '@hide']
+  deleted_github_mappings github_mappings [not null, note: '@hide']
+  created_github_mappings github_mappings [not null, note: '@hide']
+  updated_github_mappings github_mappings [not null, note: '@hide']
+  deleted_semesters semesters [not null, note: '@hide']
+  created_semesters semesters [not null, note: '@hide']
+  updated_semesters semesters [not null, note: '@hide']
+  deleted_classes classes [not null, note: '@hide']
+  created_classes classes [not null, note: '@hide']
+  updated_classes classes [not null, note: '@hide']
+  deleted_courses courses [not null, note: '@hide']
+  created_courses courses [not null, note: '@hide']
+  updated_courses courses [not null, note: '@hide']
+  deleted_enrollments enrollments [not null, note: '@hide']
+  created_enrollments enrollments [not null, note: '@hide']
+  updated_enrollments enrollments [not null]
+  deleted_projects projects [not null, note: '@hide']
+  created_projects projects [not null, note: '@hide']
+  updated_projects projects [not null, note: '@hide']
+  deleted_project_members project_members [not null, note: '@hide']
+  created_project_members project_members [not null, note: '@hide']
+  updated_project_members project_members [not null, note: '@hide']
+  deleted_repositories repositories [not null, note: '@hide']
+  created_repositories repositories [not null, note: '@hide']
+  updated_repositories repositories [not null, note: '@hide']
+
+  indexes {
+    (provider, provider_id) [unique]
+  }
+}
+
+Table refresh_tokens {
+  id String [pk]
+  jti String [unique, not null]
+  device_id String [not null]
+  device_name String
+  user_id String [not null]
+  user users [not null]
+  ip_address String
+  user_agent String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
+  expires_at DateTime [not null]
+  revoked_at DateTime
+}
+
+Table students {
+  id String [pk]
+  student_code String [unique]
+  university_email String [unique]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  user users [not null, note: '@hide']
+  github_mapping github_mappings [note: '@hide']
+  enrollments enrollments [not null, note: '@hide']
+  project_members project_members [not null, note: '@hide']
+}
+
+Table lecturers {
+  id String [pk]
+  employee_code String [unique]
+  degree String
+  department String
+  phone_number String
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  user users [not null, note: '@hide']
+  classes classes [not null, note: '@hide']
+}
+
+Table github_mappings {
+  id String [pk]
+  student_id String [unique, not null]
+  encrypted_access_token String [not null]
+  token_iv String [not null]
+  github_id String [unique, not null]
+  github_email String [unique]
+  github_username String [unique]
+  is_verified Boolean [not null, default: false]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  student students [not null]
+}
+
+Table semesters {
+  id BigInt [pk, increment]
+  code String [unique, not null]
+  name String [not null]
+  start_date DateTime
+  end_date DateTime
+  is_active Boolean [not null, default: true]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  classes classes [not null]
+}
+
+Table classes {
+  id String [pk]
+  semester_id BigInt [not null]
+  enroll_password String [not null]
+  lecturer_id String [not null]
+  course_id String [not null]
+  class_code String [not null]
+  class_name String [not null]
+  description String
+  max_students Int [not null, default: 40]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  semester semesters [not null, note: '@hide']
+  lecturer lecturers [not null, note: '@hide']
+  enrollments enrollments [not null, note: '@hide']
+  projects projects [not null, note: '@hide']
+  course courses [not null, note: '@hide']
+
+  indexes {
+    (course_id, semester_id, class_code) [unique]
+  }
+}
+
+Table courses {
+  id String [pk]
+  code String [unique, not null]
+  name String [not null]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  classes classes [not null]
+}
+
+Table enrollments {
+  id String [pk]
+  class_id String [not null]
+  student_id String [not null]
+  enrolled_at DateTime [default: `now()`, not null]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  class classes [not null, note: '@hide']
+  student students [not null, note: '@hide']
+
+  indexes {
+    (class_id, student_id) [unique]
+  }
+}
+
+Table projects {
+  id String [pk]
+  class_id String [not null]
+  name String
+  topic String
+  description String
+  avatar_url String
+  max_members Int [not null, default: 5]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  class classes [not null, note: '@hide']
+  project_members project_members [not null, note: '@hide']
+  repositories repositories [not null, note: '@hide']
+  notifications notifications [not null, note: '@hide']
+}
+
+Table project_members {
+  id String [pk]
+  project_id String [not null]
+  student_id String [not null]
+  role ProjectMemberRole [not null]
+  joined_at DateTime [default: `now()`, not null]
+  is_active Boolean [not null, default: true]
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  project projects [not null, note: '@hide']
+  student students [not null, note: '@hide']
+  commits commits [not null, note: '@hide']
+
+  indexes {
+    (project_id, student_id) [unique]
+  }
+}
+
+Table repositories {
+  id String [pk]
+  project_id String [not null]
+  url String [not null]
+  name String [not null]
+  organization String [not null]
+  owner String [not null]
+  last_scanned_at DateTime
+  scan_status String [not null, default: 'pending']
+  error_message String
+  deleted_at DateTime
+  deleted_by_id String
+  deleted_by users [note: '@hide']
+  created_at DateTime [default: `now()`, not null]
+  created_by_id String
+  created_by users [note: '@hide']
+  updated_at DateTime [default: `now()`, not null]
+  updated_by_id String
+  updated_by users [note: '@hide']
+  project projects [not null, note: '@hide']
+  commits commits [not null, note: '@hide']
+  sync_logs sync_logs [not null, note: '@hide']
+}
+
+Table commits {
+  id String [pk]
+  repository_id String [not null]
+  project_member_id String [not null]
+  message String
+  author_name_raw String
+  author_email_raw String
+  committed_date DateTime
+  additions Int
+  deletions Int
+  files_changed Int
+  hash String
+  deleted_at DateTime
+  created_at DateTime [default: `now()`, not null]
+  repository repositories [not null, note: '@hide']
+  project_member project_members [note: '@hide']
+
+  indexes {
+    (repository_id, hash) [unique]
+  }
+}
+
+Table sync_logs {
+  id String [pk]
+  repository_id String [not null]
+  trigger_type String
+  started_at DateTime
+  completed_at DateTime
+  status String
+  commits_found Int
+  commits_inserted Int
+  execution_time_ms Int
+  log_message String
+  repository repositories [not null, note: '@hide']
+}
+
+Table notifications {
+  id String [pk]
+  recipient_id String [not null]
+  sender_id String
+  project_id String
+  title String [not null]
+  message String [not null]
+  type NotificationType [not null, default: 'GENERAL']
+  status NotificationStatus [not null, default: 'UNREAD']
+  created_at DateTime [default: `now()`, not null]
+  read_at DateTime
+  recipient users [not null]
+  sender users
+  project projects
+}
+
+Enum UserRole {
+  SUPERADMIN
+  ADMIN
+  STUDENT
+  LECTURER
+}
+
+Enum ProjectMemberRole {
+  LEADER
+  MEMBER
+}
+
+Enum NotificationType {
+  INACTIVITY
+  LOW_COMMITS
+  GENERAL
+}
+
+Enum NotificationStatus {
+  UNREAD
+  READ
+}
+
+Ref: users.deleted_by_id - users.id [delete: No Action]
+
+Ref: users.created_by_id - users.id [delete: No Action]
+
+Ref: users.updated_by_id - users.id [delete: No Action]
+
+Ref: refresh_tokens.user_id > users.id [delete: Cascade]
+
+Ref: students.deleted_by_id - users.id [delete: No Action]
+
+Ref: students.created_by_id - users.id [delete: No Action]
+
+Ref: students.updated_by_id - users.id [delete: No Action]
+
+Ref: students.id - users.id [delete: No Action]
+
+Ref: lecturers.deleted_by_id - users.id [delete: No Action]
+
+Ref: lecturers.created_by_id - users.id [delete: No Action]
+
+Ref: lecturers.updated_by_id - users.id [delete: No Action]
+
+Ref: lecturers.id - users.id [delete: No Action]
+
+Ref: github_mappings.deleted_by_id > users.id [delete: No Action]
+
+Ref: github_mappings.created_by_id > users.id [delete: No Action]
+
+Ref: github_mappings.updated_by_id > users.id [delete: No Action]
+
+Ref: github_mappings.student_id - students.id [delete: No Action]
+
+Ref: semesters.deleted_by_id > users.id [delete: No Action]
+
+Ref: semesters.created_by_id > users.id [delete: No Action]
+
+Ref: semesters.updated_by_id > users.id [delete: No Action]
+
+Ref: classes.deleted_by_id > users.id [delete: No Action]
+
+Ref: classes.created_by_id > users.id [delete: No Action]
+
+Ref: classes.updated_by_id > users.id [delete: No Action]
+
+Ref: classes.semester_id > semesters.id [delete: Cascade]
+
+Ref: classes.lecturer_id > lecturers.id [delete: Restrict]
+
+Ref: classes.course_id > courses.id [delete: Cascade]
+
+Ref: courses.deleted_by_id > users.id [delete: No Action]
+
+Ref: courses.created_by_id > users.id [delete: No Action]
+
+Ref: courses.updated_by_id > users.id [delete: No Action]
+
+Ref: enrollments.deleted_by_id > users.id [delete: No Action]
+
+Ref: enrollments.created_by_id > users.id [delete: No Action]
+
+Ref: enrollments.updated_by_id > users.id [delete: No Action]
+
+Ref: enrollments.class_id > classes.id [delete: Cascade]
+
+Ref: enrollments.student_id > students.id [delete: Cascade]
+
+Ref: projects.deleted_by_id > users.id [delete: No Action]
+
+Ref: projects.created_by_id > users.id [delete: No Action]
+
+Ref: projects.updated_by_id > users.id [delete: No Action]
+
+Ref: projects.class_id > classes.id [delete: Cascade]
+
+Ref: project_members.deleted_by_id > users.id [delete: No Action]
+
+Ref: project_members.created_by_id > users.id [delete: No Action]
+
+Ref: project_members.updated_by_id > users.id [delete: No Action]
+
+Ref: project_members.project_id > projects.id [delete: Cascade]
+
+Ref: project_members.student_id > students.id [delete: Cascade]
+
+Ref: repositories.deleted_by_id > users.id [delete: No Action]
+
+Ref: repositories.created_by_id > users.id [delete: No Action]
+
+Ref: repositories.updated_by_id > users.id [delete: No Action]
+
+Ref: repositories.project_id > projects.id [delete: Cascade]
+
+Ref: commits.repository_id > repositories.id [delete: Cascade]
+
+Ref: commits.project_member_id > project_members.id [delete: Cascade]
+
+Ref: sync_logs.repository_id > repositories.id [delete: Cascade]
+
+Ref: notifications.recipient_id > users.id [delete: Cascade]
+
+Ref: notifications.sender_id > users.id [delete: Cascade]
+
+Ref: notifications.project_id > projects.id [delete: Set Null]
